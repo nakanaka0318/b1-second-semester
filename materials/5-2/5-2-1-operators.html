@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>演算子と型修飾子</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A; --warn:#C8423B; --warn-soft:#FCEBEA;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993; --warn:#F07B73; --warn-soft:#3A1E20;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993; --warn:#F07B73; --warn-soft:#3A1E20;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+.bitin{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.bitin>div{white-space:nowrap;display:flex;align-items:center;gap:8px;flex:1;min-width:130px}
+.bitin input{font-size:1.1rem;padding:8px 10px}
+table.bits th,table.bits td{padding:4px 6px}
+table.bits td.b1{color:var(--accent);font-weight:700}
+table.bits td.b0{color:var(--sub)}
+table.bits tr.res{background:var(--mark-soft)}
+table.bits tr.res th{background:var(--mark-soft)}
+table.bits td.dec{font-weight:700;color:var(--ink);min-width:3em}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.toc a:focus-visible{outline:3px solid var(--accent)}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.qbox ol{margin:.3em 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>演算子と型修飾子</h1>
+  <p>算術演算子(+ − * / %)以外の演算子と、int や char に付ける修飾子のまとめです。後半に練習問題があり、答えはタップすると表示されます。</p>
+  <div class="demo">
+    <label>ビット演算を試す(0〜255)</label>
+    <div class="bitin">
+      <div><span class="mono">a =</span> <input id="ba" type="number" min="0" max="255" value="12" inputmode="numeric"></div>
+      <div><span class="mono">b =</span> <input id="bb" type="number" min="0" max="255" value="10" inputmode="numeric"></div>
+    </div>
+    <div class="tbl"><table class="bits" id="bits"></table></div>
+    <div class="legend">同じ桁どうしで計算します。<b>&amp;</b> は両方1なら1、<b>|</b> はどちらか1なら1、<b>^</b> は違えば1。</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#assign">代入</a><a href="#incdec">++ --</a><a href="#rel">関係</a><a href="#logic">論理</a><a href="#bit">ビット</a><a href="#cond">条件</a><a href="#other">その他</a><a href="#prec">優先順位</a><a href="#mod">型修飾子</a><a href="#qual">const</a><a href="#q">練習問題</a>
+</nav>
+
+<!-- ===== 代入 ===== -->
+<section class="task" id="assign">
+  <h2><span class="no">1</span>代入演算子・複合代入演算子</h2>
+  <p><code>=</code> は「等しい」ではなく<b>右辺の値を左辺の変数に入れる</b>という意味です。算術やビット演算と組み合わせた短縮形(複合代入)があります。</p>
+  <div class="tbl"><table>
+    <tr><th>書き方</th><th>同じ意味</th></tr>
+    <tr><td class="mono">a += 3</td><td class="mono">a = a + 3</td></tr>
+    <tr><td class="mono">a -= 3</td><td class="mono">a = a - 3</td></tr>
+    <tr><td class="mono">a *= 3</td><td class="mono">a = a * 3</td></tr>
+    <tr><td class="mono">a /= 3</td><td class="mono">a = a / 3</td></tr>
+    <tr><td class="mono">a %= 3</td><td class="mono">a = a % 3</td></tr>
+    <tr><td class="mono">a &amp;= b, a |= b, a ^= b</td><td class="mono">a = a &amp; b など</td></tr>
+    <tr><td class="mono">a &lt;&lt;= 2, a &gt;&gt;= 2</td><td class="mono">a = a &lt;&lt; 2 など</td></tr>
+  </table></div>
+  <p>代入式そのものも値を持ちます(代入された値)。そのため <code>a = b = 0;</code> は右から順に <code>b = 0</code>、<code>a = 0</code> と処理されます。</p>
+</section>
+
+<!-- ===== ++ -- ===== -->
+<section class="task" id="incdec">
+  <h2><span class="no">2</span>インクリメント・デクリメント演算子</h2>
+  <p><code>++</code> は1増やす、<code>--</code> は1減らす演算子です。変数の前に付けるか後ろに付けるかで、<b>式としての値</b>が変わります。</p>
+  <div class="tbl"><table>
+    <tr><th>書き方</th><th>名前</th><th>動き</th></tr>
+    <tr><td class="mono">++i</td><td>前置</td><td>先に増やして、増えた値を使う</td></tr>
+    <tr><td class="mono">i++</td><td>後置</td><td>今の値を使ってから、増やす</td></tr>
+  </table></div>
+<pre class="code"><code>int i = 5;
+int a = i++;   /* a = 5, i = 6 */
+int b = ++i;   /* i = 7, b = 7 */</code></pre>
+  <p>単独で <code>i++;</code> と書く場合(for 文の3つ目の欄など)は、前置でも後置でも結果は同じです。</p>
+  <div class="warn"><b>注意</b>:<code>i = i++;</code> や <code>printf("%d %d", i++, i++);</code> のように、1つの式の中で同じ変数を2回以上変更すると結果が決まりません(未定義動作)。</div>
+</section>
+
+<!-- ===== 関係 ===== -->
+<section class="task" id="rel">
+  <h2><span class="no">3</span>関係演算子(比較)</h2>
+  <p>2つの値を比べて、<b>正しければ 1、間違っていれば 0</b> を返します。Cには true / false の型が元々無く、整数で表します。</p>
+  <div class="tbl"><table>
+    <tr><th>演算子</th><th>意味</th><th>例(a=3, b=5)</th></tr>
+    <tr><td class="mono">==</td><td>等しい</td><td class="mono">a == b → 0</td></tr>
+    <tr><td class="mono">!=</td><td>等しくない</td><td class="mono">a != b → 1</td></tr>
+    <tr><td class="mono">&lt;</td><td>より小さい</td><td class="mono">a &lt; b → 1</td></tr>
+    <tr><td class="mono">&gt;</td><td>より大きい</td><td class="mono">a &gt; b → 0</td></tr>
+    <tr><td class="mono">&lt;=</td><td>以下</td><td class="mono">a &lt;= 3 → 1</td></tr>
+    <tr><td class="mono">&gt;=</td><td>以上</td><td class="mono">b &gt;= 6 → 0</td></tr>
+  </table></div>
+  <div class="warn"><b>よくあるミス</b>:<code>if (a = 5)</code> は比較ではなく代入です。a に 5 が入り、式の値が 5(0以外=真)になるので、必ず実行されます。比較は <code>==</code>。</div>
+  <div class="warn"><b>数学の書き方は使えない</b>:<code>1 &lt; x &lt; 10</code> は <code>(1 &lt; x) &lt; 10</code> と解釈され、前半の結果(0か1)を10と比べるので常に真になります。<code>1 &lt; x &amp;&amp; x &lt; 10</code> と書きます。</div>
+</section>
+
+<!-- ===== 論理 ===== -->
+<section class="task" id="logic">
+  <h2><span class="no">4</span>論理演算子</h2>
+  <p>条件を組み合わせる演算子です。Cでは <b>0 が偽、0以外はすべて真</b>として扱い、結果は 1 か 0 になります。</p>
+  <div class="tbl"><table>
+    <tr><th>演算子</th><th>意味</th><th>真になる条件</th></tr>
+    <tr><td class="mono">&amp;&amp;</td><td>かつ(AND)</td><td>両方が真</td></tr>
+    <tr><td class="mono">||</td><td>または(OR)</td><td>どちらかが真</td></tr>
+    <tr><td class="mono">!</td><td>否定(NOT)</td><td>元が偽(<code>!0</code> → 1、<code>!5</code> → 0)</td></tr>
+  </table></div>
+  <h3>短絡評価(ショートサーキット)</h3>
+  <p>左側だけで結果が決まったら、<b>右側は実行されません</b>。</p>
+  <ul>
+    <li><code>A &amp;&amp; B</code>:A が偽なら全体は偽に決まるので、B は評価しない</li>
+    <li><code>A || B</code>:A が真なら全体は真に決まるので、B は評価しない</li>
+  </ul>
+<pre class="code"><code>if (n != 0 &amp;&amp; 100 / n &gt; 5) {   /* n が 0 なら割り算は実行されない */
+    ...
+}</code></pre>
+  <p>この性質を使うと、0 での割り算や配列の範囲外アクセスを防ぐ条件が書けます。</p>
+</section>
+
+<!-- ===== ビット ===== -->
+<section class="task" id="bit">
+  <h2><span class="no">5</span>ビット演算子・シフト演算子</h2>
+  <p>整数を2進数で見て、<b>1桁(1ビット)ずつ</b>計算します。論理演算子(<code>&amp;&amp;</code> <code>||</code>)とは別物です。</p>
+  <div class="tbl"><table>
+    <tr><th>演算子</th><th>名前</th><th>働き</th><th>例</th></tr>
+    <tr><td class="mono">&amp;</td><td>AND</td><td>両方1なら1</td><td class="mono">12 &amp; 10 → 8</td></tr>
+    <tr><td class="mono">|</td><td>OR</td><td>どちらか1なら1</td><td class="mono">12 | 10 → 14</td></tr>
+    <tr><td class="mono">^</td><td>XOR</td><td>違えば1</td><td class="mono">12 ^ 10 → 6</td></tr>
+    <tr><td class="mono">~</td><td>NOT</td><td>0と1を反転</td><td class="mono">~0 → -1</td></tr>
+    <tr><td class="mono">&lt;&lt;</td><td>左シフト</td><td>左にずらす(×2ⁿ)</td><td class="mono">3 &lt;&lt; 2 → 12</td></tr>
+    <tr><td class="mono">&gt;&gt;</td><td>右シフト</td><td>右にずらす(÷2ⁿ)</td><td class="mono">20 &gt;&gt; 1 → 10</td></tr>
+  </table></div>
+<div class="sample">  12 = 1100
+  10 = 1010
+  --------
+&amp;     1000  = 8
+|     1110  = 14
+^     0110  = 6</div>
+  <h3>よく使う形</h3>
+  <ul>
+    <li><code>(n &amp; 1) == 0</code>:偶数かどうか(一番下のビットが0なら偶数)</li>
+    <li><code>x | (1 &lt;&lt; k)</code>:k番目のビットを1にする</li>
+    <li><code>x &amp; ~(1 &lt;&lt; k)</code>:k番目のビットを0にする</li>
+    <li><code>(x &gt;&gt; k) &amp; 1</code>:k番目のビットを取り出す</li>
+  </ul>
+  <div class="warn">負の数の右シフトの結果は処理系によって異なります。ビット演算は <code>unsigned</code> の値で使うのが安全です。</div>
+</section>
+
+<!-- ===== 条件 ===== -->
+<section class="task" id="cond">
+  <h2><span class="no">6</span>条件演算子(三項演算子)</h2>
+  <p><code>条件 ? 値1 : 値2</code> の形で、条件が真なら値1、偽なら値2になります。Cで唯一、3つの項をとる演算子です。</p>
+<pre class="code"><code>max = (a &gt; b) ? a : b;          /* 大きいほう */
+abs = (x &lt; 0) ? -x : x;         /* 絶対値 */
+printf("%s\n", (n % 2 == 0) ? "偶数" : "奇数");</code></pre>
+  <p>簡単な if-else を1行で書けますが、入れ子にすると読みにくくなるので、複雑な場合は if 文を使います。</p>
+</section>
+
+<!-- ===== その他 ===== -->
+<section class="task" id="other">
+  <h2><span class="no">7</span>その他の演算子</h2>
+  <div class="tbl"><table>
+    <tr><th>演算子</th><th>働き</th><th>例</th></tr>
+    <tr><td class="mono">sizeof</td><td>型や変数のバイト数</td><td class="mono">sizeof(int) → 4</td></tr>
+    <tr><td class="mono">(型)</td><td>キャスト(型変換)</td><td class="mono">(double)7 / 2 → 3.5</td></tr>
+    <tr><td class="mono">,</td><td>カンマ演算子。左から順に評価し、右端の値になる</td><td class="mono">for (i=0, j=9; …; i++, j--)</td></tr>
+    <tr><td class="mono">&amp;</td><td>アドレス演算子(単項)</td><td class="mono">scanf("%d", &amp;n)</td></tr>
+    <tr><td class="mono">*</td><td>間接参照演算子(単項)</td><td class="mono">*p = 10</td></tr>
+    <tr><td class="mono">[ ]</td><td>配列の添字</td><td class="mono">a[3]</td></tr>
+    <tr><td class="mono">.  -&gt;</td><td>構造体のメンバ</td><td class="mono">s.age  p-&gt;age</td></tr>
+  </table></div>
+  <ul>
+    <li><code>sizeof</code> は関数ではなく演算子です。結果の型は <code>size_t</code> で、printf では <code>%zu</code> を使います。配列に使うと配列全体のバイト数になるので、<code>sizeof(a) / sizeof(a[0])</code> で要素数が求まります。</li>
+    <li>キャストの小数→整数は<b>0に向かって切り捨て</b>です(<code>(int)3.99</code> → 3、<code>(int)-3.99</code> → -3)。</li>
+    <li><code>&amp;</code> と <code>*</code> は、2つの値の間に置くとビットAND・掛け算、1つの値の前に置くとアドレス・間接参照になります。</li>
+  </ul>
+</section>
+
+<!-- ===== 優先順位 ===== -->
+<section class="task" id="prec">
+  <h2><span class="no">8</span>優先順位と結合規則</h2>
+  <p>上ほど先に計算されます。迷ったら括弧を付けるのが一番確実です。</p>
+  <div class="tbl"><table>
+    <tr><th>順位</th><th>演算子</th><th>結合</th></tr>
+    <tr><td>1</td><td class="mono">()  []  -&gt;  .  後置++ --</td><td>左→右</td></tr>
+    <tr><td>2</td><td class="mono">前置++ --  ! ~  単項+ -  &amp; *  (型)  sizeof</td><td>右→左</td></tr>
+    <tr><td>3</td><td class="mono">*  /  %</td><td>左→右</td></tr>
+    <tr><td>4</td><td class="mono">+  -</td><td>左→右</td></tr>
+    <tr><td>5</td><td class="mono">&lt;&lt;  &gt;&gt;</td><td>左→右</td></tr>
+    <tr><td>6</td><td class="mono">&lt;  &lt;=  &gt;  &gt;=</td><td>左→右</td></tr>
+    <tr><td>7</td><td class="mono">==  !=</td><td>左→右</td></tr>
+    <tr><td>8</td><td class="mono">&amp;</td><td>左→右</td></tr>
+    <tr><td>9</td><td class="mono">^</td><td>左→右</td></tr>
+    <tr><td>10</td><td class="mono">|</td><td>左→右</td></tr>
+    <tr><td>11</td><td class="mono">&amp;&amp;</td><td>左→右</td></tr>
+    <tr><td>12</td><td class="mono">||</td><td>左→右</td></tr>
+    <tr><td>13</td><td class="mono">? :</td><td>右→左</td></tr>
+    <tr><td>14</td><td class="mono">=  +=  -=  など</td><td>右→左</td></tr>
+    <tr><td>15</td><td class="mono">,</td><td>左→右</td></tr>
+  </table></div>
+  <div class="point"><b>要注意の2つ</b>:ビット演算子 <code>&amp; ^ |</code> は <code>==</code> より<b>後</b>に計算されます。シフト <code>&lt;&lt; &gt;&gt;</code> は <code>+ -</code> より<b>後</b>です。どちらも括弧を付けましょう。</div>
+</section>
+
+<!-- ===== 型修飾子 ===== -->
+<section class="task" id="mod">
+  <h2><span class="no">9</span>基本データ型の修飾子</h2>
+  <p><code>char</code> や <code>int</code> の前に付けて、<b>符号の有無</b>や<b>大きさ</b>を変えるキーワードです。</p>
+  <div class="tbl"><table>
+    <tr><th>修飾子</th><th>働き</th></tr>
+    <tr><td class="mono">signed</td><td>符号あり(負の数も扱う)。int は何も付けなければ signed</td></tr>
+    <tr><td class="mono">unsigned</td><td>符号なし(0以上のみ)。同じサイズで正の範囲が約2倍</td></tr>
+    <tr><td class="mono">short</td><td>int を小さくする(通常2バイト)</td></tr>
+    <tr><td class="mono">long</td><td>int を大きくする。<code>long long</code> でさらに大きく(8バイト)</td></tr>
+  </table></div>
+  <h3>主な型と範囲</h3>
+  <p>サイズは環境によって変わります。下は Visual Studio(Windows)での値です。</p>
+  <div class="tbl"><table>
+    <tr><th>型</th><th>バイト</th><th>範囲</th><th>printf</th></tr>
+    <tr><td class="mono">signed char</td><td>1</td><td class="mono">-128 〜 127</td><td class="mono">%d</td></tr>
+    <tr><td class="mono">unsigned char</td><td>1</td><td class="mono">0 〜 255</td><td class="mono">%u</td></tr>
+    <tr><td class="mono">short</td><td>2</td><td class="mono">-32,768 〜 32,767</td><td class="mono">%hd</td></tr>
+    <tr><td class="mono">unsigned short</td><td>2</td><td class="mono">0 〜 65,535</td><td class="mono">%hu</td></tr>
+    <tr><td class="mono">int</td><td>4</td><td class="mono">約 -21億 〜 21億</td><td class="mono">%d</td></tr>
+    <tr><td class="mono">unsigned int</td><td>4</td><td class="mono">0 〜 約42億</td><td class="mono">%u</td></tr>
+    <tr><td class="mono">long</td><td>4</td><td class="mono">int と同じ</td><td class="mono">%ld</td></tr>
+    <tr><td class="mono">long long</td><td>8</td><td class="mono">約 ±9.2×10¹⁸</td><td class="mono">%lld</td></tr>
+    <tr><td class="mono">unsigned long long</td><td>8</td><td class="mono">0 〜 約1.8×10¹⁹</td><td class="mono">%llu</td></tr>
+  </table></div>
+  <p>n バイトの型は 2<sup>8n</sup> 通りの値を持てます。符号ありはその半分を負の数に使うので、1バイトなら -128〜127、符号なしなら 0〜255 です。</p>
+  <ul>
+    <li><code>short</code> は <code>short int</code>、<code>unsigned</code> は <code>unsigned int</code> の省略形です。</li>
+    <li><code>long</code> は Windows では4バイト、Linux(64ビット)では8バイトです。確実に8バイトが欲しいときは <code>long long</code> を使います。</li>
+    <li>ただの <code>char</code> が signed か unsigned かは処理系しだいです。数値として使うなら <code>signed char</code> / <code>unsigned char</code> と明示します。</li>
+  </ul>
+  <h3>オーバーフロー(範囲を超えたとき)</h3>
+  <ul>
+    <li><b>unsigned</b>:範囲を超えると一周して戻ります(<code>255 + 1</code> → 0、<code>0 - 1</code> → 最大値)。これは規格で決まった動作です。</li>
+    <li><b>signed</b>:計算結果が範囲を超えるのは未定義動作です。多くの環境では <code>127 + 1</code> が -128 になりますが、当てにしてはいけません。</li>
+  </ul>
+  <div class="warn"><b>signed と unsigned を混ぜない</b>:<code>int</code> と <code>unsigned int</code> を比べると、int 側が unsigned に変換されます。<code>-1</code> は約42億になるので、<code>-1 &lt; 1u</code> が偽になります。</div>
+</section>
+
+<!-- ===== const ===== -->
+<section class="task" id="qual">
+  <h2><span class="no">10</span>型修飾子 const と volatile</h2>
+  <p>値の範囲ではなく、<b>変数の扱い方</b>を指定する修飾子です。</p>
+  <ul>
+    <li><code>const</code>:値を変更できない変数にする。代入しようとするとコンパイルエラーになります。宣言と同時に初期化します。</li>
+    <li><code>volatile</code>:プログラムの外(ハードウェアや割り込みなど)で値が変わる可能性があることを示し、コンパイラの最適化で読み込みが省かれないようにします。組み込み系で使い、普段の課題ではほぼ出てきません。</li>
+  </ul>
+<pre class="code"><code>const int MAX = 100;
+MAX = 200;              /* エラー:const は変更できない */
+
+const double PI = 3.14159;
+double area = PI * r * r;</code></pre>
+  <p><code>#define MAX 100</code> と似ていますが、const は型を持つ変数なので、型チェックが効き、デバッガでも値を確認できます。</p>
+</section>
+
+<!-- ===== 問題 ===== -->
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+  <p>各コードを実行したときの出力を答えてください。int は4バイトとします。</p>
+
+  <div class="qbox"><div class="qno">問1 複合代入</div>
+<pre class="code"><code>int a = 5;
+a += 3;
+a *= 2;
+printf("%d\n", a);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>16<span class="tap"></span></summary><div class="body">
+    <p><code>a += 3</code> で 8、<code>a *= 2</code> で 16 になります。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問2 前置と後置</div>
+<pre class="code"><code>int i = 3;
+int x = i++ * 2;
+printf("%d %d\n", x, i);
+int y = ++i * 2;
+printf("%d %d\n", y, i);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>6 4 / 10 5<span class="tap"></span></summary><div class="body">
+<div class="sample">6 4
+10 5</div>
+    <p><code>i++</code> は今の値 3 を使ってから i を 4 にするので、x = 3 × 2 = 6。<code>++i</code> は先に i を 5 にしてから使うので、y = 5 × 2 = 10 です。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問3 比較と論理</div>
+<pre class="code"><code>printf("%d %d %d\n", 3 &gt; 2 &amp;&amp; 5 &lt; 1, !0, 7 &gt; 3 &gt; 1);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>0 1 0<span class="tap"></span></summary><div class="body">
+    <ul>
+      <li><code>3 &gt; 2</code> は 1、<code>5 &lt; 1</code> は 0。1 かつ 0 なので 0。</li>
+      <li><code>!0</code> は 0 の否定で 1。</li>
+      <li><code>7 &gt; 3 &gt; 1</code> は <code>(7 &gt; 3) &gt; 1</code> → <code>1 &gt; 1</code> → 0。数学のようには読まれません。</li>
+    </ul>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問4 短絡評価</div>
+<pre class="code"><code>int p = 0, q = 0;
+if (p++ || q++) { }
+printf("%d %d\n", p, q);
+
+p = 0; q = 0;
+if (p++ &amp;&amp; q++) { }
+printf("%d %d\n", p, q);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>1 1 / 1 0<span class="tap"></span></summary><div class="body">
+<div class="sample">1 1
+1 0</div>
+    <p><code>p++</code> の値は 0(偽)です。<code>||</code> は左が偽なので右の <code>q++</code> も実行され、両方 1 になります。</p>
+    <p><code>&amp;&amp;</code> は左が偽の時点で全体が偽に決まるので、<code>q++</code> は実行されず q は 0 のままです。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問5 ビット演算</div>
+<pre class="code"><code>printf("%d %d %d %d\n", 12 &amp; 10, 12 | 10, 12 ^ 10, ~0);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>8 14 6 -1<span class="tap"></span></summary><div class="body">
+    <p>12 = 1100、10 = 1010。AND は 1000 = 8、OR は 1110 = 14、XOR は 0110 = 6。</p>
+    <p><code>~0</code> は全ビットが1になります。signed int で全ビット1は -1 を表します。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問6 シフトと優先順位</div>
+<pre class="code"><code>printf("%d %d %d\n", 3 &lt;&lt; 2, 20 &gt;&gt; 1, 1 + 2 &lt;&lt; 1);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>12 10 6<span class="tap"></span></summary><div class="body">
+    <p><code>3 &lt;&lt; 2</code> は 3 × 4 = 12、<code>20 &gt;&gt; 1</code> は 20 ÷ 2 = 10。</p>
+    <p><code>1 + 2 &lt;&lt; 1</code> は <code>+</code> のほうが優先されるので <code>(1 + 2) &lt;&lt; 1</code> = 3 × 2 = 6 です。<code>1 + (2 &lt;&lt; 1)</code> = 5 ではありません。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問7 偶数判定のバグ</div>
+  <p>次のコードは n が偶数なら 1 を表示するつもりです。n = 4 のとき何が表示されるか答え、正しく直してください。</p>
+<pre class="code"><code>int n = 4;
+printf("%d\n", n &amp; 1 == 0);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>0 と表示される<span class="tap"></span></summary><div class="body">
+    <p><code>==</code> のほうが <code>&amp;</code> より優先順位が高いので、<code>n &amp; (1 == 0)</code> → <code>n &amp; 0</code> → 0。n が何であっても常に 0 です。</p>
+<pre class="code"><code>printf("%d\n", (n &amp; 1) == 0);   /* 1 と表示される */</code></pre>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問8 条件演算子</div>
+<pre class="code"><code>int j = 5;
+int r = j &gt; 3 ? j * 2 : j + 1;
+printf("%d\n", r);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>10<span class="tap"></span></summary><div class="body">
+    <p><code>j &gt; 3</code> は真なので、<code>j * 2</code> = 10 が選ばれます。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問9 sizeof</div>
+<pre class="code"><code>int arr[10];
+printf("%zu %zu %zu\n", sizeof(char), sizeof(int), sizeof(arr));</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>1 4 40<span class="tap"></span></summary><div class="body">
+    <p>char は常に1バイト。int は4バイト。配列に sizeof を使うと配列全体のサイズになるので、4 × 10 = 40 です。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問10 キャスト</div>
+<pre class="code"><code>printf("%.1f %d %d\n", (double)7 / 2, (int)3.99, (int)-3.99);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>3.5 3 -3<span class="tap"></span></summary><div class="body">
+    <p><code>(double)7 / 2</code> はキャストが先に効くので 7.0 / 2 = 3.5。<code>(double)(7 / 2)</code> と書くと、先に整数どうしの割り算で 3 になってしまい 3.0 です。</p>
+    <p>整数へのキャストは0に向かって切り捨てなので、3.99 → 3、-3.99 → -3(-4 ではない)。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問11 unsigned char の範囲</div>
+<pre class="code"><code>unsigned char c = 255;
+c++;
+printf("%d\n", c);
+
+unsigned char d = 300;
+printf("%d\n", d);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>0 / 44<span class="tap"></span></summary><div class="body">
+<div class="sample">0
+44</div>
+    <p>unsigned char は 0〜255 なので、255 + 1 は一周して 0 になります。</p>
+    <p>300 は範囲外なので 256 で割った余りになり、300 − 256 = 44 です(コンパイラが警告を出します)。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問12 unsigned int の 0 − 1</div>
+<pre class="code"><code>unsigned int u = 0;
+u = u - 1;
+printf("%u\n", u);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>4294967295<span class="tap"></span></summary><div class="body">
+    <p>unsigned は負の数を持てないので、0 − 1 は一周して最大値 2<sup>32</sup> − 1 = 4294967295 になります。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問13 signed と unsigned の比較</div>
+<pre class="code"><code>unsigned int u = 1;
+int k = -1;
+if (k &lt; u) printf("小さい\n");
+else       printf("小さくない\n");</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>小さくない<span class="tap"></span></summary><div class="body">
+    <p>int と unsigned int を比べると、k が unsigned に変換されます。-1 は 4294967295 になるので、<code>4294967295 &lt; 1</code> は偽です。符号の違う型を比べないか、キャストで型をそろえます。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問14 複合代入とビット</div>
+<pre class="code"><code>int v = 10;
+v &lt;&lt;= 2;
+v ^= 1;
+printf("%d\n", v);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>41<span class="tap"></span></summary><div class="body">
+    <p><code>v &lt;&lt;= 2</code> で 10 × 4 = 40(101000)。<code>v ^= 1</code> で一番下のビットが反転して 101001 = 41 です。</p>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問15 型を選ぶ</div>
+  <p>次の値を入れるのに適した型を答えてください(Visual Studio の場合)。</p>
+  <ol>
+    <li>年齢(0〜150)をなるべく小さいメモリで</li>
+    <li>30億</li>
+    <li>地球の人口(約80億)</li>
+    <li>気温(−50〜60 の整数)をなるべく小さいメモリで</li>
+  </ol>
+  <details class="ans"><summary><span class="tag">答え</span>型の選び方<span class="tap"></span></summary><div class="body">
+    <ol>
+      <li><code>unsigned char</code>(0〜255)</li>
+      <li><code>unsigned int</code>(〜約42億)。int は約21億までなので入らない。<code>long long</code> でも可。</li>
+      <li><code>long long</code>。unsigned int でも約42億までなので足りない。Windows の <code>long</code> は4バイトなので不可。</li>
+      <li><code>signed char</code>(-128〜127)。負の数があるので unsigned は使えない。</li>
+    </ol>
+  </div></details></div>
+
+  <div class="qbox"><div class="qno">問16 const</div>
+  <p>次のコードをコンパイルするとどうなるか答えてください。</p>
+<pre class="code"><code>const int N = 5;
+N = N + 1;
+printf("%d\n", N);</code></pre>
+  <details class="ans"><summary><span class="tag">答え</span>コンパイルエラー<span class="tap"></span></summary><div class="body">
+    <p>const を付けた変数には代入できません。Visual Studio では「式は変更可能な左辺値である必要があります」といったエラーになります。</p>
+  </div></details></div>
+</section>
+
+<footer>練習問題の答えはすべて gcc で実行して確認しています(問11・問15・問16を除き、出力は Visual Studio でも同じです)。</footer>
+</div>
+
+<script>
+(function(){
+  var ia=document.getElementById('ba'), ib=document.getElementById('bb'), t=document.getElementById('bits');
+  function clamp(v){v=parseInt(v,10);if(isNaN(v))v=0;return Math.max(0,Math.min(255,v));}
+  function row(label,v,cls){
+    var b=('00000000'+v.toString(2)).slice(-8), h='<tr class="'+(cls||'')+'"><th class="mono">'+label+'</th>';
+    for(var k=0;k<8;k++){h+='<td class="mono b'+b[k]+'">'+b[k]+'</td>';}
+    return h+'<td class="mono dec">'+v+'</td></tr>';
+  }
+  function render(){
+    var a=clamp(ia.value), b=clamp(ib.value);
+    t.innerHTML=row('a',a)+row('b',b)+row('a &amp; b',a&b,'res')+row('a | b',a|b,'res')+row('a ^ b',a^b,'res');
+  }
+  ia.addEventListener('input',render); ib.addEventListener('input',render); render();
+
+  var kw=/^(int|char|void|return|for|if|else|while|include|define|unsigned|signed|short|long|const|double|sizeof)$/;
+  document.querySelectorAll('pre.code code').forEach(function(el){
+    var src=el.textContent, out='';
+    var re=/(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(#?\b[A-Za-z_]\w*\b)|(\b\d+(?:\.\d+)?\b)|([\s\S])/g, m;
+    function e(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    while((m=re.exec(src))){
+      if(m[1]) out+='<span class="tk-com">'+e(m[1])+'</span>';
+      else if(m[2]) out+='<span class="tk-str">'+e(m[2])+'</span>';
+      else if(m[3]) out+= kw.test(m[3].replace('#',''))?'<span class="tk-kw">'+e(m[3])+'</span>':e(m[3]);
+      else if(m[4]) out+='<span class="tk-num">'+m[4]+'</span>';
+      else out+=e(m[5]);
+    }
+    el.innerHTML=out;
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body data-root="../" data-course="1-1">
-<div class="wrap">
+<div class="wrap" id="list-view">
 <nav class="crumb"><a href="../index.html">← 教材ポータル</a></nav>
 <header>
   <h1 id="cname"><span class="code-badge">1-1</span>確率統計</h1>
@@ -23,6 +23,18 @@
 
 <footer><a href="../index.html">トップへ戻る</a></footer>
 </div>
+
+<section class="viewer" id="viewer" hidden>
+  <div class="vbar">
+    <a class="vback" href="#" aria-label="教材一覧に戻る">← 一覧</a>
+    <div class="vhead"><span class="mid" id="vid"></span><span class="vtitle" id="vtitle"></span></div>
+    <div class="vtools">
+      <span class="vnav" id="vprev"></span><span class="vnav" id="vnext"></span>
+      <a class="vorig" id="vorig" href="#" target="_blank" rel="noopener" title="元のページを新しいタブで開く">↗</a>
+    </div>
+  </div>
+  <iframe id="vframe" class="vframe" title="教材"></iframe>
+</section>
 <script src="../data/courses.js"></script>
 <script src="../assets/app.js"></script>
 </body>

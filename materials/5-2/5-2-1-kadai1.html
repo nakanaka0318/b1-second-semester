@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>課題1 解説 ― 文字と文字コード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>課題1 解説<br>文字は「数」でできている</h1>
+  <p>3つの課題はどれも、文字列を1文字ずつ見て、その文字コードを使う問題です。まずは下に何か打ち込んで、文字と番号・コードの関係を確かめてみてください。</p>
+  <div class="demo">
+    <label for="demo-in">半角で入力してみる</label>
+    <input id="demo-in" value="This is a Pen." maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="cells" id="cells"></div>
+    <div class="legend">上段 <b>インデックス</b>、中段 <b>文字</b>、下段 <b>16進の文字コード</b>。黄色は文頭以外の大文字(課題1-3で ^ を付ける位置)。</div>
+  </div>
+</header>
+
+<!-- ============ 1-1 ============ -->
+<section class="task" id="k1">
+  <h2><span class="no">1-1</span>文字・インデックス・文字コードを表示</h2>
+  <div class="problem">
+    <p>キーボードから半角文字列を読み込んで配列に格納し、1文字ずつ次の3つを1行に表示する。</p>
+    <p>(1) 配列のインデックス (2) その文字 (3) その文字の文字コード(16進数)</p>
+  </div>
+
+  <h3>押さえておくこと</h3>
+  <p>C言語の文字列は <code>char</code> 型の配列で、最後に終わりの印 <code>'\0'</code> が入っています。<code>Cat</code> を読み込むと、配列の中身は次のようになります。</p>
+  <div class="tbl"><table>
+    <tr><th>インデックス</th><td class="mono">0</td><td class="mono">1</td><td class="mono">2</td><td class="mono">3</td></tr>
+    <tr><th>中身</th><td class="mono">'C'</td><td class="mono">'a'</td><td class="mono">'t'</td><td class="mono">'\0'</td></tr>
+  </table></div>
+  <p>そして <code>char</code> の中身は実はただの整数(文字コード)です。同じ値でも、<code>printf</code> の書式を変えるだけで見え方が変わります。</p>
+  <div class="tbl"><table>
+    <tr><th>書式</th><th>表示</th><th>'C' の場合</th></tr>
+    <tr><td class="mono">%c</td><td>文字として</td><td class="mono">C</td></tr>
+    <tr><td class="mono">%d</td><td>10進数として</td><td class="mono">67</td></tr>
+    <tr><td class="mono">%x</td><td>16進数として</td><td class="mono">43</td></tr>
+  </table></div>
+
+  <details><summary><span class="tag">ヒント1</span>文字列の読み込み方<span class="tap"></span></summary><div class="body">
+    <p><code>char s[100];</code> のように配列を用意して、<code>scanf("%s", s);</code> で読み込みます。配列名 <code>s</code> はそれ自体がアドレスなので <code>&amp;</code> は付けません。</p>
+    <p>入力が長すぎて配列からあふれないように、<code>"%99s"</code> と最大文字数を書いておくと安全です(最後の <code>'\0'</code> の分を1つ空けて 99)。</p>
+  </div></details>
+
+  <details><summary><span class="tag">ヒント2</span>いつまで繰り返す?<span class="tap"></span></summary><div class="body">
+    <p>文字列の長さは入力によって変わります。<code>for</code> 文でインデックス <code>i</code> を 0 から増やしていき、<b><code>s[i]</code> が <code>'\0'</code> になったら止める</b>のがCの定番の書き方です。</p>
+    <p>1行の表示は、同じ <code>s[i]</code> を <code>%c</code> と <code>%x</code> の2回渡せばOKです。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>コードと解説<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char s[100];
+    int i;
+
+    printf("文字列を入力: ");
+    scanf("%99s", s);
+
+    for (i = 0; s[i] != '\0'; i++) {
+        printf("%d, %c, %x\n", i, s[i], s[i]);
+    }
+    return 0;
+}</code></pre>
+    <p><b>実行例</b></p>
+<div class="sample">文字列を入力: <span class="in">Cat</span>
+0, C, 43
+1, a, 61
+2, t, 74</div>
+    <ol class="steps">
+      <li><code>scanf("%99s", s)</code> で文字列を配列 <code>s</code> に格納します。</li>
+      <li><code>s[i] != '\0'</code> の間だけループするので、入力の長さに関係なく全文字を処理できます。</li>
+      <li><code>printf</code> に <code>s[i]</code> を2回渡し、1回目は <code>%c</code>(文字)、2回目は <code>%x</code>(16進)で表示します。<code>%X</code> にすると <code>4A</code> のように英字部分が大文字になります。</li>
+    </ol>
+    <div class="point"><b>補足</b>:<code>%s</code> は空白で読み込みが止まるので、<code>Hello World</code> と入れると <code>Hello</code> だけが処理されます。空白も含めたい場合は課題1-3の読み込み方を参照してください。</div>
+  </div></details>
+</section>
+
+<!-- ============ 1-2 ============ -->
+<section class="task" id="k2">
+  <h2><span class="no">1-2</span>すべて大文字にする</h2>
+  <div class="problem">
+    <p>キーボードから英文字列を読み込んで、すべて大文字にして表示する。</p>
+    <p>例:<code>Cat</code> → <code>CAT</code>、<code>dog</code> → <code>DOG</code></p>
+  </div>
+
+  <h3>押さえておくこと</h3>
+  <p>ASCIIコードでは、アルファベットは順番に並んでいて、小文字は大文字よりちょうど 32 大きい位置にあります。</p>
+  <div class="tbl"><table>
+    <tr><th>大文字</th><td class="mono">A = 65</td><td class="mono">B = 66</td><td class="mono">C = 67</td><td>…</td><td class="mono">Z = 90</td></tr>
+    <tr><th>小文字</th><td class="mono">a = 97</td><td class="mono">b = 98</td><td class="mono">c = 99</td><td>…</td><td class="mono">z = 122</td></tr>
+  </table></div>
+  <p>文字は整数なので、足し算や引き算、大小比較がそのままできます。たとえば <code>'a' - 32</code> は <code>'A'</code> と同じ値です。</p>
+
+  <details><summary><span class="tag">ヒント1</span>何に 32 を引くか<span class="tap"></span></summary><div class="body">
+    <p>すべての文字から 32 を引くと、もともと大文字の <code>C</code>(67)は 35 の <code>#</code> になってしまいます。<b>小文字のときだけ</b>引く必要があります。</p>
+  </div></details>
+
+  <details><summary><span class="tag">ヒント2</span>小文字かどうかの判定<span class="tap"></span></summary><div class="body">
+    <p>小文字は <code>'a'</code> から <code>'z'</code> まで連続しているので、範囲で判定できます。</p>
+<pre class="code"><code>if (s[i] &gt;= 'a' &amp;&amp; s[i] &lt;= 'z')</code></pre>
+    <p><code>97</code> や <code>122</code> と数字で書くより、<code>'a'</code> と書いたほうが意味が読み取りやすくなります。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>コードと解説<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char s[100];
+    int i;
+
+    printf("英文字列を入力: ");
+    scanf("%99s", s);
+
+    for (i = 0; s[i] != '\0'; i++) {
+        if (s[i] &gt;= 'a' &amp;&amp; s[i] &lt;= 'z') {
+            s[i] = s[i] - 32;   /* 小文字 → 大文字 */
+        }
+    }
+    printf("%s\n", s);
+    return 0;
+}</code></pre>
+    <p><b>実行例</b></p>
+<div class="sample">英文字列を入力: <span class="in">Cat</span>
+CAT</div>
+    <ol class="steps">
+      <li>1-1 と同じく <code>'\0'</code> までループします。</li>
+      <li>小文字のときだけ 32 を引いて、配列の中身そのものを大文字に書き換えます。大文字や記号はそのまま残ります。</li>
+      <li>最後に <code>%s</code> で配列全体をまとめて表示します。</li>
+    </ol>
+    <div class="point"><b>別解</b>:<code>s[i] - 32</code> の代わりに <code>s[i] - ('a' - 'A')</code> と書くと、32 という数字の意味がコードから分かります。また <code>#include &lt;ctype.h&gt;</code> の <code>toupper(s[i])</code> を使えば判定ごと任せられますが、この課題の狙いは文字コードの差を使うことなので、まずは自分で書く方法を身につけましょう。</div>
+  </div></details>
+</section>
+
+<!-- ============ 1-3 ============ -->
+<section class="task" id="k3">
+  <h2><span class="no">1-3</span>文頭以外の大文字に ^ を付ける</h2>
+  <div class="problem">
+    <p>半角の英文を読み込み、文頭以外で大文字が使われている位置を、次の行に <code>^</code> で示す。長い文への対策も考えるとなお良い。</p>
+<div class="sample">This is a Pen.
+          ^</div>
+  </div>
+
+  <h3>押さえておくこと</h3>
+  <p>ポイントは2つです。1つは<b>空白を含む英文をどう読み込むか</b>、もう1つは<b>^ をどうやって真下に置くか</b>です。</p>
+  <p>2行目も1行目と同じ文字数だけ1文字ずつ出力し、大文字の位置では <code>^</code>、それ以外では空白を出せば、自然と位置がそろいます(半角文字は全部同じ幅なので)。</p>
+
+  <details><summary><span class="tag">ヒント1</span>空白を含めて読み込む<span class="tap"></span></summary><div class="body">
+    <p><code>scanf("%s", s)</code> は空白で止まるので、<code>This is a Pen.</code> だと <code>This</code> しか入りません。改行までをまとめて読むには次のように書きます。</p>
+<pre class="code"><code>scanf("%255[^\n]", s);</code></pre>
+    <p><code>%[^\n]</code> は「改行以外の文字を読めるだけ読む」という意味です。<code>fgets(s, sizeof(s), stdin)</code> でも読めますが、その場合は末尾に改行文字が入る点に注意が必要です。</p>
+  </div></details>
+
+  <details><summary><span class="tag">ヒント2</span>2行目の作り方<span class="tap"></span></summary><div class="body">
+    <p>1行目は <code>printf("%s\n", s)</code> でそのまま表示します。2行目は <code>'\0'</code> までループして、各文字について <code>putchar</code> で1文字ずつ出します。</p>
+    <ul>
+      <li>文頭ではなく(<code>i != 0</code>)、かつ大文字(<code>'A'</code>〜<code>'Z'</code>)なら <code>putchar('^')</code></li>
+      <li>それ以外なら <code>putchar(' ')</code></li>
+    </ul>
+    <p>最後に <code>putchar('\n')</code> で改行します。</p>
+  </div></details>
+
+  <details><summary><span class="tag">ヒント3</span>長い文への対策<span class="tap"></span></summary><div class="body">
+    <p>画面の幅より長い文だと、1行目が途中で折り返されて ^ の位置がずれてしまいます。</p>
+    <p>そこで、たとえば20文字ずつに区切って「文字列の行」と「^ の行」をペアで出力します。区切りの開始位置を <code>start</code> として、<code>start</code> を 20 ずつ増やす外側のループと、その20文字を処理する内側のループの二重ループにします。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>基本版<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char s[256];
+    int i;
+
+    printf("英文を入力: ");
+    scanf("%255[^\n]", s);
+
+    printf("%s\n", s);
+    for (i = 0; s[i] != '\0'; i++) {
+        if (i != 0 &amp;&amp; s[i] &gt;= 'A' &amp;&amp; s[i] &lt;= 'Z') {
+            putchar('^');
+        } else {
+            putchar(' ');
+        }
+    }
+    putchar('\n');
+    return 0;
+}</code></pre>
+    <p><b>実行例</b></p>
+<div class="sample">英文を入力: <span class="in">This is a Pen.</span>
+This is a Pen.
+          ^</div>
+    <ol class="steps">
+      <li><code>%255[^\n]</code> で空白ごと1行を読み込みます。</li>
+      <li>1行目は文字列をそのまま表示します。</li>
+      <li>2行目は1文字ごとに <code>^</code> か空白を出すので、1行目とぴったり同じ位置関係になります。</li>
+      <li><code>i != 0</code> で文頭(インデックス0)の <code>T</code> を除外しています。</li>
+    </ol>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>長い文への対策版<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+#define WIDTH 20   /* 1行に表示する文字数 */
+
+int main(void)
+{
+    char s[256];
+    int start, i;
+
+    printf("英文を入力: ");
+    scanf("%255[^\n]", s);
+
+    for (start = 0; s[start] != '\0'; start += WIDTH) {
+        /* 1行目: WIDTH 文字分を表示 */
+        for (i = start; i &lt; start + WIDTH &amp;&amp; s[i] != '\0'; i++) {
+            putchar(s[i]);
+        }
+        putchar('\n');
+
+        /* 2行目: 大文字の真下に ^ */
+        for (i = start; i &lt; start + WIDTH &amp;&amp; s[i] != '\0'; i++) {
+            if (i != 0 &amp;&amp; s[i] &gt;= 'A' &amp;&amp; s[i] &lt;= 'Z') {
+                putchar('^');
+            } else {
+                putchar(' ');
+            }
+        }
+        putchar('\n');
+    }
+    return 0;
+}</code></pre>
+    <p><b>実行例</b></p>
+<div class="sample">英文を入力: <span class="in">I think NASA and Tokyo are Great places to visit.</span>
+I think NASA and Tok
+        ^^^^     ^
+yo are Great places
+       ^
+to visit.
+</div>
+    <ol class="steps">
+      <li>外側のループで <code>start</code> を 0, 20, 40 … と進め、20文字ずつのブロックに分けます。</li>
+      <li>内側のループは、ブロックの終わりか <code>'\0'</code> のどちらか先に来たほうで止まります。</li>
+      <li>ブロックごとに「文字列の行」と「^ の行」をセットで出すので、長い文でも位置がずれません。</li>
+      <li>1行の幅は <code>#define WIDTH</code> を変えるだけで調整できます。</li>
+    </ol>
+    <div class="point"><b>さらに良くするなら</b>:この方法だと <code>Tokyo</code> のように単語の途中で切れることがあります。区切り位置の手前の空白を探して、そこで改行すると読みやすくなります。また、<code>. </code> の直後の大文字も「文頭」とみなすと、複数の文を入力したときにも正しく判定できます。</div>
+  </div></details>
+</section>
+
+<footer>解答例はどれも gcc でコンパイルし、上の実行例どおりに動くことを確認済みです。</footer>
+</div>
+
+<script>
+(function(){
+  // 入力デモ
+  var inp=document.getElementById('demo-in'), box=document.getElementById('cells');
+  function esc(c){return c===' '?'␣':c.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function render(){
+    var s=inp.value, h='';
+    for(var i=0;i<s.length;i++){
+      var ch=s[i], code=s.charCodeAt(i);
+      var up=(i!==0 && ch>='A' && ch<='Z');
+      h+='<div class="cell'+(up?' up':'')+'"><div class="i">'+i+'</div><div class="c">'+esc(ch)+'</div><div class="h">'+(code<128?code.toString(16):'?')+'</div></div>';
+    }
+    box.innerHTML=h;
+  }
+  inp.addEventListener('input',render); render();
+
+  // 簡易シンタックスハイライト
+  var kw=/^(int|char|void|return|for|if|else|while|include|define)$/;
+  document.querySelectorAll('pre.code code').forEach(function(el){
+    var src=el.textContent, out='';
+    var re=/(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(#?\b[A-Za-z_]\w*\b)|(\b\d+\b)|([\s\S])/g, m;
+    function e(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    while((m=re.exec(src))){
+      if(m[1]) out+='<span class="tk-com">'+e(m[1])+'</span>';
+      else if(m[2]) out+='<span class="tk-str">'+e(m[2])+'</span>';
+      else if(m[3]) out+= kw.test(m[3].replace('#',''))?'<span class="tk-kw">'+e(m[3])+'</span>':e(m[3]);
+      else if(m[4]) out+='<span class="tk-num">'+m[4]+'</span>';
+      else out+=e(m[5]);
+    }
+    el.innerHTML=out;
+  });
+})();
+</script>
+</body>
+</html>
