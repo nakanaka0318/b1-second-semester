@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ネットワーク基礎とOSI参照モデル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.encap{display:grid;grid-template-columns:minmax(130px,190px) 1fr;gap:12px;margin-top:8px}
+.layers{display:flex;flex-direction:column;gap:3px}
+.layers div{font-size:.8rem;padding:5px 8px;border-radius:6px;background:var(--bg);border:1.5px solid var(--line);color:var(--sub);display:flex;gap:6px}
+.layers div b{font-family:"JetBrains Mono",monospace;color:var(--accent)}
+.layers div.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.layers div.on b{color:#fff}
+.pkt{display:flex;flex-wrap:wrap;gap:2px;align-items:stretch;min-height:44px}
+.pkt span{padding:6px 7px;border-radius:5px;font-size:.74rem;display:flex;align-items:center;font-weight:700;color:#fff}
+.pkt .d{background:var(--ink);color:var(--paper)}
+.pkt .h{background:var(--accent)}
+.pkt .h.new{animation:pop .4s ease-out;background:var(--mark)}
+.pkt .t{background:var(--ok)}
+.pkt .bits{background:none;color:var(--ink);font-family:"JetBrains Mono",monospace;font-weight:400;font-size:.72rem;word-break:break-all}
+@keyframes pop{from{transform:scale(1.3)}to{transform:none}}
+@media (prefers-reduced-motion: reduce){.pkt .h.new{animation:none}}
+.side{font-size:.78rem;font-weight:700;color:var(--sub);margin-bottom:4px}
+.scale{display:flex;gap:4px;margin:8px 0}
+.scale button{flex:1;font:inherit;font-weight:700;padding:8px 4px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.scale button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.era{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin:8px 0}
+.era button{font:inherit;font-size:.82rem;padding:8px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-align:left}
+.era button b{display:block;font-family:"JetBrains Mono",monospace;color:var(--accent)}
+.era button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+@media (max-width:520px){.encap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>ネットワーク基礎とOSI参照モデル</h1>
+  <p>情報通信ネットワーク 第1回(#1 コンピュータネットワーク基礎)のまとめです。スライドの空欄は <span style="display:inline-block;min-width:2.4em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0">?</span> になっていて、タップすると答えが出ます。自分で答えを考えてから開いてみましょう。</p>
+  <div class="demo">
+    <label>「おはようございます」が相手に届くまで(OSI参照モデルの7階層)</label>
+    <div class="encap">
+      <div><div class="side" id="eside"></div><div class="layers" id="elayers"></div></div>
+      <div><div class="side">データの形</div><div class="pkt" id="epkt"></div><div class="msg" id="emsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;margin-top:10px;font-size:.92rem" aria-live="polite"></div></div>
+    </div>
+    <div class="row"><button class="btn" id="enext" type="button">次へ</button><button class="btn sub" id="eprev" type="button">戻る</button><button class="btn sub" id="ereset" type="button">最初から</button><span class="legend" id="estep"></span></div>
+  </div>
+</header>
+
+<div class="blbar"><span class="t">穴埋め:<span id="blcount"></span></span><button class="btn sub" id="blhide" type="button">すべて隠す</button><button class="btn sub" id="blshow" type="button">すべて表示</button></div>
+
+<nav class="toc">
+  <a href="#net">ネットワークの規模</a><a href="#hist">利用形態の変遷</a><a href="#proto">プロトコル</a><a href="#std">標準化と階層化</a><a href="#osi">OSI参照モデル</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="net">
+  <h2><span class="no">1</span>スタンドアロンからネットワークへ</h2>
+  <ul>
+    <li><b>スタンドアロン</b>:コンピュータ単体で利用。作業ごとに別々のコンピュータを使い分ける。</li>
+    <li><b>ネットワーク利用</b>:コンピュータをネットワークで接続し、処理を <b class="bl">サーバ</b> に集約することで、ユーザのコンピュータから利用できる。</li>
+  </ul>
+  <h3>規模による分類</h3>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>タップして範囲を比べる</div>
+    <div class="scale" id="scale"><button data-k="0">PAN</button><button data-k="1">LAN</button><button data-k="2">MAN</button><button data-k="3">WAN</button></div>
+    <div class="msg" id="scmsg" style="background:var(--bg);border-radius:10px;padding:10px 14px" aria-live="polite"></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>名前</th><th>範囲</th></tr>
+    <tr><td><b class="bl">PAN</b>(<b class="bl">Personal</b> Area Network)</td><td>ユーザの周辺など、極めて限られた範囲</td></tr>
+    <tr><td><b class="bl">LAN</b>(<b class="bl">Local</b> Area Network)</td><td>家庭・オフィス・キャンパス内など、比較的狭いエリア</td></tr>
+    <tr><td><b class="bl">MAN</b>(<b class="bl">Metropolitan</b> Area Network)</td><td>都市レベルのエリア</td></tr>
+    <tr><td><b class="bl">WAN</b>(<b class="bl">Wide</b> Area Network)</td><td>地理的に離れた広範囲</td></tr>
+  </table></div>
+  <h3>コンピュータ通信から情報通信環境へ</h3>
+  <ul>
+    <li>初期:管理者が指定した <b class="bl">特定</b> のコンピュータ同士を接続(プライベートなネットワーク = LAN)。業務データのやりとりが中心。</li>
+    <li>インターネット:LAN 同士を接続したものが WAN、世界中の <b>ISP</b>(Internet Service Provider)を相互接続したものがインターネット。</li>
+    <li>さらに進化すると、空気や水のように意識されない存在に(Digital Inclusion)。</li>
+  </ul>
+</section>
+
+<section class="task" id="hist">
+  <h2><span class="no">2</span>コンピュータの利用形態の変遷</h2>
+  <p>年代をタップすると説明が出ます。</p>
+  <div class="era" id="era"></div>
+  <div class="msg" id="eramsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;min-height:4em" aria-live="polite"></div>
+  <h3>バッチ処理</h3>
+  <ul>
+    <li>プログラムやデータをまとめて <b class="bl">一括</b> 処理する方式。パンチカードや紙テープに記録して読み込ませる。</li>
+    <li>当時のコンピュータは高価で巨大。ユーザは計算機センターまでカードを持って行き、オペレータに実行を依頼した。</li>
+  </ul>
+  <h3>TSS(Time Sharing System)</h3>
+  <ul>
+    <li>1台の大型コンピュータ(ホスト、メインフレーム)に複数の <b>端末</b>(キーボードとディスプレイを備えた入出力装置。<b class="bl">パソコン</b> とは違う)を接続。</li>
+    <li>ホストと端末を <b class="bl">通信回線</b> でスター型に接続し、複数のユーザが <b class="bl">同時</b> にホストを利用できる。</li>
+    <li>インタラクティブ(対話的)な操作が可能になり、使い勝手が格段に向上。</li>
+  </ul>
+  <h3>コンピュータ間通信 → コンピュータネットワーク</h3>
+  <ul>
+    <li>1970年代に通信回線の利用制限が撤廃され、コンピュータ間を回線で接続できるように。複数のコンピュータで <b class="bl">分散処理</b> が可能に。</li>
+    <li><b class="bl">Ethernet</b> の誕生(1973年、Xerox パロアルト研究所のロバート・メトカーフら)。1980年に DEC・Intel・Xerox(DIX)が Ethernet version 1 を発表。</li>
+    <li><b class="bl">TCP/IP</b> の標準化(1982年)→ 異なるメーカーのコンピュータ同士で相互接続できるネットワークが登場。</li>
+    <li>4.2BSD(<b class="bl">UNIX</b> 系OS)のリリース(1983年):TCP/IP を標準実装した世界初のOS。</li>
+  </ul>
+  <h3>インターネット</h3>
+  <ul>
+    <li><b class="bl">WWW</b>(World Wide Web)の誕生:CERN のティム・バーナーズ=リーが発明(1989年)。1990年12月20日に世界初のWebページ公開。</li>
+    <li>NCSA Mosaic(1993年):テキストと画像を同じウィンドウに表示できた最初のブラウザ。</li>
+    <li>Windows 95(1995年):TCP/IP を搭載し、一般の企業や家庭にインターネットが普及し始める。</li>
+  </ul>
+</section>
+
+<section class="task" id="proto">
+  <h2><span class="no">3</span>プロトコルとパケット通信</h2>
+  <h3><b class="bl">プロトコル</b></h3>
+  <ul>
+    <li>コンピュータ同士が通信するための約束事。使用するプロトコルが同じなら、メーカーの異なる CPU や OS のコンピュータ間でも相互通信できることが保証される。</li>
+    <li>プロトコルが定める内容:データの <b class="bl">フォーマット</b> やサイズ、通信の <b class="bl">手順</b> など。</li>
+  </ul>
+  <h3>パケット通信</h3>
+  <ul>
+    <li>大きなデータを小さく分割して送る方法(パケット = 小包)。</li>
+    <li>パケットは、送りたいデータと、制御情報を書いた <b class="bl">ヘッダ</b> からなる。</li>
+    <li>プロトコルは、ヘッダに書く情報と、その情報をどう処理するかを定義する。</li>
+  </ul>
+</section>
+
+<section class="task" id="std">
+  <h2><span class="no">4</span>プロトコルの標準化と階層化</h2>
+  <p>メーカーの異なるコンピュータ間でも自由に通信したい → 各社のプロトコルを共通化する = <b class="bl">標準化</b></p>
+  <div class="tbl"><table>
+    <tr><th></th><th><b class="bl">OSI</b></th><th><b class="bl">TCP/IP</b></th></tr>
+    <tr><th>正式名など</th><td>Open Systems Interconnection(開放型システム間相互接続)</td><td>インターネットの標準プロトコル</td></tr>
+    <tr><th>標準化した組織</th><td>ISO(国際標準化機構)</td><td>IETF(Internet Engineering Task Force)</td></tr>
+    <tr><th>現在</th><td>OSI のプロトコルは普及していない</td><td>大学や ICT 企業が中心に標準化。インターネットで使われている</td></tr>
+  </table></div>
+  <h3>プロトコルの <b class="bl">階層化</b></h3>
+  <ul>
+    <li>通信に必要な機能を複数の階層に分割(ネットワークアーキテクチャ)。複雑なプロトコルを単純化できる。</li>
+    <li>一部の層のプロトコルを変えるだけで機能を変えられる(<b>柔軟性・拡張性</b>が高い)。変更はその層の中で完結する(<b>独立性・保守性</b>が高い)。</li>
+    <li><b>インタフェース</b>:上位層と下位層の間でサービスをやり取りするときの約束事。</li>
+    <li><b>プロトコル</b>:通信相手と<b>同じ階層</b>でやり取りするときの約束事。</li>
+  </ul>
+</section>
+
+<section class="task" id="osi">
+  <h2><span class="no">5</span><b class="bl">OSI参照モデル</b></h2>
+  <ul>
+    <li>通信に必要な機能を <b class="bl">7つの階層</b> で定義したもの。プロトコルを設計するときのガイドライン。</li>
+    <li>プロトコルについて議論するとき、このモデルの階層に基づいて「どの層の話か」を示すことが多い。</li>
+    <li>送信側:<b class="bl">上</b> 位層から <b class="bl">下</b> 位層へデータを渡す(ヘッダの <b class="bl">付加</b>)</li>
+    <li>受信側:<b class="bl">下</b> 位層から <b class="bl">上</b> 位層へデータを渡す(ヘッダの <b class="bl">除去</b>)</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th>層</th><th>名前</th><th>役割</th></tr>
+    <tr><td>7</td><td><b class="bl">アプリケーション層</b></td><td>アプリの中の通信に関係する部分を定義(例:宛先 B さん・送信元 A さん・本文)</td></tr>
+    <tr><td>6</td><td><b class="bl">プレゼンテーション層</b></td><td>データの <b class="bl">表現</b> 形式を定義(文字コード、画像・動画フォーマットなど)。コンピュータ固有の形式 ⇔ ネットワーク共通の形式に変換。符号に変換する = <b class="bl">エンコード</b>、元に戻す = <b class="bl">デコード</b></td></tr>
+    <tr><td>5</td><td><b class="bl">セッション層</b></td><td>セッション(= <b class="bl">通信の開始から終了まで</b>)の開始・終了・管理。コネクションをいくつ、どう張るかを判断する</td></tr>
+    <tr><td>4</td><td><b class="bl">トランスポート層</b></td><td>コネクションの確立・切断、確認応答や再送制御でデータ転送の <b class="bl">信頼性</b> を確保</td></tr>
+    <tr><td>3</td><td><b class="bl">ネットワーク層</b></td><td>送信ホストから受信ホストまでデータを配達。<b class="bl">IPアドレス</b> で宛先を識別し、中継器(<b class="bl">ルータ</b>)が転送先を決める</td></tr>
+    <tr><td>2</td><td><b class="bl">データリンク層</b></td><td>通信媒体で直接つながった機器同士でデータをやり取り。<b class="bl">MACアドレス</b>(物理アドレス)で機器を特定</td></tr>
+    <tr><td>1</td><td><b class="bl">物理層</b></td><td><b class="bl">ビット列</b> を <b class="bl">電圧</b> の高低や <b class="bl">光</b> の点滅に変換。ケーブル・コネクタの形状、周波数、変調方式などを定義</td></tr>
+  </table></div>
+  <div class="point"><b>覚え方の例</b>:上から「ア・プ・セ・ト・ネ・デ・ブ」。ページ上部の図で、ヘッダが付いていく様子を確かめましょう。</div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox"><div class="qno">問1 規模</div><p>家庭やオフィス、キャンパス内など比較的狭いエリアのネットワークは?</p>
+    <div class="opts"><button>PAN</button><button data-ok>LAN</button><button>MAN</button><button>WAN</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問2 利用形態</div><p>1台のホストに複数の端末をつなぎ、複数のユーザが同時に使えるようにした方式は?</p>
+    <div class="opts"><button>バッチ処理</button><button data-ok>TSS(タイムシェアリングシステム)</button><button>分散処理</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3 OSI 参照モデル</div><p>IPアドレスを使って、送信ホストから受信ホストまでデータを配達する層は?</p>
+    <div class="opts"><button>データリンク層</button><button>トランスポート層</button><button data-ok>ネットワーク層</button><button>セッション層</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問4 OSI 参照モデル</div><p>文字コード(UTF-8 など)や画像フォーマットを扱う層は?</p>
+    <div class="opts"><button>アプリケーション層</button><button data-ok>プレゼンテーション層</button><button>物理層</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問5 OSI 参照モデル</div><p>確認応答や再送制御によって、データ転送の信頼性を確保する層は?</p>
+    <div class="opts"><button data-ok>トランスポート層</button><button>ネットワーク層</button><button>セッション層</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問6 アドレス</div><p>データリンク層で機器を特定するために使うアドレスは?</p>
+    <div class="opts"><button>IPアドレス</button><button data-ok>MACアドレス</button><button>メールアドレス</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問7 ヘッダ</div><p>送信側でデータが上位層から下位層へ渡されるとき、ヘッダはどうなる?</p>
+    <div class="opts"><button data-ok>各層で付加される</button><button>各層で除去される</button><button>変化しない</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問8 標準化</div><p>現在のインターネットで使われている標準プロトコルを提案・標準化している組織は?</p>
+    <div class="opts"><button>ISO</button><button data-ok>IETF</button><button>CERN</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="7"><div class="qno">問9 階層の数</div><p>OSI 参照モデルは何階層?</p>
+    <div class="check"><input class="ans" placeholder="例 5" aria-label="問9の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox"><div class="qno">問10 記述</div><p>プロトコルを階層化する利点を2つ説明しなさい。</p>
+    <details class="ans"><summary><span class="tag">解答例</span>解答例を見る<span class="tap"></span></summary><div class="body">
+      <p>① 一部の層のプロトコルを入れ替えるだけで機能を変えられるので、<b>柔軟性・拡張性</b>が高い。② 機能の変更がその層のプロトコル内で完結し、他の層に影響しないので、<b>独立性・保守性</b>が高い。(複雑なプロトコルを単純な部品に分けて設計できる、という点も利点です。)</p>
+    </div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>名城大学 情報工学部「情報通信ネットワーク」#1 のスライドをもとに作成しました。穴埋めの答えは教科書(マスタリングTCP/IP 入門編)の用語に合わせて補っています。授業での解答と違う場合は授業を優先してください。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  /* ===== カプセル化 ===== */
+  var L=[[7,'アプリケーション層','AH','宛先:Bさん / 送信元:Aさん'],[6,'プレゼンテーション層','PH','文字コード:UTF-8'],[5,'セッション層','SH','コネクションの張り方'],
+         [4,'トランスポート層','TH','確認応答・再送のための情報'],[3,'ネットワーク層','NH','宛先 IPアドレス'],[2,'データリンク層','DH','宛先 MACアドレス'],[1,'物理層','','']];
+  var step=0; /* 0..7 送信(7層を下る) 8..14 受信(上る) */
+  function bits(){return '0110100101101111 0100100010101100 …(電気信号・光信号)';}
+  function render(){
+    var send=step<=7, cur, hdrs;
+    if(send){cur=step===0?-1:step-1; hdrs=Math.min(step,6);}
+    else{cur=7-(step-7); hdrs=cur;}
+    document.getElementById('eside').textContent=send?'送信側 A さん(上 → 下)':'受信側 B さん(下 → 上)';
+    var lh=''; L.forEach(function(l,i){lh+='<div class="'+(i===cur?'on':'')+'"><b>L'+l[0]+'</b>'+l[1]+'</div>';});
+    document.getElementById('elayers').innerHTML=lh;
+    var p='';
+    if(cur===6){p='<span class="bits">'+bits()+'</span>';}
+    else{
+      for(var i=hdrs-1;i>=0;i--){var isNew=send&&i===hdrs-1&&step>0; p+='<span class="h'+(isNew?' new':'')+'" title="'+L[i][3]+'">'+L[i][2]+'</span>';}
+      p+='<span class="d">おはようございます</span>';
+      if(hdrs>=6) p+='<span class="t" title="誤り検出用">FCS</span>';
+    }
+    document.getElementById('epkt').innerHTML=p;
+    var m;
+    if(step===0) m='A さんが「おはようございます」と入力して送信ボタンを押しました。ここから L7 → L1 へ、各層がヘッダを付けながら下に渡していきます。';
+    else if(send&&cur<6) m='<b>L'+L[cur][0]+' '+L[cur][1]+'</b>:ヘッダ <b>'+L[cur][2]+'</b>('+L[cur][3]+')を付加して、下の層へ渡します。'+(cur===5?'データリンク層はフレームの末尾に誤り検出用の FCS も付けます。':'');
+    else if(send) m='<b>L1 物理層</b>:ヘッダ付きのデータ全体をビット列にし、電圧の高低や光の点滅に変えてケーブルに流します。';
+    else if(cur===6) m='<b>受信側 L1 物理層</b>:届いた電気信号・光信号をビット列に戻して、上の層へ渡します。';
+    else if(cur>=0) m='<b>L'+L[cur][0]+' '+L[cur][1]+'</b>:自分の層のヘッダ <b>'+L[cur][2]+'</b> を読んで処理し、取り除いてから上の層へ渡します。'+(cur===0?' → B さんの画面に「おはようございます」が表示されました!':'');
+    document.getElementById('emsg').innerHTML=m;
+    document.getElementById('estep').textContent=(step+1)+' / 15';
+    document.getElementById('enext').disabled=step>=14; document.getElementById('eprev').disabled=step<=0;
+  }
+  document.getElementById('enext').addEventListener('click',function(){if(step<14){step++;render();}});
+  document.getElementById('eprev').addEventListener('click',function(){if(step>0){step--;render();}});
+  document.getElementById('ereset').addEventListener('click',function(){step=0;render();});
+  render();
+
+  /* ===== 規模 ===== */
+  var SC=[['PAN','Personal Area Network','数 m 程度','スマホとワイヤレスイヤホン、スマートウォッチなど(Bluetooth)'],
+          ['LAN','Local Area Network','〜数百 m〜数 km','家庭の Wi-Fi、大学のキャンパスネットワーク'],
+          ['MAN','Metropolitan Area Network','〜数十 km','都市内の拠点どうしを結ぶネットワーク'],
+          ['WAN','Wide Area Network','数百 km〜世界','離れた都市や国をまたぐネットワーク(インターネットはその集合)']];
+  var sb=document.querySelectorAll('#scale button');
+  function sc(k){sb.forEach(function(b){b.type='button';b.setAttribute('aria-pressed',+b.getAttribute('data-k')===k?'true':'false');});
+    var s=SC[k]; document.getElementById('scmsg').innerHTML='<b>'+s[0]+'</b>('+s[1]+')<br>範囲の目安:'+s[2]+'<br>例:'+s[3];}
+  sb.forEach(function(b){b.addEventListener('click',function(){sc(+b.getAttribute('data-k'));});}); sc(1);
+
+  /* ===== 年代 ===== */
+  var ERA=[['1950年代','バッチ処理の時代','プログラムとデータをまとめて一括処理。計算機センターに持ち込んで実行を依頼した。'],
+    ['1960年代','TSS の時代','1台のホストに複数の端末をつなぎ、複数のユーザが同時に対話的に利用。'],
+    ['1970年代','コンピュータ間通信の時代','通信回線でコンピュータどうしをつなぎ、データのやり取りが一瞬で完了。分散処理が可能に。'],
+    ['1980年代','コンピュータネットワークの時代','Ethernet・TCP/IP・4.2BSD。異なるメーカーのコンピュータ同士がつながる。ウィンドウシステムと結びつく。'],
+    ['1990年代','インターネット普及の時代','WWW、Mosaic、商用インターネット、Windows 95。企業や家庭に普及。'],
+    ['2000年代','インターネット技術中心の時代','電話や放送など、様々な通信がインターネット技術(TCP/IP)で実現されるように。'],
+    ['2010年代','いつでもどこでも何にでも TCP/IP','スマートフォンやクラウド。あらゆる機器が TCP/IP でつながる。'],
+    ['2020年代','いろいろな仕組みがつながる時代','IoT など、様々な仕組みがネットワークでつながる。今後は「安全に」つながることが課題。']];
+  var eb=document.getElementById('era');
+  ERA.forEach(function(e,i){var b=document.createElement('button');b.type='button';b.innerHTML='<b>'+e[0]+'</b>'+e[1];
+    b.addEventListener('click',function(){eb.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed','false');});b.setAttribute('aria-pressed','true');document.getElementById('eramsg').innerHTML='<b>'+e[0]+' '+e[1]+'</b><br>'+e[2];});
+    eb.appendChild(b);});
+  eb.firstChild.click();
+})();
+</script>
+</body>
+</html>

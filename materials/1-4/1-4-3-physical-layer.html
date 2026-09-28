@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>物理層と伝送媒体</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.bitsin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.1rem;letter-spacing:.15em;padding:8px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;max-width:320px}
+.bitsin:focus{outline:none;border-color:var(--accent)}
+.sw{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.sw button{font:inherit;font-weight:700;font-size:.9rem;padding:6px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.dev{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin:8px 0}
+.dev button{font:inherit;font-size:.88rem;font-weight:700;padding:10px 8px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.dev button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.osi7{display:flex;flex-direction:column-reverse;gap:2px;margin-top:8px}
+.osi7 div{font-size:.78rem;padding:3px 8px;border-radius:5px;background:var(--bg);color:var(--sub)}
+.osi7 div.on{background:var(--accent);color:#fff;font-weight:700}
+.spec{display:flex;height:34px;border-radius:8px;overflow:hidden;margin:8px 0;font-size:.62rem;font-weight:700}
+.spec span{flex:1;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--accent);border-right:1px solid var(--paper);text-align:center;line-height:1.1}
+.spec span:nth-child(odd){opacity:.75}
+.spec span.lo{opacity:.45}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>物理層と伝送媒体</h1>
+  <p>情報通信ネットワーク 第3回(#3 物理層)のまとめです。スライドの空欄は <span style="display:inline-block;min-width:2.4em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0">?</span> になっていて、タップすると答えが出ます。</p>
+  <div class="demo">
+    <label for="mbits">マンチェスター符号を作ってみる(0 と 1 を入力)</label>
+    <input id="mbits" class="bitsin" value="00100111" maxlength="16" inputmode="numeric" autocomplete="off">
+    <svg class="chart" id="msvg" viewBox="0 0 600 300" role="img" aria-label="クロック、データ、マンチェスター符号の波形"></svg>
+    <div class="legend">送信信号 = クロック ⊕ データ(⊕ = XOR)。0 は「高→低」、1 は「低→高」。<b>どのビットも真ん中で必ず信号が変化</b>するので、1 や 0 が続いても受信側は区切りを見失いません。いちばん下は、同じデータをそのまま送った場合(NRZ)。</div>
+  </div>
+</header>
+
+<div class="blbar"><span class="t">穴埋め:<span id="blcount"></span></span><button class="btn sub" id="blhide" type="button">すべて隠す</button><button class="btn sub" id="blshow" type="button">すべて表示</button></div>
+
+<nav class="toc">
+  <a href="#basic">物理層とは</a><a href="#level">ビットの表現</a><a href="#sync">同期と符号化</a><a href="#media">通信媒体</a><a href="#radio">無線</a><a href="#mod">変調</a><a href="#dev">ネットワーク機器</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="basic">
+  <h2><span class="no">1</span>物理層の基礎知識</h2>
+  <ul>
+    <li>送信側:<b class="bl">ビット列</b> を電圧の高低や光の点滅などの <b class="bl">物理信号</b> に変換して伝送する。</li>
+    <li>受信側:受け取った電気信号や光信号をビット列に戻す。</li>
+    <li>物理層の規格:ビットと信号の変換の規則、ケーブルの構造や品質、コネクタの形状などを規定する。</li>
+  </ul>
+</section>
+
+<section class="task" id="level">
+  <h2><span class="no">2</span>電気信号によるビットの表現</h2>
+  <p>電気信号の <b class="bl">電圧レベル</b>(振幅)で <b class="bl">0</b> と <b class="bl">1</b> からなる情報を表す。2<sup>n</sup> 個のレベルを使えば、一度に <b class="bl">n</b> ビット送れる。また、周波数が <b class="bl">高い</b> ほど多くの情報を送れる。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>レベルを増やすと? ノイズがあると?</div>
+    <div class="row"><label for="ln">レベル数</label><select id="ln"><option value="1">2 レベル(n = 1 ビット)</option><option value="2" selected>4 レベル(n = 2 ビット)</option><option value="3">8 レベル(n = 3 ビット)</option><option value="4">16 レベル(n = 4 ビット)</option></select></div>
+    <div class="row"><label for="nz">ノイズの大きさ <b id="nzv"></b></label><input id="nz" type="range" min="0" max="100" value="20"></div>
+    <svg class="chart" id="lsvg" viewBox="0 0 600 200" role="img" aria-label="受信電圧の散らばり"></svg>
+    <div class="stats" id="lst"></div>
+    <div class="row"><button class="btn sub" id="lre" type="button">もう一度送る</button></div>
+  </div>
+  <h3>物理的な制約</h3>
+  <ol>
+    <li><b>周波数の上限</b>:材質などの特性で、ケーブルに流せる周波数に上限がある(LANケーブルのカテゴリ)。</li>
+    <li><b>電圧を細かく分けすぎると区別できない</b>:距離が長いと減衰や雑音で受信電圧が変わるので、一定の電圧差が必要。現在は数個のレベルが限界。上の「試す」で、レベルを増やすとノイズで読み間違いが増えるのが分かります。</li>
+    <li><b>同じ信号が続くと区切りが分からない</b>:1 が続くと何個送られたか判定しにくい。送信側と受信側で <b class="bl">同期</b>(Synchronization)していないとエラーになる。</li>
+  </ol>
+</section>
+
+<section class="task" id="sync">
+  <h2><span class="no">3</span>同期の方法とライン符号</h2>
+  <ul>
+    <li>A) データを送る前に <b class="bl">同期信号を送る</b>:典型的には <b class="bl">0</b> と <b class="bl">1</b> を交互に送る。</li>
+    <li>B) 信号の中にデータを <b class="bl">符号化</b> して送る(ライン符号方式):区切りをずれなく合わせるため、<b class="bl">データ</b> を送る途中で必ず <b class="bl">信号レベル</b> を変化させる。</li>
+  </ul>
+  <h3>マンチェスター符号</h3>
+  <ul>
+    <li>クロックと送信データの XOR で信号を作る。送信時:<span class="mono">クロック ⊕ 送信データ = 送信信号</span>、受信時:<span class="mono">受信信号 ⊕ クロック = 受信データ</span>。</li>
+    <li>ビットの途中で必ず信号が変化(0 は高→低、1 は低→高)するので、受信側でクロック同期を維持しやすい。</li>
+  </ul>
+  <p>ページ上部で、スライドの例「00100111」の波形を確かめられます。1 が3つ続く部分でも、マンチェスター符号では毎回レベルが変わっています。</p>
+</section>
+
+<section class="task" id="media">
+  <h2><span class="no">4</span>通信媒体</h2>
+  <ul>
+    <li><b>伝送速度</b>:2つの機器間を流れるデータの物理的な速度(単位 = <b class="bl">bps</b>)。信号そのものの速さ(ほぼ一定)とは違い、「高速」= 短時間に多くのデータを送れること。</li>
+    <li><b class="bl">スループット</b>:ホスト間の実効転送速度。帯域だけでなく CPU 能力、混雑度、パケット中のデータの割合なども影響する。</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th>媒体</th><th>特徴</th></tr>
+    <tr><td><b>同軸ケーブル</b></td><td>断面が同心円状。外部導体が電磁シールドになり、外からの <b class="bl">ノイズ</b> の影響を受けにくい。高周波信号の伝送用(無線機器、放送機器など)</td></tr>
+    <tr><td><b class="bl">ツイストペアケーブル</b>(より対線)</td><td>導線を2本1組でより合わせたもの。ノイズの影響を小さくし、減衰を抑える。<b class="bl">LAN</b> の通信媒体として最も広く使われる(LANケーブル)。<b class="bl">UTP</b>(非シールド、安価で一般的)と <b class="bl">STP</b>(シールド、ノイズに強いが高価)</td></tr>
+    <tr><td><b>光ファイバー</b></td><td>コア(屈折率が高い)とクラッドの二重構造。光は <b class="bl">全反射</b> でコア内に閉じ込められて進む。長距離(UTPは通常100mまで)・ノイズに強い・高速。ただし接続が難しく高価。マルチモード(太い、安価、短距離)とシングルモード(細い、高速・長距離、40km以上)</td></tr>
+  </table></div>
+  <h3>LANケーブルのカテゴリ</h3>
+  <p>品質は <b class="bl">カテゴリ</b>(CAT)で分類。数字が大きいほど通信速度が <b class="bl">速く</b>、伝送帯域が <b class="bl">広い</b>。1Gbps より速い通信には CAT6A 以上が必須。</p>
+  <div class="tbl"><table>
+    <tr><th>カテゴリ</th><th>規格</th><th>通信速度</th><th>伝送帯域</th><th>種類</th></tr>
+    <tr><td>CAT5e</td><td>1000BASE-T</td><td>1Gbps</td><td>100MHz</td><td>UTP, STP</td></tr>
+    <tr><td>CAT6</td><td>1000BASE-TX</td><td>1Gbps</td><td>250MHz</td><td>UTP, STP</td></tr>
+    <tr><td>CAT6A</td><td>10GBASE-T</td><td>10Gbps</td><td>500MHz</td><td>UTP, STP</td></tr>
+    <tr><td>CAT7</td><td>10GBASE-T</td><td>10Gbps</td><td>600MHz</td><td>STP</td></tr>
+    <tr><td>CAT7A</td><td>10GBASE-T</td><td>10Gbps</td><td>1,000MHz</td><td>STP</td></tr>
+    <tr><td>CAT8</td><td>40GBASE-T</td><td>40Gbps</td><td>2,000MHz</td><td>STP</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="radio">
+  <h2><span class="no">5</span>無線</h2>
+  <p><b class="bl">電波</b>(<b class="bl">3THz</b> 以下の電磁波)を使ってデータを送受信する。有線と同じく、周波数が <b class="bl">高い</b> ほど高速通信が可能。</p>
+  <div class="spec" aria-hidden="true"><span class="lo">VLF</span><span class="lo">LF</span><span class="lo">MF</span><span class="lo">HF</span><span>VHF</span><span>UHF<br>携帯・無線LAN</span><span>SHF<br>無線LAN 5GHz</span><span>EHF<br>ミリ波</span><span>サブミリ波</span></div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">計算</span>周波数 → 波長(λ = 光速 ÷ 周波数)</div>
+    <div class="row"><input id="fq" class="bitsin" style="max-width:9em;letter-spacing:0" type="number" value="2.4" step="any" aria-label="周波数"><select id="fu"><option value="1e3">kHz</option><option value="1e6">MHz</option><option value="1e9" selected>GHz</option></select></div>
+    <div class="stats" id="fst"></div>
+  </div>
+  <h3>電波の性質</h3>
+  <ul>
+    <li>障害物の材質で透過・反射する。反射や透過をくり返すと電波は <b class="bl">弱く</b> なる。</li>
+    <li>電波は <b class="bl">減衰</b> する。基地局から離れるほど弱くなり、周波数が <b class="bl">高い</b> ほど減衰しやすい。</li>
+    <li>障害物のへりに沿って裏側に回り込む(<b class="bl">回折</b> 特性)。<b class="bl">低い</b> 周波数ほど回折しやすい(建物の奥や地下にも届きやすい)。</li>
+    <li><b class="bl">干渉</b> が発生する。複数の電波がぶつかると強めあったり(同位相)、打ち消しあったり(逆位相)する。</li>
+    <li>基地局は高出力で遠くまで届くが、スマホは低出力。基地局から遠いほど送信電力を多く使うので、バッテリの消耗が早い。</li>
+  </ul>
+  <h3><b class="bl">ISM</b> バンド</h3>
+  <p>産業・科学・医療用に、<b class="bl">免許</b> 不要で自由に使えるよう開放されている周波数帯。代表は <b class="bl">2.4GHz</b> 帯(無線LAN、Bluetooth、電子レンジ)。ほかに 5.7〜5.8GHz 帯(ETC2.0 の DSRC、産業用ドローンなど)。</p>
+</section>
+
+<section class="task" id="mod">
+  <h2><span class="no">6</span>電波によるビットの表現(変調)</h2>
+  <p><b class="bl">搬送波</b>(データを載せる前の正弦波)の形をビットの値に応じて変化させる(<b class="bl">変調</b>)。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>同じビット列を ASK・FSK・PSK で送ると</div>
+    <div class="row"><input id="mb2" class="bitsin" value="1011" maxlength="8" inputmode="numeric" aria-label="送るビット列"><label><input type="checkbox" id="mnoise"> ノイズを加える</label></div>
+    <svg class="chart" id="modsvg" viewBox="0 0 600 330" role="img" aria-label="変調波形"></svg>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>変える量</th><th>アナログ</th><th>デジタル</th><th>特徴(デジタル)</th></tr>
+    <tr><td>振幅</td><td>AM</td><td><b>ASK</b></td><td>回路は単純。ただし減衰で振幅が下がる/ノイズで上がると誤判定しやすい</td></tr>
+    <tr><td>周波数</td><td>FM</td><td><b>FSK</b></td><td>出力レベルが一定なのでノイズに強い。ただし周波数の占有幅が広く、利用効率が低い</td></tr>
+    <tr><td>位相</td><td>PM</td><td><b>PSK</b></td><td>ノイズに強く、FSK より周波数の利用効率もよい</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="dev">
+  <h2><span class="no">7</span>ネットワークの構成機器</h2>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>機器をタップすると、動作する層が光ります</div>
+    <div class="dev" id="dev"></div>
+    <div class="msg" id="dmsg" style="background:var(--bg);border-radius:10px;padding:10px 14px" aria-live="polite"></div>
+    <div class="osi7" id="osi7"></div>
+  </div>
+  <h3>リピーター</h3>
+  <ul>
+    <li>物理層でネットワークを延長する。受け取った信号の <b class="bl">増幅</b> や波形の <b class="bl">整形</b> をして、反対側へ再生する。</li>
+    <li>延長には制限がある(10Mbps Ethernet は最大4台、100Mbps は最大2台)。</li>
+    <li><b class="bl">リピーターハブ</b>:各ポートがリピーターになっている装置。あるポートに来たデータを <b class="bl">全てのポート</b> に転送する。近年はスイッチングハブ(データリンク層)に置き換わった。</li>
+  </ul>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox" data-ans="3"><div class="qno">問1 レベルとビット数</div><p>8 個の電圧レベルを使うと、一度に何ビット送れる?</p>
+    <div class="check"><input class="ans" placeholder="例 2" aria-label="問1の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:3</b></p><p>2<sup>n</sup> = 8 より n = 3。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問2 マンチェスター符号</div><p>マンチェスター符号で「1」を送るときの信号の変化は?(このページの規則で)</p>
+    <div class="opts"><button>高 → 低</button><button data-ok>低 → 高</button><button>高のまま</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3 マンチェスター符号の利点</div><p>マンチェスター符号の利点は?</p>
+    <div class="opts"><button>周波数の利用効率がよい</button><button data-ok>ビットの途中で必ず変化するので同期を保ちやすい</button><button>ケーブルが不要</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問4 ケーブル</div><p>光がコアとクラッドの境界で全反射しながら進むのは?</p>
+    <div class="opts"><button>同軸ケーブル</button><button>UTP ケーブル</button><button data-ok>光ファイバーケーブル</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問5 LANケーブル</div><p>10Gbps の通信をするとき、最低限必要なカテゴリは?</p>
+    <div class="opts"><button>CAT5e</button><button>CAT6</button><button data-ok>CAT6A</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問6 電波</div><p>建物の奥や地下にも届きやすいのは、周波数が高い電波? 低い電波?</p>
+    <div class="opts"><button>高い電波</button><button data-ok>低い電波</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="0.125"><div class="qno">問7 波長</div><p>2.4GHz の電波の波長は何 m?(光速 = 3.0 × 10<sup>8</sup> m/s)</p>
+    <div class="check"><input class="ans" placeholder="例 0.5" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:0.125 m(12.5 cm)</b></p><p>3.0 × 10<sup>8</sup> ÷ 2.4 × 10<sup>9</sup> = 0.125 m。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問8 変調</div><p>ノイズに強く、周波数の利用効率も優れているデジタル変調方式は?</p>
+    <div class="opts"><button>ASK</button><button>FSK</button><button data-ok>PSK</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問9 ネットワーク機器</div><p>物理層でネットワークを延長する機器は?</p>
+    <div class="opts"><button data-ok>リピーター</button><button>ブリッジ</button><button>ルーター</button><button>ゲートウェイ</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問10 ISM バンド</div><p>無線LAN・Bluetooth・電子レンジが使う代表的な ISM バンドは?</p>
+    <div class="opts"><button>700MHz 帯</button><button data-ok>2.4GHz 帯</button><button>60GHz 帯</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>名城大学 情報工学部「情報通信ネットワーク」#3 のスライドをもとに作成しました。穴埋めの答えは教科書(マスタリングTCP/IP 入門編)の用語に合わせて補っています。授業での解答と違う場合は授業を優先してください。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  function clean(s,max){return (s.replace(/[^01]/g,'')||'0').slice(0,max);}
+  /* ===== マンチェスター ===== */
+  var mi=document.getElementById('mbits'), ms=document.getElementById('msvg');
+  function drawM(){
+    var b=clean(mi.value,16).split('').map(Number), n=b.length;
+    var W=Math.max(320,Math.round(ms.clientWidth||600)), L=92, R=12, bw=(W-L-R)/n, H=300;
+    ms.setAttribute('viewBox','0 0 '+W+' '+H);
+    var rows=[['クロック',24],['データ',84],['マンチェスター',144],['受信側で復元',204],['NRZ(比較)',264]], amp=18, h='';
+    for(var i=0;i<=n;i++){var x=L+i*bw; h+='<line class="bitl" x1="'+x+'" x2="'+x+'" y1="4" y2="'+(H-4)+'"/>';}
+    b.forEach(function(v,i){h+='<text x="'+(L+i*bw+bw/2)+'" y="'+(84-amp-4)+'" text-anchor="middle" class="lbl">'+v+'</text>';});
+    function wave(levels,y,cls){ /* levels: 半ビットごとの 0/1 */
+      var d='', hw=bw/2;
+      levels.forEach(function(v,k){var yy=y+(v?-amp:amp), x0=L+k*hw; d+=(k===0?'M'+x0+','+yy:'L'+x0+','+yy)+'L'+(x0+hw)+','+yy;});
+      return '<path class="wave '+(cls||'')+'" d="'+d+'"/>';
+    }
+    var clk=[],dat=[],man=[],rec=[],nrz=[];
+    b.forEach(function(v){clk.push(1,0);dat.push(v,v);man.push(1^v,0^v);});
+    man.forEach(function(v,k){rec.push(v^clk[k]);});
+    h+=wave(clk,24,'s')+wave(dat,84)+wave(man,144,'m')+wave(rec,204)+wave(dat,264,'s');
+    rows.forEach(function(r){h+='<text x="4" y="'+(r[1]+4)+'" class="lbl">'+r[0]+'</text>';});
+    ms.innerHTML=h;
+  }
+  mi.addEventListener('input',drawM); window.addEventListener('resize',drawM); drawM();
+
+  /* ===== レベルとノイズ ===== */
+  var ln=document.getElementById('ln'), nz=document.getElementById('nz'), ls=document.getElementById('lsvg'), seed=1;
+  function rnd(){return Math.random();}
+  function gauss(){var u=rnd()||1e-9,v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  function drawL(){
+    var n=+ln.value, K=1<<n, sigma=+nz.value/100*0.6, N=60, W=Math.max(320,Math.round(ls.clientWidth||600)), H=200, L=40, R=10, T=10, B=14, ph=H-T-B;
+    document.getElementById('nzv').textContent=nz.value;
+    ls.setAttribute('viewBox','0 0 '+W+' '+H);
+    var h='', err=0, step=(W-L-R)/N;
+    function Y(v){return T+ph-(v+0.5)/(5+1)*ph;} /* 0〜5V を想定 */
+    for(var k=0;k<K;k++){var v=5*k/(K-1); h+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/>'; if(K<=8) h+='<text x="'+(L-4)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v.toFixed(1)+'</text>';}
+    for(var i=0;i<N;i++){
+      var sym=Math.floor(rnd()*K), v=5*sym/(K-1), r=v+gauss()*sigma, got=Math.max(0,Math.min(K-1,Math.round(r/5*(K-1)))), ok=got===sym; if(!ok)err++;
+      h+='<circle cx="'+(L+step*i+step/2)+'" cy="'+Y(Math.max(-0.4,Math.min(5.4,r)))+'" r="3.5" style="fill:'+(ok?'var(--accent)':'var(--warn)')+'"><title>送信 '+v.toFixed(2)+'V → 受信 '+r.toFixed(2)+'V'+(ok?'':'(読み間違い)')+'</title></circle>';
+    }
+    ls.innerHTML=h;
+    document.getElementById('lst').innerHTML='<div class="stat"><div class="k">1回で送れるビット数</div><div class="v">'+n+' ビット</div></div>'+
+      '<div class="stat"><div class="k">レベルの間隔</div><div class="v">'+(5/(K-1)).toFixed(2)+' V</div></div>'+
+      '<div class="stat'+(err?' hl':'')+'"><div class="k">60回中の読み間違い(赤い点)</div><div class="v">'+err+' 回</div></div>';
+  }
+  ln.addEventListener('change',drawL); nz.addEventListener('input',drawL); document.getElementById('lre').addEventListener('click',drawL); window.addEventListener('resize',drawL); drawL();
+
+  /* ===== 変調 ===== */
+  var mb=document.getElementById('mb2'), mn=document.getElementById('mnoise'), mv=document.getElementById('modsvg');
+  function drawMod(){
+    var b=clean(mb.value,8).split('').map(Number), n=b.length, W=Math.max(320,Math.round(mv.clientWidth||600)), L=62, R=10, bw=(W-L-R)/n, amp=22, H=330;
+    mv.setAttribute('viewBox','0 0 '+W+' '+H);
+    var rows=[['データ',30],['搬送波',95],['ASK',160],['FSK',225],['PSK',290]], h='', noise=mn.checked;
+    for(var i=0;i<=n;i++){var x=L+i*bw;h+='<line class="bitl" x1="'+x+'" x2="'+x+'" y1="8" y2="'+(H-6)+'"/>';}
+    b.forEach(function(v,i){h+='<text x="'+(L+i*bw+bw/2)+'" y="'+(30+5)+'" text-anchor="middle" class="lbl">'+v+'</text>';});
+    function path(fn,y){var d='',S=Math.max(40,Math.round(bw/2));for(var i=0;i<n;i++)for(var s=0;s<=S;s++){var t=s/S,x=L+(i+t)*bw,v=fn(b[i],t)+(noise?(Math.random()-.5)*0.5:0);d+=(i===0&&s===0?'M':'L')+x.toFixed(1)+','+(y-v*amp).toFixed(1);}return d;}
+    var cyc=3;
+    h+='<path class="wave s" d="'+path(function(v,t){return Math.sin(2*Math.PI*cyc*t);},95)+'"/>';
+    h+='<path class="wave" d="'+path(function(v,t){return (v?1:0.25)*Math.sin(2*Math.PI*cyc*t);},160)+'"/>';
+    h+='<path class="wave m" d="'+path(function(v,t){return Math.sin(2*Math.PI*(v?cyc*2:cyc)*t);},225)+'"/>';
+    h+='<path class="wave" d="'+path(function(v,t){return Math.sin(2*Math.PI*cyc*t+(v?0:Math.PI));},290)+'"/>';
+    rows.forEach(function(r){h+='<text x="4" y="'+(r[1]+4)+'" class="lbl">'+r[0]+'</text>';});
+    mv.innerHTML=h;
+  }
+  mb.addEventListener('input',drawMod); mn.addEventListener('change',drawMod); window.addEventListener('resize',drawMod); drawMod();
+
+  /* ===== 波長 ===== */
+  function drawF(){
+    var f=+document.getElementById('fq').value*+document.getElementById('fu').value, lam=3e8/f, txt;
+    if(!(f>0)){document.getElementById('fst').innerHTML='';return;}
+    txt=lam>=1000?(lam/1000).toPrecision(3)+' km':lam>=1?lam.toPrecision(3)+' m':lam>=0.01?(lam*100).toPrecision(3)+' cm':(lam*1000).toPrecision(3)+' mm';
+    var band=[[3e4,'VLF(超長波)'],[3e5,'LF(長波)'],[3e6,'MF(中波)'],[3e7,'HF(短波)'],[3e8,'VHF(超短波)'],[3e9,'UHF(極超短波)'],[3e10,'SHF(マイクロ波)'],[3e11,'EHF(ミリ波)'],[3e12,'サブミリ波']].filter(function(x){return f<x[0];})[0];
+    document.getElementById('fst').innerHTML='<div class="stat hl"><div class="k">波長 λ</div><div class="v">'+txt+'</div></div><div class="stat"><div class="k">周波数帯</div><div class="v" style="font-family:inherit">'+(band?band[1]:'電波ではない(3THz 超)')+'</div></div>';
+  }
+  ['fq','fu'].forEach(function(id){document.getElementById(id).addEventListener('input',drawF);document.getElementById(id).addEventListener('change',drawF);}); drawF();
+
+  /* ===== 機器 ===== */
+  var DEV=[['NIC',[1,2],'コンピュータをネットワークに接続する装置(ネットワークインタフェース)。最近はマザーボードに内蔵。'],
+    ['リピーター',[1],'物理層でネットワークを延長。信号を増幅・整形して再生する。リピーターハブは全ポートに転送。'],
+    ['ブリッジ / L2スイッチ',[2],'データリンク層でネットワークを延長。MACアドレスを見て転送先を決める。'],
+    ['ルーター / L3スイッチ',[3],'ネットワーク層でパケットを転送。IPアドレスを見て経路を決める。'],
+    ['L4-7スイッチ',[4,5,6,7],'トランスポート層より上の情報でトラフィックを処理(負荷分散など)。'],
+    ['ゲートウェイ',[1,2,3,4,5,6,7],'プロトコルの変換をする装置(異なるプロトコルのネットワークをつなぐ)。']];
+  var NM=['物理層','データリンク層','ネットワーク層','トランスポート層','セッション層','プレゼンテーション層','アプリケーション層'];
+  var o7=document.getElementById('osi7'); NM.forEach(function(n,i){var d=document.createElement('div');d.textContent='L'+(i+1)+' '+n;o7.appendChild(d);});
+  var dv=document.getElementById('dev');
+  DEV.forEach(function(d){var b=document.createElement('button');b.type='button';b.textContent=d[0];b.addEventListener('click',function(){
+    dv.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed','false');});b.setAttribute('aria-pressed','true');
+    o7.querySelectorAll('div').forEach(function(x,i){x.classList.toggle('on',d[1].indexOf(i+1)>=0);});
+    document.getElementById('dmsg').innerHTML='<b>'+d[0]+'</b>:'+d[2];});dv.appendChild(b);});
+  dv.children[1].click();
+})();
+</script>
+</body>
+</html>

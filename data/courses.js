@@ -34,7 +34,17 @@ window.COURSES = [
       file: "materials/1-3/1-3-2-instruction-cycle.html",
       note: "PC・IR・ALU、命令サイクル7段階、PCの計算(+4)、制御方式。1ステップずつ動かせるCPUシミュレータ付き" }
   ] },
-  { id: "1-4", name: "情報通信ネットワーク",   materials: [] },
+  { id: "1-4", name: "情報通信ネットワーク",   materials: [
+    { id: "1-4-1-network-osi", lesson: 1, title: "ネットワーク基礎とOSI参照モデル",
+      file: "materials/1-4/1-4-1-network-osi.html",
+      note: "#1 ネットワークの規模・歴史・プロトコル・OSI参照モデル。スライドの穴埋め、ヘッダが付く様子を追えるカプセル化の図付き" },
+    { id: "1-4-2-tcpip", lesson: 2, title: "TCP/IP基礎",
+      file: "materials/1-4/1-4-2-tcpip.html",
+      note: "#2 TCP/IPの歴史・RFC・階層モデル・アドレス・パケット構造。回線交換とパケット交換のシミュレーション付き" },
+    { id: "1-4-3-physical-layer", lesson: 3, title: "物理層と伝送媒体",
+      file: "materials/1-4/1-4-3-physical-layer.html",
+      note: "#3 ビットの表現・マンチェスター符号・ケーブル・電波・変調・ネットワーク機器。波形を描くツール付き" }
+  ] },
   { id: "2-1", name: "社会科学基礎",           materials: [] },
   { id: "2-2", name: "微分積分2",              materials: [] },
   { id: "3-2", name: "中国語",                 materials: [] },
