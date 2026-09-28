@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B1後期 教材ポータル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-root="">
+<div class="wrap">
+<header>
+  <h1>B1後期 教材ポータル</h1>
+  <p>Claude Code で作った各科目の教材へのリンク集です。科目を選ぶと回ごとの教材が表示されます。</p>
+</header>
+
+<div class="search"><input id="q" type="search" placeholder="科目名・教材名で絞り込み(例: プログラミング、演算子)" aria-label="科目を検索"></div>
+
+<h2 class="sec">科目一覧</h2>
+<div class="grid" id="grid"></div>
+
+<h2 class="sec">最近追加した教材</h2>
+<div id="recent"></div>
+
+<footer>教材の追加は <code>data/courses.js</code> を編集してください。</footer>
+</div>
+<script src="data/courses.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
