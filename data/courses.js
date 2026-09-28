@@ -6,42 +6,54 @@
  * を足すだけでOKです。トップページと科目ページの両方に自動で反映されます。
  * file があるとポータル内で表示し、url は「元のページ」へのリンクになります。
  * file を省略すると url を新しいタブで開きます。
+ * refs には教材のもとにしたノート写真やスライド(refs/ 以下、git には入れない)を書きます。
+ *   { label: "ノート", files: ["refs/xxx.jpg"] } または { label: "スライド #1", dir: "refs/slide-01", pages: 25 }
+ * アーティファクト版では、教材の左下に「参照」ボタンとして表示されます。
  */
 window.LESSON_COUNT = 15;
 
 window.COURSES = [
   { id: "1-1", name: "確率統計",               materials: [
-    { id: "1-1-1-probability-space", lesson: 1, title: "確率の考え方と確率空間",
+    { id: "1-1-1-probability-space", refs: [{ label: "ノート", files: ["refs/1-1-1-note.jpg"] }],
+      lesson: 1, title: "確率の考え方と確率空間",
       file: "materials/1-1/1-1-1-probability-space.html",
       note: "数学的・統計的・主観的確率、σ集合体、確率測度。σ集合体チェッカーと大数の法則のグラフ付き" },
-    { id: "1-1-2-conditional", lesson: 2, title: "独立な試行と条件付き確率",
+    { id: "1-1-2-conditional", refs: [{ label: "ノート", files: ["refs/1-1-2-note.jpg"] }],
+      lesson: 2, title: "独立な試行と条件付き確率",
       file: "materials/1-1/1-1-2-conditional.html",
       note: "独立な試行・反復試行の定理・条件付き確率・乗法定理。サイコロ表とシミュレーション、答え合わせ付き練習問題10問" }
   ] },
   { id: "1-2", name: "テクニカルリテラシー",   materials: [
-    { id: "1-2-1-technical-documents", lesson: 1, title: "理系の文書力と技術文書の種類",
+    { id: "1-2-1-technical-documents", refs: [{ label: "ノート", files: ["refs/1-2-1-note.jpg"] }],
+      lesson: 1, title: "理系の文書力と技術文書の種類",
       file: "materials/1-2/1-2-1-technical-documents.html",
       note: "文書力が必要な理由、技術文書の読み方(行間を読む)、6種類の技術文書。文書あてクイズと理解度チェック付き" },
-    { id: "1-2-2-writing-rules", lesson: 2, title: "理系の文書で必要なこと・不要なこと",
+    { id: "1-2-2-writing-rules", refs: [{ label: "ノート", files: ["refs/1-2-2-note.jpg"] }],
+      lesson: 2, title: "理系の文書で必要なこと・不要なこと",
       file: "materials/1-2/1-2-2-writing-rules.html",
       note: "事実と意見の区別、不要な表現、首尾一貫しない文の直し方。自分の文を診断できる文章チェッカー付き" }
   ] },
   { id: "1-3", name: "コンピュータアーキテクチャ", materials: [
-    { id: "1-3-1-organization-isa", lesson: 1, title: "コンピュータの構成と命令セット",
+    { id: "1-3-1-organization-isa", refs: [{ label: "ノート①", files: ["refs/1-3-1-note-a.jpg"] }, { label: "ノート②(二重線より上)", files: ["refs/1-3-x-note-b.jpg"] }],
+      lesson: 1, title: "コンピュータの構成と命令セット",
       file: "materials/1-3/1-3-1-organization-isa.html",
       note: "ノイマン型、5大構成要素、語長、機械語とアセンブリ言語、命令セット、RISC/CISC。C言語→機械語の変換デモ付き" },
-    { id: "1-3-2-instruction-cycle", lesson: 2, title: "プロセッサの基本動作と命令サイクル",
+    { id: "1-3-2-instruction-cycle", refs: [{ label: "ノート①(二重線より下)", files: ["refs/1-3-x-note-b.jpg"] }, { label: "ノート②", files: ["refs/1-3-2-note-c.jpg"] }],
+      lesson: 2, title: "プロセッサの基本動作と命令サイクル",
       file: "materials/1-3/1-3-2-instruction-cycle.html",
       note: "PC・IR・ALU、命令サイクル7段階、PCの計算(+4)、制御方式。1ステップずつ動かせるCPUシミュレータ付き" }
   ] },
   { id: "1-4", name: "情報通信ネットワーク",   materials: [
-    { id: "1-4-1-network-osi", lesson: 1, title: "ネットワーク基礎とOSI参照モデル",
+    { id: "1-4-1-network-osi", refs: [{ label: "スライド #1", dir: "refs/slide-01", pages: 25 }],
+      lesson: 1, title: "ネットワーク基礎とOSI参照モデル",
       file: "materials/1-4/1-4-1-network-osi.html",
       note: "#1 ネットワークの規模・歴史・プロトコル・OSI参照モデル。スライドの穴埋め、ヘッダが付く様子を追えるカプセル化の図付き" },
-    { id: "1-4-2-tcpip", lesson: 2, title: "TCP/IP基礎",
+    { id: "1-4-2-tcpip", refs: [{ label: "スライド #2", dir: "refs/slide-02", pages: 28 }],
+      lesson: 2, title: "TCP/IP基礎",
       file: "materials/1-4/1-4-2-tcpip.html",
       note: "#2 TCP/IPの歴史・RFC・階層モデル・アドレス・パケット構造。回線交換とパケット交換のシミュレーション付き" },
-    { id: "1-4-3-physical-layer", lesson: 3, title: "物理層と伝送媒体",
+    { id: "1-4-3-physical-layer", refs: [{ label: "スライド #3", dir: "refs/slide-03", pages: 30 }],
+      lesson: 3, title: "物理層と伝送媒体",
       file: "materials/1-4/1-4-3-physical-layer.html",
       note: "#3 ビットの表現・マンチェスター符号・ケーブル・電波・変調・ネットワーク機器。波形を描くツール付き" }
   ] },

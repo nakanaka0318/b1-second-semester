@@ -14,6 +14,26 @@ const css = read("assets/style.css") + `
 body{background:var(--bg)}
 .vbar{padding-top:calc(8px + env(safe-area-inset-top, 0px))}
 .vnav.off{pointer-events:none}
+/* 参照ボタンとパネル */
+.viewer{isolation:isolate}
+.vref{position:absolute;left:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));z-index:3;font:inherit;font-size:.88rem;font-weight:700;
+  padding:8px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.18)}
+.vref span{color:var(--sub);font-weight:400;font-size:.8rem;margin-left:2px}
+.vref:hover{border-color:var(--accent);color:var(--accent)}
+.vref:focus-visible,.refhead button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.refpanel{position:absolute;inset:0;z-index:4;background:rgba(10,16,28,.55);display:flex;align-items:flex-end;justify-content:flex-start;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))}
+.refbox{width:min(560px,100%);max-height:min(88%,900px);display:flex;flex-direction:column;background:var(--paper);border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.refhead{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.refhead b{font-size:.95rem}
+.reftabs{display:flex;gap:6px;flex-wrap:wrap;order:3;flex-basis:100%}
+.reftabs:empty{display:none}
+.reftabs button{font:inherit;font-size:.8rem;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.reftabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+#refclose{font:inherit;font-size:.85rem;padding:4px 12px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;margin-left:auto}
+.refbody{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.refbody figure{margin:0}
+.refbody img{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+.refbody figcaption{font-size:.75rem;color:var(--sub);text-align:center;margin-top:3px;font-family:"JetBrains Mono",monospace}
 `;
 
 const html = `<title>B1後期 教材ポータル</title>
@@ -57,6 +77,13 @@ ${css}
     </div>
   </div>
   <iframe id="vframe" class="vframe" title="教材"></iframe>
+  <button class="vref" id="vref" type="button" hidden>参照</button>
+  <div class="refpanel" id="refpanel" hidden role="dialog" aria-modal="true" aria-label="参照した資料">
+    <div class="refbox">
+      <div class="refhead"><b>参照した資料</b><div class="reftabs" id="reftabs"></div><button id="refclose" type="button">閉じる</button></div>
+      <div class="refbody" id="refbody"></div>
+    </div>
+  </div>
 </section>
 
 <script>
@@ -73,6 +100,15 @@ fs.writeFileSync(path.join(root, "artifact/portal.html"), html);
 global.window = {};
 require(path.join(root, "data/courses.js"));
 const files = [];
-for (const c of window.COURSES) for (const m of c.materials) if (m.file) files.push(m.file);
+for (const c of window.COURSES) for (const m of c.materials) {
+  if (m.file) files.push(m.file);
+  for (const r of m.refs || []) {
+    if (r.files) files.push(...r.files);
+    else for (let i = 1; i <= r.pages; i++) files.push(r.dir + "/p" + String(i).padStart(2, "0") + ".jpg");
+  }
+}
+const missing = [...new Set(files)].filter((f) => !fs.existsSync(path.join(root, f)));
+if (missing.length) console.log("※ 手元にないファイル(公開済みならそのまま残る): " + missing.length + " 件");
 console.log("artifact/portal.html を作成しました。付属ファイル " + files.length + " 件:");
-console.log(JSON.stringify(Object.fromEntries(files.map((f) => [f, f]))));
+fs.writeFileSync(path.join(root, "artifact/files.json"), JSON.stringify(Object.fromEntries([...new Set(files)].filter((f) => fs.existsSync(path.join(root, f))).map((f) => [f, f])), null, 1));
+console.log("公開するファイルの対応表: artifact/files.json");

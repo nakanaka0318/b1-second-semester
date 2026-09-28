@@ -77,6 +77,7 @@
       e.textContent = txt;
     }
     nav("vprev", list[k - 1], "‹ 前"); nav("vnext", list[k + 1], "次 ›");
+    setRefs(m.refs || []);
     if (loaded !== m.file) {
       loaded = m.file;
       var fresh = frame.cloneNode(false); fresh.removeAttribute("src"); fresh.removeAttribute("srcdoc");
@@ -88,6 +89,39 @@
     }
   }
 
+  /* ---------- 参照資料(ノート写真・スライド) ---------- */
+  var refs = [], refTab = 0;
+  var rbtn = document.getElementById("vref"), panel = document.getElementById("refpanel");
+  function refFiles(r) {
+    if (r.files) return r.files.map(function (f) { return [f, ""]; });
+    var a = []; for (var i = 1; i <= r.pages; i++) a.push([r.dir + "/p" + (i < 10 ? "0" : "") + i + ".jpg", "p." + i]);
+    return a;
+  }
+  function setRefs(r) {
+    refs = r; refTab = 0; closeRefs();
+    rbtn.hidden = !r.length;
+    var n = 0; r.forEach(function (x) { n += x.files ? x.files.length : x.pages; });
+    rbtn.innerHTML = '参照 <span>' + n + (r.length === 1 && !r[0].files ? " ページ" : " 枚") + "</span>";
+  }
+  function drawRefs() {
+    document.getElementById("reftabs").innerHTML = refs.map(function (r, i) {
+      return '<button type="button" data-i="' + i + '" aria-pressed="' + (i === refTab) + '">' + esc(r.label) + "</button>";
+    }).join("");
+    document.getElementById("refbody").innerHTML = refFiles(refs[refTab]).map(function (f) {
+      return '<figure><img src="' + esc(f[0]) + '" loading="lazy" alt="' + esc(refs[refTab].label + " " + f[1]) + '">' + (f[1] ? "<figcaption>" + f[1] + "</figcaption>" : "") + "</figure>";
+    }).join("");
+    document.getElementById("refbody").scrollTop = 0;
+  }
+  function openRefs() { if (!refs.length) return; drawRefs(); panel.hidden = false; document.getElementById("refclose").focus(); }
+  function closeRefs() { panel.hidden = true; }
+  rbtn.addEventListener("click", openRefs);
+  document.getElementById("refclose").addEventListener("click", function () { closeRefs(); rbtn.focus(); });
+  panel.addEventListener("click", function (e) { if (e.target === panel) closeRefs(); });
+  document.getElementById("reftabs").addEventListener("click", function (e) {
+    var i = e.target.getAttribute && e.target.getAttribute("data-i"); if (i !== null && i !== undefined) { refTab = +i; drawRefs(); }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !panel.hidden) { closeRefs(); rbtn.focus(); } });
+
   /* ---------- ルーティング ---------- */
   var views = { home: document.getElementById("home"), course: document.getElementById("course"), viewer: document.getElementById("viewer") };
   function show(v) {
@@ -97,9 +131,10 @@
   function route() {
     var h = decodeURIComponent(location.hash.slice(1));
     var c = h.charAt(0) === "c" ? courses.filter(function (x) { return "c" + x.id === h; })[0] : null;
-    if (c) { drawCourse(c); show("course"); window.scrollTo(0, 0); return; }
+    if (c) { closeRefs(); drawCourse(c); show("course"); window.scrollTo(0, 0); return; }
     var fm = h ? findMat(h) : null;
     if (fm && fm[1].file) { openMat(fm[0], fm[1]); show("viewer"); return; }
+    closeRefs();
     show("home");
   }
   window.addEventListener("hashchange", route);
