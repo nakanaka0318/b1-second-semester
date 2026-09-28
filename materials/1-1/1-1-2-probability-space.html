@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>確率の考え方と確率空間</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.kinds{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:stretch;margin:12px 0}
+.kinds .root{grid-row:span 3;display:flex;align-items:center;justify-content:center;background:var(--ink);color:var(--paper);border-radius:10px;padding:8px 12px;font-weight:700;writing-mode:vertical-rl;letter-spacing:.2em}
+.kinds .k{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.kinds .k b{display:block}
+.kinds .k .g{font-size:.75rem;color:var(--sub)}
+.kinds .k.obj{border-left:4px solid var(--accent)}
+.kinds .k.subj{border-left:4px solid var(--mark)}
+.dice{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.die{width:48px;height:48px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.3rem;font-weight:700;cursor:pointer}
+.die[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font:inherit;font-family:"JetBrains Mono",monospace;font-size:.92rem;padding:5px 12px;border-radius:99px;border:1.5px dashed var(--line);background:var(--bg);color:var(--sub);cursor:pointer}
+.chip[aria-pressed="true"]{border-style:solid;border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:700}
+.chip.added{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(1.25);background:var(--mark-soft)}100%{transform:none}}
+@media (prefers-reduced-motion: reduce){.chip.added{animation:none}}
+.fam{font-family:"JetBrains Mono",monospace;background:var(--bg);border-radius:10px;padding:8px 12px;margin:8px 0;overflow-x:auto;white-space:nowrap}
+.cond{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed var(--line)}
+.cond:last-child{border-bottom:0}
+.cond .mk{flex:none;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;margin-top:3px}
+.cond .mk.ok{background:var(--ok)}.cond .mk.ng{background:var(--warn)}
+.cond .why{font-size:.85rem;color:var(--sub)}
+.verdict{margin-top:10px;font-weight:700;padding:8px 12px;border-radius:10px}
+.verdict.ok{background:var(--accent-soft)}
+.verdict.ng{background:var(--warn-soft)}
+.ptable td.mono{text-align:left}
+.ptable tr.bad td{color:var(--warn)}
+.hover-tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);font-size:.78rem;border-radius:6px;padding:3px 8px;white-space:nowrap;transform:translate(-50%,-120%)}
+.chartbox{position:relative}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>確率の考え方と確率空間</h1>
+  <p>確率統計 第2回のノートのまとめです。「確率」にはいくつかの考え方があること、そして数学ではそれを <b>(Ω, 𝓕, P)</b> という3点セットで定義することを、動かしながら確かめます。</p>
+  <div class="demo">
+    <label>コインを投げ続けると「表の割合」はどうなる?(統計的確率)</label>
+    <div class="row">
+      <select id="smode" aria-label="試行の種類">
+        <option value="0.5">コインの表(理論値 1/2)</option>
+        <option value="0.1666666667">サイコロの1の目(理論値 1/6)</option>
+      </select>
+      <button class="btn" data-add="10" type="button">+10回</button>
+      <button class="btn" data-add="100" type="button">+100回</button>
+      <button class="btn" data-add="1000" type="button">+1000回</button>
+      <button class="btn sub" id="sreset" type="button">リセット</button>
+    </div>
+    <div class="chartbox" id="sbox">
+      <svg class="chart" id="schart" viewBox="0 0 600 220" role="img" aria-label="試行回数と相対頻度の折れ線グラフ"></svg>
+      <div class="hover-tip" id="stip" hidden></div>
+    </div>
+    <div class="legend2"><span><i style="background:var(--accent)"></i>起こった割合 r/m</span><span><i style="background:var(--mark)"></i>理論値</span></div>
+    <div class="stats" id="sstats"></div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#kinds">確率の種類</a><a href="#math">数学的確率</a><a href="#stat">統計的確率</a><a href="#subj">主観的確率</a><a href="#sigma">σ集合体</a><a href="#axiom">確率測度</a><a href="#q">練習問題</a>
+</nav>
+
+<!-- ===== 種類 ===== -->
+<section class="task" id="kinds">
+  <h2><span class="no">1</span>確率の種類</h2>
+  <p>「確率」という言葉には、大きく分けて2つの立場があります。</p>
+  <div class="kinds">
+    <div class="root">確率</div>
+    <div class="k obj"><span class="g">客観的確率</span><b>数学的確率(理論的確率)</b>場合の数の比で決まる。</div>
+    <div class="k obj"><span class="g">客観的確率</span><b>統計的確率(経験的確率)</b>たくさん試した結果の割合で決まる。</div>
+    <div class="k subj"><span class="g">主観的確率</span><b>主観的確率</b>その人がどれくらい確信しているかの度合い。</div>
+  </div>
+</section>
+
+<section class="task" id="math">
+  <h2><span class="no">1.1</span>数学的確率(理論的確率)</h2>
+  <div class="formula">P(A) = <span class="frac"><span>|A|</span><span>|Ω|</span></span><small>|A|:A が起こる場合の数 |Ω|:起こりうるすべての場合の数(どれも同様に確からしい)</small></div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>サイコロの目をタップして事象 A を作る</div>
+    <div class="dice" id="dice"></div>
+    <div class="row">
+      <button class="btn sub" data-pre="2,4,6" type="button">偶数</button>
+      <button class="btn sub" data-pre="3,6" type="button">3の倍数</button>
+      <button class="btn sub" data-pre="5,6" type="button">5以上</button>
+      <button class="btn sub" data-pre="2,3,5" type="button">素数</button>
+      <button class="btn sub" data-pre="" type="button">空にする</button>
+    </div>
+    <div class="formula" id="mathout" aria-live="polite"></div>
+  </div>
+  <p>何も選ばない A = ∅ なら P = 0、全部選んで A = Ω なら P = 1。どんな A でも <b>0 ≤ P(A) ≤ 1</b> になることが見て取れます。これが後で出てくる確率の定義(公理)の元になっています。</p>
+</section>
+
+<section class="task" id="stat">
+  <h2><span class="no">1.2</span>統計的確率(経験的確率)</h2>
+  <p>試行を m 回行い、事象 A が r 回起こったとします。m を大きくしていったときの割合 r/m の行き着く値 p を、A の統計的確率とします。</p>
+  <div class="formula">P(A) = <span class="mono">lim</span><sub>m→∞</sub> <span class="frac"><span>r</span><span>m</span></span> = p</div>
+  <p>ページ上部のグラフで「+1000回」を何度か押すと、最初はばらついていた折れ線が理論値の線に近づいていきます(<b>大数の法則</b>)。画びょうの向きのように、場合の数で計算できないものでも、この方法なら確率を決められます。</p>
+</section>
+
+<section class="task" id="subj">
+  <h2><span class="no">1.3</span>主観的確率</h2>
+  <p>「明日の試験に受かる気が 80% くらいする」のような、<b>個人の確信の度合い</b>を数値にしたものです。同じ出来事でも人によって値が違ってかまいません。くり返せない1回きりの出来事にも使えます。</p>
+</section>
+
+<!-- ===== σ集合体 ===== -->
+<section class="task" id="sigma">
+  <h2><span class="no">2</span>確率の定義 ① σ集合体(完全加法族)</h2>
+  <p>数学的確率も統計的確率も、共通して満たすルールだけを取り出して「確率」を定義します。まず、<b>確率を考えてよい事象の集まり</b>を決めます。</p>
+  <p>標本空間 Ω の部分集合からなる集合族 𝓕 が、次の3つの条件を満たすとき、𝓕 を <b>σ集合体</b>(完全加法族)とよびます。</p>
+  <div class="tbl"><table>
+    <tr><th>条件</th><th>意味(ことばで)</th></tr>
+    <tr><td class="mono">(i) Ω ∈ 𝓕</td><td>「何かが起こる」という事象は入っている</td></tr>
+    <tr><td class="mono">(ii) A ∈ 𝓕 ⇒ A<sup>c</sup> ∈ 𝓕</td><td>A が入っていれば「A が起こらない」も入っている</td></tr>
+    <tr><td class="mono">(iii) A<sub>i</sub> ∈ 𝓕 (i=1,2,…) ⇒ ⋃A<sub>i</sub> ∈ 𝓕</td><td>入っている事象の「または」も入っている</td></tr>
+  </table></div>
+  <p>𝓕 の要素を<b>事象</b>とよび、Ω と 𝓕 の組 <b>(Ω, 𝓕)</b> を<b>可測空間</b>といいます。</p>
+  <div class="point"><b>ノートの例</b>:コイン1枚なら Ω = {H, T}、𝓕 = {∅, {H}, {T}, {H, T}}。Ω の部分集合を全部集めたもの(べき集合)は必ず σ集合体になります。</div>
+
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>σ集合体チェッカー</div>
+    <div class="row">
+      <label for="omega">標本空間 Ω</label>
+      <select id="omega">
+        <option value="HT">{H, T}(コイン)</option>
+        <option value="123" selected>{1, 2, 3}</option>
+      </select>
+    </div>
+    <p class="legend" style="margin:4px 0 0">部分集合をタップして 𝓕 に入れたり外したりしてください。</p>
+    <div class="chips" id="chips"></div>
+    <div class="row">
+      <button class="btn sub" id="pmin" type="button">{∅, Ω} にする</button>
+      <button class="btn sub" id="pall" type="button">全部入れる</button>
+      <button class="btn" id="pfix" type="button">足りないものを補って完成させる</button>
+    </div>
+    <div class="fam" id="fam"></div>
+    <div id="conds"></div>
+    <div class="verdict" id="verdict" aria-live="polite"></div>
+  </div>
+  <p>Ω が有限集合なら、(iii) は「2つずつの和集合が入っているか」を確かめれば十分です。また (i) と (ii) から Ω<sup>c</sup> = ∅ も必ず入ります。</p>
+</section>
+
+<!-- ===== 確率測度 ===== -->
+<section class="task" id="axiom">
+  <h2><span class="no">3</span>確率の定義 ② 確率測度と確率空間</h2>
+  <p>σ集合体 𝓕 上で定義された関数 P が、次の3つを満たすとき、P を Ω の<b>確率測度</b>といいます。</p>
+  <div class="tbl"><table>
+    <tr><th>公理</th><th>意味</th></tr>
+    <tr><td class="mono">(1) P(Ω) = 1</td><td>全体の確率は1</td></tr>
+    <tr><td class="mono">(2) 0 ≤ P(A) ≤ 1 (A ∈ 𝓕)</td><td>どの事象の確率も0以上1以下</td></tr>
+    <tr><td class="mono">(3) A<sub>i</sub> ∩ A<sub>j</sub> = ∅ (i ≠ j) のとき<br>P(⋃A<sub>i</sub>) = ΣP(A<sub>i</sub>)</td><td>重ならない事象の「または」の確率は、足し算</td></tr>
+  </table></div>
+  <p>そして Ω、𝓕、P の3つを組にした <b>(Ω, 𝓕, P)</b> を<b>確率空間</b>とよびます。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>Ω = {1, 2, 3} に確率を配ってみる</div>
+    <p class="legend" style="margin:0">根元事象 {1}, {2}, {3} の確率を決めると、公理(3)の足し算で、残りの事象の確率がすべて決まります。</p>
+    <div class="row"><label for="q1">P({1}) = <b id="q1v"></b></label><input id="q1" type="range" min="0" max="100" step="5" value="20"></div>
+    <div class="row"><label for="q2">P({2}) = <b id="q2v"></b></label><input id="q2" type="range" min="0" max="100" step="5" value="50"></div>
+    <div class="row"><label for="q3">P({3}) = <b id="q3v"></b></label><input id="q3" type="range" min="0" max="100" step="5" value="30"></div>
+    <div class="tbl"><table class="ptable" id="ptable"></table></div>
+    <div class="verdict" id="pverdict" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ===== 問題 ===== -->
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+  <p>数値の問題は分数(例 <span class="mono">3/4</span>)か小数で入力して「判定」を押してください。</p>
+
+  <div class="qbox"><div class="qno">問1 確率の種類</div>
+    <p>次の確率は、数学的・統計的・主観的のどれにあたるか。</p>
+    <ol><li>サイコロで1の目が出る確率は 1/6</li><li>過去のデータから、この地域の6月に雨が降る確率は 40%</li><li>自分が次の試験で満点を取る確率は 10% くらいだと思う</li></ol>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:数学的・統計的・主観的</b></p>
+      <ol><li>数学的確率:6通りが同様に確からしいとして、場合の数の比で決めている。</li><li>統計的確率:実際に起こった回数の割合から決めている。</li><li>主観的確率:個人の確信の度合い。</li></ol>
+    </div></details></div>
+
+  <div class="qbox" data-ans="1/4"><div class="qno">問2 数学的確率</div>
+    <p>ジョーカーを除くトランプ52枚から1枚引くとき、ハートである確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/4" aria-label="問2の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:1/4</b></p><p><span class="mono">|A|/|Ω| = 13/52 = 1/4</span>。</p></div></details></div>
+
+  <div class="qbox" data-ans="3/4"><div class="qno">問3 標本空間</div>
+    <p>コインを2枚投げる。標本空間 Ω を書き出したうえで、少なくとも1枚が表(H)である確率を求めよ。</p>
+    <div class="check"><input class="ans" placeholder="例 3/4" aria-label="問3の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:3/4</b></p>
+      <p><span class="mono">Ω = {HH, HT, TH, TT}</span>(4通り)。少なくとも1枚表は TT 以外の3通りなので 3/4。</p>
+      <p>「表0枚・1枚・2枚」の3通りを Ω にすると、それぞれの起こりやすさが同じでないので数学的確率の式が使えません(1枚は HT と TH の2通り分)。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="0.62"><div class="qno">問4 統計的確率</div>
+    <p>画びょうを1000回投げたら、針が上を向いたのが620回だった。針が上を向く統計的確率(の推定値)は?</p>
+    <div class="check"><input class="ans" placeholder="例 0.5" aria-label="問4の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:0.62</b></p><p><span class="mono">r/m = 620/1000 = 0.62</span>。画びょうは形が非対称なので「同様に確からしい」が使えず、数学的確率では求められません。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問5 σ集合体かどうか</div>
+    <p>Ω = {1, 2, 3} とする。次の 𝓕 は σ集合体か。</p>
+    <ol><li><span class="mono">𝓕 = {∅, {1}, {2, 3}, {1, 2, 3}}</span></li><li><span class="mono">𝓕 = {∅, {1}, {1, 2, 3}}</span></li><li><span class="mono">𝓕 = {∅, {1}, {2}, {2, 3}, {1, 3}, {1, 2, 3}}</span></li></ol>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:1は〇、2と3は✕</b></p>
+      <ol>
+        <li>〇。{1} と {2,3} が互いに補集合、∅ と Ω も補集合。和集合もすべて中にある。</li>
+        <li>✕。{1} の補集合 {2, 3} が入っていないので (ii) を満たさない。</li>
+        <li>✕。補集合はそろっているが、{1} ∪ {2} = {1, 2} が入っていないので (iii) を満たさない。</li>
+      </ol>
+      <p>上のチェッカーで同じ 𝓕 を作ると確かめられます。「足りないものを補って完成させる」を押すと、2は1と同じ形に、3はべき集合(8個)になります。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="8"><div class="qno">問6 べき集合の大きさ</div>
+    <p>Ω = {1, 2, 3} の部分集合をすべて集めた 𝓕(べき集合)の要素はいくつか。</p>
+    <div class="check"><input class="ans" placeholder="例 4" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:8</b></p><p>各要素について「入れる/入れない」の2通りなので <span class="mono">2<sup>3</sup> = 8</span>。Ω = {H, T} なら 2<sup>2</sup> = 4 で、ノートの例と一致します。</p></div></details></div>
+
+  <div class="qbox" data-ans="0.5"><div class="qno">問7 公理を使った計算</div>
+    <p>Ω = {1, 2, 3} で P({1}) = 0.2、P({2}) = 0.5 とする。P({1, 3}) は?</p>
+    <div class="check"><input class="ans" placeholder="例 0.5" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:0.5</b></p>
+      <p>公理(1)と(3)より <span class="mono">P({1}) + P({2}) + P({3}) = P(Ω) = 1</span> なので <span class="mono">P({3}) = 0.3</span>。{1} と {3} は重ならないので <span class="mono">P({1, 3}) = 0.2 + 0.3 = 0.5</span>。</p>
+      <p>別解:{1, 3} は {2} の補集合なので <span class="mono">1 − 0.5 = 0.5</span>(次の問8)。</p>
+    </div></details></div>
+
+  <div class="qbox"><div class="qno">問8 公理から性質を導く</div>
+    <p>確率測度の公理 (1)〜(3) だけを使って、<span class="mono">P(A<sup>c</sup>) = 1 − P(A)</span> を示せ。</p>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:証明</b></p>
+      <ol class="steps">
+        <li>A と A<sup>c</sup> は重ならない(A ∩ A<sup>c</sup> = ∅)。また A ∪ A<sup>c</sup> = Ω。</li>
+        <li>公理(3)より <span class="mono">P(A ∪ A<sup>c</sup>) = P(A) + P(A<sup>c</sup>)</span>。</li>
+        <li>左辺は P(Ω) なので、公理(1)より 1。よって <span class="mono">P(A) + P(A<sup>c</sup>) = 1</span>、つまり <span class="mono">P(A<sup>c</sup>) = 1 − P(A)</span>。</li>
+      </ol>
+      <p>特に A = Ω とすると A<sup>c</sup> = ∅ なので <span class="mono">P(∅) = 0</span> も分かります。「少なくとも1回」の問題で余事象を使えるのは、この性質のおかげです。</p>
+    </div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>シミュレーションは乱数を使うため、押すたびに結果が変わります。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), solved={}, score=document.getElementById('score');
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+boxes.length+'(入力問題)'; }
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+
+(function(){
+  /* ===== 統計的確率 ===== */
+  var sm=document.getElementById('smode'), svg=document.getElementById('schart'), tip=document.getElementById('stip'), box=document.getElementById('sbox');
+  var hist=[], r=0, m=0;
+  var W=600,H=220,L=40,R=12,T=10,B=24,pw=W-L-R,ph=H-T-B;
+  function size(){W=Math.max(300,Math.round(svg.clientWidth||600));pw=W-L-R;svg.setAttribute('viewBox','0 0 '+W+' '+H);}
+  function add(k){var p=+sm.value;for(var i=0;i<k;i++){m++;if(Math.random()<p)r++;hist.push(r/m);}draw();}
+  function X(i,n){return L+pw*(i)/(Math.max(n,2)-1);}
+  function Y(v){return T+ph-ph*v;}
+  function draw(){
+    size(); var p=+sm.value, h='';
+    [0,.25,.5,.75,1].forEach(function(v){h+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/><text x="'+(L-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v.toFixed(2)+'</text>';});
+    h+='<line class="ref" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(p)+'" y2="'+Y(p)+'"/>';
+    var n=hist.length;
+    if(n){
+      var step=Math.max(1,Math.floor(n/600)), d='';
+      for(var i=0;i<n;i+=step) d+=(d?'L':'M')+X(i,n).toFixed(1)+','+Y(hist[i]).toFixed(1);
+      d+='L'+X(n-1,n).toFixed(1)+','+Y(hist[n-1]).toFixed(1);
+      h+='<path class="line" d="'+d+'"/>';
+      h+='<circle cx="'+X(n-1,n)+'" cy="'+Y(hist[n-1])+'" r="4" fill="var(--accent)" stroke="var(--paper)" stroke-width="2"/>';
+      h+='<text x="'+L+'" y="'+(H-6)+'">1</text><text x="'+(W-R)+'" y="'+(H-6)+'" text-anchor="end">m = '+n+'</text>';
+    } else {
+      h+='<text x="'+(L+pw/2)+'" y="'+(T+ph/2-10)+'" text-anchor="middle">ボタンを押して試行を始めよう</text>';
+    }
+    h+='<line id="xh" class="grid" y1="'+T+'" y2="'+(T+ph)+'" visibility="hidden"/>';
+    svg.innerHTML=h;
+    document.getElementById('sstats').innerHTML=
+      '<div class="stat"><div class="k">試行回数 m</div><div class="v">'+m+'</div></div>'+
+      '<div class="stat"><div class="k">起こった回数 r</div><div class="v">'+r+'</div></div>'+
+      '<div class="stat hl"><div class="k">割合 r/m</div><div class="v">'+(m?(r/m).toFixed(4):'—')+'</div></div>'+
+      '<div class="stat"><div class="k">理論値とのずれ</div><div class="v">'+(m?Math.abs(r/m-p).toFixed(4):'—')+'</div></div>';
+  }
+  function hover(e){
+    var n=hist.length; if(!n){tip.hidden=true;return;}
+    var rect=svg.getBoundingClientRect(), sx=(e.clientX-rect.left)/rect.width*W;
+    var i=Math.round((sx-L)/pw*(Math.max(n,2)-1)); if(i<0||i>=n){tip.hidden=true;return;}
+    var xh=document.getElementById('xh'); xh.setAttribute('x1',X(i,n)); xh.setAttribute('x2',X(i,n)); xh.setAttribute('visibility','visible');
+    tip.hidden=false; tip.textContent='m = '+(i+1)+':r/m = '+hist[i].toFixed(3);
+    tip.style.left=(X(i,n)/W*rect.width)+'px'; tip.style.top=(Y(hist[i])/H*rect.height)+'px';
+  }
+  svg.addEventListener('pointermove',hover);
+  svg.addEventListener('pointerleave',function(){tip.hidden=true;var xh=document.getElementById('xh');if(xh)xh.setAttribute('visibility','hidden');});
+  document.querySelectorAll('[data-add]').forEach(function(b){b.addEventListener('click',function(){add(+b.getAttribute('data-add'));});});
+  function sreset(){hist=[];r=0;m=0;draw();}
+  document.getElementById('sreset').addEventListener('click',sreset);
+  sm.addEventListener('change',sreset);
+  window.addEventListener('resize',draw);
+  draw();
+
+  /* ===== 数学的確率 ===== */
+  var dice=document.getElementById('dice'), sel={2:1,4:1,6:1};
+  function drawDice(){
+    dice.innerHTML='';
+    for(var i=1;i<=6;i++){(function(i){
+      var b=document.createElement('button'); b.type='button'; b.className='die'; b.textContent=i; b.setAttribute('aria-pressed',sel[i]?'true':'false');
+      b.addEventListener('click',function(){if(sel[i])delete sel[i];else sel[i]=1;drawDice();}); dice.appendChild(b);
+    })(i);}
+    var ks=Object.keys(sel).sort(), n=ks.length;
+    document.getElementById('mathout').innerHTML='A = {'+ks.join(', ')+'}  →  P(A) = <span class="frac"><span>'+n+'</span><span>6</span></span>'+(gcd(n,6)>1&&n>0&&n<6?' = '+fracHTML(n,6):n===0?' = 0':n===6?' = 1':'');
+  }
+  document.querySelectorAll('[data-pre]').forEach(function(b){b.addEventListener('click',function(){sel={};b.getAttribute('data-pre').split(',').filter(Boolean).forEach(function(k){sel[k]=1;});drawDice();});});
+  drawDice();
+
+  /* ===== σ集合体チェッカー ===== */
+  var om=document.getElementById('omega'), chips=document.getElementById('chips'), F={}, recent={};
+  function els(){return om.value==='HT'?['H','T']:['1','2','3'];}
+  function full(){return (1<<els().length)-1;}
+  function name(mask){var e=els(),a=[];for(var i=0;i<e.length;i++) if(mask>>i&1) a.push(e[i]); return a.length?'{'+a.join(', ')+'}':'∅';}
+  function masks(){var a=[];for(var m=0;m<=full();m++)a.push(m);return a.sort(function(x,y){return pop(x)-pop(y)||x-y;});}
+  function pop(m){var c=0;while(m){c+=m&1;m>>=1;}return c;}
+  function inF(){return masks().filter(function(m){return F[m];});}
+  function drawSigma(){
+    chips.innerHTML='';
+    masks().forEach(function(m){
+      var b=document.createElement('button'); b.type='button'; b.className='chip'+(recent[m]?' added':''); b.textContent=name(m); b.setAttribute('aria-pressed',F[m]?'true':'false');
+      b.addEventListener('click',function(){if(F[m])delete F[m];else F[m]=1;recent={};drawSigma();}); chips.appendChild(b);
+    });
+    recent={};
+    var list=inF();
+    document.getElementById('fam').textContent='𝓕 = {'+list.map(name).join(', ')+'}  ('+list.length+'個)';
+    var c1=!!F[full()];
+    var miss2=[]; list.forEach(function(m){var c=full()^m; if(!F[c]) miss2.push(name(m)+' の補集合 '+name(c));});
+    var miss3=[], seen={};
+    list.forEach(function(a){list.forEach(function(b){var u=a|b; if(a<b&&!F[u]&&!seen[u]){seen[u]=1;miss3.push(name(a)+' ∪ '+name(b)+' = '+name(u));}});});
+    function row(ok,t,why){return '<div class="cond"><span class="mk '+(ok?'ok':'ng')+'">'+(ok?'✓':'✕')+'</span><div>'+t+(why?'<div class="why">'+why+'</div>':'')+'</div></div>';}
+    document.getElementById('conds').innerHTML=
+      row(c1,'(i) Ω ∈ 𝓕',c1?'':'Ω = '+name(full())+' が入っていない')+
+      row(!miss2.length,'(ii) 補集合が入っている',miss2.length?'足りない:'+miss2.slice(0,3).join('、')+(miss2.length>3?' ほか':''):'')+
+      row(!miss3.length,'(iii) 和集合が入っている',miss3.length?'足りない:'+miss3.slice(0,3).join('、')+(miss3.length>3?' ほか':''):'');
+    var ok=c1&&!miss2.length&&!miss3.length, v=document.getElementById('verdict');
+    v.className='verdict '+(ok?'ok':'ng');
+    v.textContent=ok?'〇 これは σ集合体です。(Ω, 𝓕) は可測空間になります。':'✕ σ集合体ではありません。✕ の条件を直してみましょう。';
+  }
+  function closeF(){
+    var before=Object.assign({},F); F[full()]=1; F[0]=1;
+    var changed=true;
+    while(changed){changed=false;var list=inF();
+      list.forEach(function(a){var c=full()^a;if(!F[c]){F[c]=1;changed=true;}
+        list.forEach(function(b){if(!F[a|b]){F[a|b]=1;changed=true;}});});}
+    recent={}; Object.keys(F).forEach(function(k){if(!before[k])recent[k]=1;});
+    drawSigma();
+  }
+  function preset(){F={}; if(om.value==='HT'){F[0]=1;F[1]=1;F[2]=1;F[3]=1;}else{F[0]=1;F[1]=1;F[7]=1;} drawSigma();}
+  om.addEventListener('change',preset);
+  document.getElementById('pmin').addEventListener('click',function(){F={};F[0]=1;F[full()]=1;drawSigma();});
+  document.getElementById('pall').addEventListener('click',function(){F={};masks().forEach(function(m){F[m]=1;});drawSigma();});
+  document.getElementById('pfix').addEventListener('click',closeF);
+  preset();
+
+  /* ===== 確率測度 ===== */
+  var q=[1,2,3].map(function(i){return document.getElementById('q'+i);});
+  function drawP(){
+    var v=q.map(function(s){return +s.value;}); /* 百分率の整数で持つ(誤差を避ける) */
+    q.forEach(function(s,i){document.getElementById('q'+(i+1)+'v').textContent=(v[i]/100).toFixed(2);});
+    var tot=v[0]+v[1]+v[2], h='<tr><th>事象 A</th><th>P(A) の計算(公理3の足し算)</th><th>P(A)</th></tr>';
+    var E=['∅','{1}','{2}','{3}','{1, 2}','{1, 3}','{2, 3}','{1, 2, 3} = Ω'], M=[[],[0],[1],[2],[0,1],[0,2],[1,2],[0,1,2]];
+    M.forEach(function(ix,k){
+      var s=ix.reduce(function(a,i){return a+v[i];},0), bad=s>100;
+      h+='<tr'+(bad||(k===7&&tot!==100)?' class="bad"':'')+'><td class="mono">'+E[k]+'</td><td class="mono">'+(ix.length?ix.map(function(i){return (v[i]/100).toFixed(2);}).join(' + '):'0(何も起こらない)')+'</td><td class="mono"><b>'+(s/100).toFixed(2)+'</b></td></tr>';
+    });
+    document.getElementById('ptable').innerHTML=h;
+    var pv=document.getElementById('pverdict');
+    if(tot===100){pv.className='verdict ok';pv.textContent='〇 P(Ω) = 1 なので公理(1)(2)(3)をすべて満たします。(Ω, 𝓕, P) は確率空間です。';}
+    else{pv.className='verdict ng';pv.textContent='✕ P(Ω) = '+(tot/100).toFixed(2)+' で、公理(1) P(Ω) = 1 を満たしません。'+(tot>100?'1を超える事象もあり、公理(2)にも反しています。':'合計がちょうど 1.00 になるように調整してみましょう。');}
+  }
+  q.forEach(function(s){s.addEventListener('input',drawP);}); drawP();
+})();
+</script>
+</body>
+</html>

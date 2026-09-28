@@ -10,7 +10,14 @@
 window.LESSON_COUNT = 15;
 
 window.COURSES = [
-  { id: "1-1", name: "確率統計",               materials: [] },
+  { id: "1-1", name: "確率統計",               materials: [
+    { id: "1-1-1-conditional", lesson: 1, title: "独立な試行と条件付き確率",
+      file: "materials/1-1/1-1-1-conditional.html",
+      note: "独立な試行・反復試行の定理・条件付き確率・乗法定理。サイコロ表とシミュレーション、答え合わせ付き練習問題10問" },
+    { id: "1-1-2-probability-space", lesson: 2, title: "確率の考え方と確率空間",
+      file: "materials/1-1/1-1-2-probability-space.html",
+      note: "数学的・統計的・主観的確率、σ集合体、確率測度。σ集合体チェッカーと大数の法則のグラフ付き" }
+  ] },
   { id: "1-2", name: "テクニカルリテラシー",   materials: [] },
   { id: "1-3", name: "コンピュータアーキテクチャ", materials: [] },
   { id: "1-4", name: "情報通信ネットワーク",   materials: [] },

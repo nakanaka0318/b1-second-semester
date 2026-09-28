@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>独立な試行と条件付き確率</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+/* サイコロ2個の表 */
+.dgrid{display:grid;grid-template-columns:28px repeat(6,1fr);gap:3px;max-width:420px;margin:10px auto 0}
+.dgrid .h{font-family:"JetBrains Mono",monospace;font-size:.8rem;color:var(--sub);display:flex;align-items:center;justify-content:center}
+.dgrid .c{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:.72rem;background:var(--dim);color:var(--sub);transition:background .15s,color .15s}
+.dgrid .c.a1{background:var(--accent-soft);color:var(--ink)}
+.dgrid .c.both{background:var(--accent);color:#fff;font-weight:700}
+.dgrid .c.a2only{box-shadow:inset 0 0 0 2px var(--mark)}
+.dgrid .corner{font-size:.62rem;line-height:1.1;text-align:center}
+.coins{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.coin{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--line);background:var(--bg)}
+.coin.h{background:var(--mark-soft);border-color:var(--mark)}
+.coin.flip{animation:flip .35s ease-out}
+@keyframes flip{from{transform:rotateY(90deg)}to{transform:none}}
+@media (prefers-reduced-motion: reduce){.coin.flip{animation:none}}
+.nline{position:relative;height:54px;margin:6px 4px 0}
+.nline .axis{position:absolute;left:0;right:0;top:24px;height:2px;background:var(--line)}
+.nline .tick{position:absolute;top:30px;transform:translateX(-50%);font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--sub)}
+.nline .tick.goal{color:var(--mark);font-weight:700}
+.nline .dot{position:absolute;top:13px;width:24px;height:24px;margin-left:-12px;border-radius:50%;background:var(--accent);border:3px solid var(--paper);transition:left .3s ease}
+.tree{display:grid;grid-template-columns:auto auto auto;gap:4px 14px;align-items:center;font-size:.92rem;margin:10px 0;overflow-x:auto}
+.tree .n{background:var(--bg);border-radius:8px;padding:3px 10px;white-space:nowrap}
+.tree .p{font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:.85rem;white-space:nowrap}
+.tree .r{font-family:"JetBrains Mono",monospace;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>独立な試行と条件付き確率</h1>
+  <p>確率統計 第1回のノートのまとめです。「前の結果が次に影響しない」独立な試行と、「〜が起きたと分かっているとき」の条件付き確率を、手を動かしながら確かめます。後半に答え合わせできる練習問題があります。</p>
+  <div class="demo">
+    <label>サイコロ2個・36通りで「条件付き確率」を見る</label>
+    <div class="row">
+      <label for="e1">条件 A₁</label><select id="e1"></select>
+      <label for="e2">事象 A₂</label><select id="e2"></select>
+    </div>
+    <div class="dgrid" id="dgrid"></div>
+    <div class="stats" id="dstats"></div>
+    <div class="legend">行が <b>1個目</b>、列が <b>2個目</b> の目。<b>濃い青</b>=A₁かつA₂、<b>薄い青</b>=A₁だけ、<b>黄色の枠</b>=A₁の外にあるA₂。条件付き確率は「薄い青+濃い青」の中で濃い青が占める割合です。</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#indep">独立な試行</a><a href="#binom">反復試行の定理</a><a href="#walk">例題:点の移動</a><a href="#cond">条件付き確率</a><a href="#mult">乗法定理</a><a href="#q">練習問題</a>
+</nav>
+
+<!-- ===== 2.1 ===== -->
+<section class="task" id="indep">
+  <h2><span class="no">2.1</span>独立な試行</h2>
+  <p>コイン投げやサイコロ投げのように、<b>1回目の結果が2回目の結果に影響を与えない</b>試行を<b>独立な試行</b>といいます。</p>
+  <p>2つの独立な試行の結果をそれぞれ A₁, A₂ とするとき、両方が起こる確率は掛け算で求まります。</p>
+  <div class="formula">P(A₁ ∩ A₂) = P(A₁) × P(A₂)<small>独立事象の乗法定理</small></div>
+  <div class="point"><b>例</b>:コインで表(1/2)、サイコロで6(1/6)が両方出る確率は <span class="mono">1/2 × 1/6 = 1/12</span>。コインの結果はサイコロに影響しないので、掛けるだけでよい。</div>
+  <div class="warn"><b>注意</b>:袋から玉を<b>戻さずに</b>続けて取り出す場合は、1回目の結果で袋の中身が変わるので独立ではありません。この場合は後で出てくる<a href="#mult">乗法定理</a>を使います。</div>
+</section>
+
+<!-- ===== 反復試行 ===== -->
+<section class="task" id="binom">
+  <h2><span class="no">定理</span>反復試行(独立試行)の定理</h2>
+  <p>1回の試行で事象が起こる確率を p、起こらない確率を 1−p とします。この試行を <b>n 回</b>独立にくり返すとき、ちょうど <b>x 回</b>起こる確率は</p>
+  <div class="formula"><sub>n</sub>C<sub>x</sub> p<sup>x</sup> (1−p)<sup>n−x</sup><small>どの x 回で起こるかの選び方 × 1通りあたりの確率</small></div>
+  <h3>ノートの例:サイコロを5回投げて、6の目がちょうど3回出る確率</h3>
+  <p>p = 1/6、n = 5、x = 3 なので</p>
+  <div class="formula"><sub>5</sub>C<sub>3</sub> (<span class="frac"><span>1</span><span>6</span></span>)<sup>3</sup>(<span class="frac"><span>5</span><span>6</span></span>)<sup>2</sup> = <span class="frac"><span>10 × 25</span><span>6<sup>5</sup></span></span> = <span class="frac"><span>125</span><span>3888</span></span></div>
+
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>n・p・x を変えてグラフで見る</div>
+    <div class="row">
+      <label for="bp">1回の確率 p</label>
+      <select id="bp">
+        <option value="1/2">1/2(コインの表)</option>
+        <option value="1/6" selected>1/6(サイコロの6)</option>
+        <option value="1/3">1/3(サイコロの1か2)</option>
+        <option value="1/4">1/4(4択を勘で正解)</option>
+        <option value="1/10">1/10(当たりくじ)</option>
+      </select>
+    </div>
+    <div class="row"><label for="bn">回数 n = <b id="bnv"></b></label><input id="bn" type="range" min="1" max="20" value="5"></div>
+    <div class="row"><label for="bx">起こる回数 x = <b id="bxv"></b></label><input id="bx" type="range" min="0" max="5" value="3"></div>
+    <div class="formula" id="bformula" aria-live="polite"></div>
+    <svg class="chart" id="bchart" viewBox="0 0 600 240" role="img" aria-label="起こる回数ごとの確率の棒グラフ"></svg>
+    <div class="legend2" id="blegend"><span><i style="background:var(--accent)"></i>理論値(棒をタップで x を選択)</span></div>
+    <div class="row">
+      <button class="btn" id="bsim" type="button">実際に 10000 セット試す</button>
+      <span class="legend" id="bsimtxt"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 例題 ===== -->
+<section class="task" id="walk">
+  <h2><span class="no">例題</span>コインで点が動く</h2>
+  <div class="problem">
+    <p>数直線上の点が原点にある。コインを投げて表なら <b>+2</b>、裏なら <b>−1</b> 動く。5回投げたとき、点が <b>1</b> にある確率を求めよ。</p>
+  </div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>実際に投げてみる</div>
+    <div class="coins" id="coins"></div>
+    <div class="nline" id="nline"><div class="axis"></div><div class="dot" id="ndot"></div></div>
+    <div class="row">
+      <button class="btn" id="w1" type="button">5回投げる</button>
+      <button class="btn sub" id="w1000" type="button">1000セット投げる</button>
+      <button class="btn sub" id="wreset" type="button">リセット</button>
+    </div>
+    <div class="stats" id="wstats"></div>
+  </div>
+  <details><summary><span class="tag">ヒント</span>表の回数を x とおく<span class="tap"></span></summary><div class="body">
+    <p>5回のうち表が x 回なら、裏は 5 − x 回。最後の位置は <span class="mono">2x − (5 − x)</span> です。これが 1 になる x を求めれば、あとは反復試行の定理です。</p>
+  </div></details>
+  <details class="ans"><summary><span class="tag">解答</span>解き方<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:5/16</b></p>
+    <ol class="steps">
+      <li>表が x 回とすると <span class="mono">2x − (5 − x) = 1</span> → <span class="mono">3x = 6</span> → <span class="mono">x = 2</span>。つまり「表がちょうど2回」。</li>
+      <li>反復試行の定理より <span class="mono"><sub>5</sub>C<sub>2</sub>(1/2)<sup>2</sup>(1/2)<sup>3</sup> = 10/32 = 5/16</span>。</li>
+    </ol>
+    <p>上のシミュレーションで「1000セット」を何回か押すと、割合が 5/16 = 0.3125 に近づいていくのが分かります。</p>
+  </div></details>
+</section>
+
+<!-- ===== 条件付き確率 ===== -->
+<section class="task" id="cond">
+  <h2><span class="no">2.2</span>条件付き確率</h2>
+  <p>事象 A₁ が<b>起こっているという条件のもとで</b> A₂ が起こる確率を、A₁ のもとでの A₂ の<b>条件付き確率</b>といい、<span class="mono">P<sub>A₁</sub>(A₂)</span> または <span class="mono">P(A₂ | A₁)</span> と書きます。</p>
+  <div class="formula">P(A₂ | A₁) = <span class="frac"><span>P(A₁ ∩ A₂)</span><span>P(A₁)</span></span><small>ただし P(A₁) ≠ 0</small></div>
+  <p>「A₁ が起きた」と分かった時点で、考える世界(全体)が Ω から <b>A₁ に縮む</b>と考えると分かりやすいです。ページ上部の表で、A₁ を選ぶと薄い青に縮んだ世界が見えます。</p>
+  <div class="point"><b>例</b>:サイコロ2個で「合計が8」と分かっているとき、1個目が偶数である確率。合計8は (2,6)(3,5)(4,4)(5,3)(6,2) の5通り、そのうち1個目が偶数は3通りなので <span class="mono">3/5</span>。上の表で A₁=「合計が8」、A₂=「1個目が偶数」を選んで確かめてみましょう。</div>
+</section>
+
+<!-- ===== 乗法定理 ===== -->
+<section class="task" id="mult">
+  <h2><span class="no">定理</span>乗法定理</h2>
+  <p>条件付き確率の式の分母を払うと、「両方起こる確率」を<b>順番に掛け算</b>で求める式になります。</p>
+  <div class="formula">P(A₁ ∩ A₂) = P(A₁) · P(A₂ | A₁) = P(A₂) · P(A₁ | A₂)</div>
+  <p>A₁ ∩ A₂ は A₂ ∩ A₁ と同じなので、どちらから見ても同じ値です。つまり</p>
+  <div class="formula">P(A₁) · P(A₂ | A₁) = P(A₂) · P(A₁ | A₂)<small>これが乗法定理(後で習うベイズの定理のもとになる式)</small></div>
+  <div class="point"><b>独立との関係</b>:A₁ と A₂ が独立なら、A₁ が起きても A₂ の確率は変わらないので <span class="mono">P(A₂ | A₁) = P(A₂)</span>。これを乗法定理に入れると 2.1 の <span class="mono">P(A₁ ∩ A₂) = P(A₁)P(A₂)</span> になります。</div>
+  <h3>例:赤玉3個・白玉2個の袋から、戻さずに2個取り出す</h3>
+  <div class="tree">
+    <span class="n">1個目</span><span class="n">2個目</span><span class="n">確率</span>
+    <span class="r">赤 <span class="p">3/5</span></span><span class="r">赤 <span class="p">2/4</span></span><span class="r">3/5 × 2/4 = 6/20</span>
+    <span class="r"></span><span class="r">白 <span class="p">2/4</span></span><span class="r">3/5 × 2/4 = 6/20</span>
+    <span class="r">白 <span class="p">2/5</span></span><span class="r">赤 <span class="p">3/4</span></span><span class="r">2/5 × 3/4 = 6/20</span>
+    <span class="r"></span><span class="r">白 <span class="p">1/4</span></span><span class="r">2/5 × 1/4 = 2/20</span>
+  </div>
+  <p>2個目の確率(青字)が1個目の結果で変わっているのがポイントです。これが P(A₂ | A₁)。4つの合計は 20/20 = 1 になります。</p>
+</section>
+
+<!-- ===== 問題 ===== -->
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+  <p>答えを分数(例 <span class="mono">3/5</span>)か小数で入力して「判定」を押してください。約分していなくても正解になります。</p>
+
+  <div class="qbox" data-ans="1/6"><div class="qno">問1 独立な試行</div>
+    <p>サイコロを2回投げる。1回目が偶数で、かつ2回目が5以上である確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問1の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:1/6</b></p>
+      <p>独立なので掛け算。<span class="mono">3/6 × 2/6 = 1/2 × 1/3 = 1/6</span>。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="1/4"><div class="qno">問2 反復試行</div>
+    <p>コインを4回投げて、表がちょうど3回出る確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問2の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:1/4</b></p>
+      <p><span class="mono"><sub>4</sub>C<sub>3</sub>(1/2)<sup>3</sup>(1/2)<sup>1</sup> = 4/16 = 1/4</span>。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="671/1296"><div class="qno">問3 少なくとも1回</div>
+    <p>サイコロを4回投げて、6の目が<b>少なくとも1回</b>出る確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問3の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:671/1296</b></p>
+      <p>「少なくとも1回」は余事象「1回も出ない」を使うのが楽です。1回も出ない確率は <span class="mono">(5/6)<sup>4</sup> = 625/1296</span>。よって <span class="mono">1 − 625/1296 = 671/1296</span>(約 0.518)。</p>
+      <p>1回〜4回の場合を全部足しても同じ答えになりますが、計算が4倍になります。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="5/16"><div class="qno">問4 点の移動</div>
+    <p>例題と同じルール(表で +2、裏で −1)でコインを<b>6回</b>投げる。点が <b>3</b> にある確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問4の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:5/16</b></p>
+      <p>表 x 回で <span class="mono">2x − (6 − x) = 3</span> → <span class="mono">x = 3</span>。<span class="mono"><sub>6</sub>C<sub>3</sub>(1/2)<sup>6</sup> = 20/64 = 5/16</span>。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="729/2500"><div class="qno">問5 当たりくじ</div>
+    <p>当たる確率が 1/10 のくじを、毎回もとに戻して4回引く。ちょうど1回だけ当たる確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問5の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:729/2500</b></p>
+      <p><span class="mono"><sub>4</sub>C<sub>1</sub>(1/10)<sup>1</sup>(9/10)<sup>3</sup> = 4 × 729/10000 = 2916/10000 = 729/2500</span>(約 0.29)。</p>
+      <p>「もとに戻す」ので毎回の確率は同じ 1/10 = 独立な試行です。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="3/5"><div class="qno">問6 条件付き確率</div>
+    <p>サイコロを2個投げたところ、目の合計が 8 だった。1個目の目が偶数である確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:3/5</b></p>
+      <p>合計8は5通り。そのうち1個目が偶数は (2,6)(4,4)(6,2) の3通り。式で書くと <span class="mono">P(A₂|A₁) = (3/36)/(5/36) = 3/5</span>。ページ上部の表でも確かめられます。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="3/10"><div class="qno">問7 乗法定理</div>
+    <p>赤玉3個・白玉2個の袋から、戻さずに2個取り出す。2個とも赤である確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:3/10</b></p>
+      <p><span class="mono">P(1個目赤) × P(2個目赤 | 1個目赤) = 3/5 × 2/4 = 3/10</span>。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="3/5"><div class="qno">問8 2個目が赤</div>
+    <p>問7と同じ袋で、<b>2個目</b>が赤である確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問8の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:3/5</b></p>
+      <p>1個目が赤の場合と白の場合に分けて足します。<span class="mono">3/5 × 2/4 + 2/5 × 3/4 = 6/20 + 6/20 = 3/5</span>。</p>
+      <p>1個目と同じ 3/5 になります。1個目を見ていなければ、2個目も「5個のうち赤3個」から選ぶのと同じだからです(くじ引きの順番は公平)。</p>
+    </div></details></div>
+
+  <div class="qbox" data-ans="1/2"><div class="qno">問9 逆向きの条件付き確率</div>
+    <p>問7と同じ袋で、2個目が赤だったと分かった。このとき1個目も赤だった確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問9の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:1/2</b></p>
+      <p>乗法定理 <span class="mono">P(A₂)·P(A₁|A₂) = P(A₁ ∩ A₂)</span> より <span class="mono">P(A₁|A₂) = (3/10) ÷ (3/5) = 1/2</span>。</p>
+      <p>「後の結果から前の結果を推測する」この考え方がベイズの定理につながります。</p>
+    </div></details></div>
+
+  <div class="qbox"><div class="qno">問10 独立かどうか</div>
+    <p>サイコロを1個投げる。A=「偶数の目」、B=「4以下の目」とする。A と B は独立か?(P(A∩B) と P(A)P(B) を比べてみよう)</p>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+      <p class="ansline"><b>答え:独立である</b></p>
+      <p>A∩B = {2, 4} なので <span class="mono">P(A∩B) = 2/6 = 1/3</span>。<span class="mono">P(A)P(B) = 1/2 × 4/6 = 1/3</span>。等しいので独立です。</p>
+      <p>「B=4以下」と分かっても偶数の割合は {1,2,3,4} のうち2個で 1/2 のまま、つまり <span class="mono">P(A|B) = P(A)</span> です。B を「3以下」に変えると <span class="mono">1/6 ≠ 1/4</span> で独立ではなくなります。1回の試行の中の事象でも独立になることがある、という例です。</p>
+    </div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>数値はすべて計算で確認済みです。シミュレーションは乱数を使うため、押すたびに少しずつ結果が変わります。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), solved={}, score=document.getElementById('score');
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+boxes.length+'(入力問題)'; }
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+
+(function(){
+  /* ===== サイコロ2個の表 ===== */
+  var EV=[
+    ['1個目が偶数',function(a,b){return a%2===0;}],
+    ['1個目が6',function(a,b){return a===6;}],
+    ['2個目が5以上',function(a,b){return b>=5;}],
+    ['合計が8',function(a,b){return a+b===8;}],
+    ['合計が7',function(a,b){return a+b===7;}],
+    ['合計が10以上',function(a,b){return a+b>=10;}],
+    ['ゾロ目',function(a,b){return a===b;}],
+    ['1個目 > 2個目',function(a,b){return a>b;}],
+    ['少なくとも1つが6',function(a,b){return a===6||b===6;}]
+  ];
+  var s1=document.getElementById('e1'), s2=document.getElementById('e2');
+  EV.forEach(function(e,i){s1.add(new Option(e[0],i));s2.add(new Option(e[0],i));});
+  s1.value=3; s2.value=0;
+  var g=document.getElementById('dgrid'), st=document.getElementById('dstats');
+  function drawGrid(){
+    var f1=EV[s1.value][1], f2=EV[s2.value][1], n1=0,n2=0,n12=0, h='<div class="h corner"></div>';
+    for(var b=1;b<=6;b++) h+='<div class="h">'+b+'</div>';
+    for(var a=1;a<=6;a++){
+      h+='<div class="h">'+a+'</div>';
+      for(b=1;b<=6;b++){
+        var x=f1(a,b), y=f2(a,b); if(x)n1++; if(y)n2++; if(x&&y)n12++;
+        h+='<div class="c'+(x&&y?' both':x?' a1':y?' a2only':'')+'">'+a+','+b+'</div>';
+      }
+    }
+    g.innerHTML=h;
+    var indep = n12*36===n1*n2;
+    st.innerHTML=
+      '<div class="stat"><div class="k">P(A₁)</div><div class="v">'+fracHTML(n1,36)+'</div></div>'+
+      '<div class="stat"><div class="k">P(A₁ ∩ A₂)</div><div class="v">'+fracHTML(n12,36)+'</div></div>'+
+      '<div class="stat hl"><div class="k">P(A₂ | A₁) = '+n12+'/'+n1+'</div><div class="v">'+(n1?fracHTML(n12,n1):'—')+'</div></div>'+
+      '<div class="stat"><div class="k">(比較)P(A₂)</div><div class="v">'+fracHTML(n2,36)+'</div></div>'+
+      '<div class="stat"><div class="k">A₁とA₂は</div><div class="v" style="font-family:inherit">'+(indep?'独立':'独立でない')+'</div></div>';
+  }
+  s1.addEventListener('change',drawGrid); s2.addEventListener('change',drawGrid); drawGrid();
+
+  /* ===== 反復試行 ===== */
+  var bp=document.getElementById('bp'), bn=document.getElementById('bn'), bx=document.getElementById('bx');
+  var svg=document.getElementById('bchart'), emp=null;
+  function C(n,k){var r=1n;for(var i=1;i<=k;i++){r=r*BigInt(n-k+i)/BigInt(i);}return r;}
+  function bgcd(a,b){while(b){var t=a%b;a=b;b=t;}return a;}
+  function exact(n,k,pn,pd){
+    var num=C(n,k)*(BigInt(pn)**BigInt(k))*(BigInt(pd-pn)**BigInt(n-k)), den=BigInt(pd)**BigInt(n);
+    var gg=bgcd(num,den)||1n; return [num/gg,den/gg];
+  }
+  function pv(){var t=bp.value.split('/');return [+t[0],+t[1]];}
+  function drawBinom(){
+    var n=+bn.value; bx.max=n; if(+bx.value>n) bx.value=n; var x=+bx.value, p=pv(), pn=p[0], pd=p[1];
+    document.getElementById('bnv').textContent=n; document.getElementById('bxv').textContent=x;
+    var e=exact(n,x,pn,pd), val=Number(e[0])/Number(e[1]);
+    var fr=(e[1]===1n)?String(e[0]):'<span class="frac"><span>'+e[0]+'</span><span>'+e[1]+'</span></span>';
+    document.getElementById('bformula').innerHTML='<sub>'+n+'</sub>C<sub>'+x+'</sub>(<span class="frac"><span>'+pn+'</span><span>'+pd+'</span></span>)<sup>'+x+'</sup>(<span class="frac"><span>'+(pd-pn)+'</span><span>'+pd+'</span></span>)<sup>'+(n-x)+'</sup> = '+fr+' ≈ <b>'+val.toFixed(4)+'</b>';
+    var probs=[],max=0; for(var k=0;k<=n;k++){var q=exact(n,k,pn,pd);q=Number(q[0])/Number(q[1]);probs.push(q);if(q>max)max=q;}
+    if(emp) emp.forEach(function(v){if(v>max)max=v;});
+    var top=1,st=[0.01,0.02,0.05,0.1,0.2,0.25]; for(var si=0;si<st.length;si++){if(st[si]*4>=max){top=st[si]*4;break;}}
+    var W=Math.max(300,Math.round(svg.clientWidth||600)),H=240,L=40,R=10,T=10,B=26,pw=W-L-R,ph=H-T-B,bw=pw/(n+1), h='';
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    for(var i=0;i<=4;i++){var yv=top*i/4, yy=T+ph-ph*i/4; h+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'"/><text x="'+(L-6)+'" y="'+(yy+4)+'" text-anchor="end">'+(+yv.toFixed(2))+'</text>';}
+    probs.forEach(function(q,k){
+      var bh=ph*q/top, xx=L+bw*k+bw*0.15, ww=bw*0.7, yy=T+ph-bh, r=Math.min(4,ww/2,bh);
+      var d='M'+xx+','+(T+ph)+'V'+(yy+r)+'Q'+xx+','+yy+' '+(xx+r)+','+yy+'H'+(xx+ww-r)+'Q'+(xx+ww)+','+yy+' '+(xx+ww)+','+(yy+r)+'V'+(T+ph)+'Z';
+      h+='<path class="bar'+(k===x?' on':'')+'" data-k="'+k+'" d="'+d+'"><title>x = '+k+':確率 '+q.toFixed(4)+(emp?'/実験 '+emp[k].toFixed(4):'')+'</title></path>';
+      /* 当たり判定を広げる透明な矩形 */
+      h+='<rect data-k="'+k+'" x="'+(L+bw*k)+'" y="'+T+'" width="'+bw+'" height="'+ph+'" fill="transparent" style="cursor:pointer"><title>x = '+k+':確率 '+q.toFixed(4)+'</title></rect>';
+      if(emp){var ey=T+ph-ph*emp[k]/top; h+='<circle class="emp" cx="'+(L+bw*k+bw/2)+'" cy="'+ey+'" r="4.5" pointer-events="none"/>';}
+      if(n<=12||k%2===0) h+='<text x="'+(L+bw*k+bw/2)+'" y="'+(H-8)+'" text-anchor="middle"'+(k===x?' style="fill:var(--ink);font-weight:700"':'')+'>'+k+'</text>';
+    });
+    svg.innerHTML=h;
+    document.getElementById('blegend').innerHTML='<span><i style="background:var(--accent)"></i>理論値(棒をタップで x を選択)</span>'+(emp?'<span><i style="background:var(--paper);border:2px solid var(--mark);border-radius:50%"></i>実験の割合(10000セット)</span>':'');
+  }
+  svg.addEventListener('click',function(e){var k=e.target.getAttribute('data-k'); if(k!==null){bx.value=k;drawBinom();}});
+  function reset(){emp=null;document.getElementById('bsimtxt').textContent='';drawBinom();}
+  bp.addEventListener('change',reset); bn.addEventListener('input',reset); bx.addEventListener('input',drawBinom);
+  document.getElementById('bsim').addEventListener('click',function(){
+    var n=+bn.value,p=pv(),pr=p[0]/p[1],cnt=new Array(n+1).fill(0),N=10000;
+    for(var s=0;s<N;s++){var c=0;for(var t=0;t<n;t++) if(Math.random()<pr)c++; cnt[c]++;}
+    emp=cnt.map(function(v){return v/N;});
+    var x=+bx.value; document.getElementById('bsimtxt').textContent='x = '+x+' になったのは '+cnt[x]+' / 10000 セット(割合 '+(cnt[x]/N).toFixed(4)+')';
+    drawBinom();
+  });
+  drawBinom();
+  window.addEventListener('resize',drawBinom);
+
+  /* ===== 点の移動 ===== */
+  var coins=document.getElementById('coins'), nl=document.getElementById('nline'), dot=document.getElementById('ndot');
+  var MIN=-5,MAX=10, sets=0, hit=0;
+  function pos(v){return ((v-MIN)/(MAX-MIN)*100)+'%';}
+  for(var v=MIN;v<=MAX;v++){var t=document.createElement('div');t.className='tick'+(v===1?' goal':'');t.style.left=pos(v);t.textContent=v;nl.appendChild(t);}
+  dot.style.left=pos(0);
+  function wstats(last){
+    document.getElementById('wstats').innerHTML=
+      (last!==undefined?'<div class="stat'+(last===1?' hl':'')+'"><div class="k">今回の位置</div><div class="v">'+last+(last===1?' 🎯':'')+'</div></div>':'')+
+      '<div class="stat"><div class="k">投げたセット数</div><div class="v">'+sets+'</div></div>'+
+      '<div class="stat"><div class="k">位置1になった回数</div><div class="v">'+hit+'</div></div>'+
+      '<div class="stat hl"><div class="k">割合(理論値 5/16 = 0.3125)</div><div class="v">'+(sets?(hit/sets).toFixed(4):'—')+'</div></div>';
+  }
+  function once(){var p=0,r=[];for(var i=0;i<5;i++){var hd=Math.random()<.5;r.push(hd);p+=hd?2:-1;}return [r,p];}
+  var busy=false;
+  document.getElementById('w1').addEventListener('click',function(){
+    if(busy) return; busy=true;
+    var o=once(), r=o[0], p=0, i=0; coins.innerHTML=''; dot.style.left=pos(0);
+    (function step(){
+      if(i>=5){sets++; if(o[1]===1)hit++; wstats(o[1]); busy=false; return;}
+      var c=document.createElement('div'); c.className='coin flip'+(r[i]?' h':''); c.textContent=r[i]?'表':'裏'; coins.appendChild(c);
+      p+=r[i]?2:-1; dot.style.left=pos(p); i++; setTimeout(step,330);
+    })();
+  });
+  document.getElementById('w1000').addEventListener('click',function(){
+    for(var k=0;k<1000;k++){if(once()[1]===1)hit++;} sets+=1000; wstats();
+  });
+  document.getElementById('wreset').addEventListener('click',function(){sets=0;hit=0;coins.innerHTML='';dot.style.left=pos(0);wstats();});
+  wstats();
+})();
+</script>
+</body>
+</html>
