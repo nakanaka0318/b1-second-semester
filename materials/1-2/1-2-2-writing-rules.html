@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>理系の文書で必要なこと・不要なこと</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+
+textarea{width:100%;min-height:7em;font:inherit;font-size:1rem;line-height:1.7;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);resize:vertical}
+textarea:focus{outline:none;border-color:var(--accent)}
+.out{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:10px;line-height:2}
+.out mark{background:none;color:inherit;border-bottom:3px solid;padding:0 1px;cursor:help}
+.out mark.feel{border-color:#C8423B}
+.out mark.vague{border-color:#D99A00}
+.out mark.verbose{border-color:#1F6FB2}
+.out mark.polite{border-color:#8A5CC7}
+.out .longs{background:var(--warn-soft);border-radius:4px}
+.issues{list-style:none;padding:0;margin:8px 0 0;font-size:.9rem}
+.issues li{padding:4px 0;border-bottom:1px dashed var(--line)}
+.key{display:inline-block;width:12px;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.samples{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.samples button{font:inherit;font-size:.8rem;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.samples button:hover{border-color:var(--accent)}
+.okmsg{color:var(--ok);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>理系の文書で必要なこと・不要なこと</h1>
+  <p>テクニカルリテラシー 第2回のノートのまとめです。理系の文書では何を書き、何を書かないのか。後半では「首尾一貫しない文」の直し方を練習します。</p>
+  <div class="demo">
+    <label for="txt">文章チェッカー:レポートの文を貼り付けてみよう</label>
+    <textarea id="txt"></textarea>
+    <div class="samples" id="samples"></div>
+    <div class="out" id="out" aria-live="polite"></div>
+    <ul class="issues" id="issues"></ul>
+    <div class="legend">
+      <span><i class="key" style="background:#C8423B"></i>心情・感想</span>
+      <span style="margin-left:10px"><i class="key" style="background:#D99A00"></i>ぼかした表現</span>
+      <span style="margin-left:10px"><i class="key" style="background:#1F6FB2"></i>冗長な表現</span>
+      <span style="margin-left:10px"><i class="key" style="background:#8A5CC7"></i>過剰な敬語</span>
+      <span style="margin-left:10px"><span class="longs">背景色</span>=長すぎる文</span>
+      <br>機械的なチェックなので、指摘がすべて誤りとは限りません。「本当に必要か?」を考えるきっかけにしてください。
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#need">必要なこと</a><a href="#fact">事実と意見</a><a href="#noneed">不要なこと</a><a href="#shubi">首尾一貫しない文</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="need">
+  <h2><span class="no">1</span>理系の文書で必要なこと</h2>
+  <div class="tbl"><table>
+    <tr><th>必要なこと</th><th>ポイント</th></tr>
+    <tr><td><b>内容の明確さ</b></td><td>必要なことは漏れなく書き、不要なことは書かない</td></tr>
+    <tr><td><b>事実と意見の区別</b></td><td>事実なのか、自分の意見(判断・推測)なのかを読み手が区別できるように書く</td></tr>
+    <tr><td><b>論理的な展開</b></td><td>文と文、段落と段落のつながりに筋道がある</td></tr>
+    <tr><td><b>重要なことを先に</b></td><td>結論や要点を先に述べ、詳細は後に書く</td></tr>
+    <tr><td><b>明快かつ簡潔</b></td><td>短く、はっきりと書く。例:「我々は図1のような測定器を試作した。」</td></tr>
+    <tr><td><b>複数の解釈ができない</b></td><td>読み手によって意味が変わらない、誤解の余地のない文にする</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="fact">
+  <h2><span class="no">2</span>事実と意見を区別する</h2>
+  <p>一般の文章では、意見を事実のように書いても許されることがありますが、理系の文書では許されません。</p>
+  <div class="bad">この方式は従来方式より優れている。</div>
+  <p>→「優れている」は意見(判断)なのに、事実のように書かれています。根拠となる事実と、そこからの判断を分けます。</p>
+  <div class="good">この方式の処理時間は従来方式の約3分の1であった(表2)。このことから、処理速度の点でこの方式は従来方式より優れていると考えられる。</div>
+  <div class="point"><b>見分け方</b>:<b>事実</b>=測定・観察・文献などで確かめられること。<b>意見</b>=そこからの判断・推測・評価(「〜と考えられる」「〜が望ましい」)。</div>
+</section>
+
+<section class="task" id="noneed">
+  <h2><span class="no">3</span>理系の文書で不要なこと</h2>
+  <div class="tbl"><table>
+    <tr><th>不要なこと</th><th>例</th></tr>
+    <tr><td><b>心情や感想</b></td><td>「〜にはまいった」「〜したいと思う」「楽しかった」</td></tr>
+    <tr><td><b>構成の奇抜さ・意外性</b></td><td>結論を最後まで隠す、読み手を驚かせる展開</td></tr>
+    <tr><td><b>ぼかした表現</b></td><td>「〜かもしれない」「〜のような気がする」「ある程度」「かなり」</td></tr>
+    <tr><td><b>相手に失礼のないような表現(過剰な敬語を含む)</b></td><td>「〜させていただきました」「〜してございます」</td></tr>
+  </table></div>
+  <p>小説や手紙では大切な要素でも、理系の文書では<b>内容を正確に伝える邪魔</b>になります。ページ上部のチェッカーで、自分のレポートの文を確かめてみましょう。</p>
+</section>
+
+<section class="task" id="shubi">
+  <h2><span class="no">4</span>首尾一貫しない文</h2>
+  <h3>① 主語と述語が対応していない文</h3>
+  <p>文の最初(首)と最後(尾)がかみ合っていない文です。長い文で起こりやすくなります。</p>
+  <div class="bad">ここで問題となるのは、交通が渋滞していて時間がかかる。</div>
+  <p>「問題となるのは」に対応する述語がありません。「問題となるのは ~ ことである」の形にするか、主語を変えます。</p>
+  <div class="good">修正例1:ここで問題となるのは、交通が渋滞していて時間がかかることである。</div>
+  <div class="good">修正例2:交通が渋滞していて時間がかかることが問題となる。</div>
+
+  <h3>② 呼応していない文</h3>
+  <p>決まった形でセットになる言葉(呼応)が崩れている文です。</p>
+  <div class="bad">この方法を用いた理由は、計算量が少ない。</div>
+  <div class="good">この方法を用いた理由は、計算量が少ないからである。</div>
+
+  <h3>③ 複数の解釈ができる文</h3>
+  <div class="bad">A君は急いで帰ったB君を追いかけた。</div>
+  <p>急いだのは A君? B君? 読点の位置や語順で1通りに決めます。</p>
+  <div class="good">A君は、急いで帰ったB君を追いかけた。(急いだのは B君)</div>
+  <div class="good">A君は急いで、帰ったB君を追いかけた。(急いだのは A君)</div>
+
+  <div class="point"><b>チェックのコツ</b>:長い文は、主語と述語だけを抜き出して読んでみる。「問題となるのは…かかる」のように、つながらなければ首尾一貫していません。</div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+  <p>文の問題点を選んでください。正解すると、下の「修正例」で直し方を確認できます。</p>
+
+  <div class="qbox"><div class="qno">問1</div>
+    <div class="bad">今回の実験はとても大変だったが、最後にはうまくいって本当にうれしかった。</div>
+    <div class="opts"><button>主語と述語の不一致</button><button data-ok>心情・感想が書かれている</button><button>過剰な敬語</button></div>
+    <span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">修正例</span>直し方を見る<span class="tap"></span></summary><div class="body"><div class="good">当初は測定値が安定しなかったが、試料の温度を一定に保つことで再現性のある値が得られた。</div><p>「大変だった」「うれしかった」ではなく、何が問題で、どう解決したかという事実を書きます。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問2</div>
+    <div class="bad">この結果の原因は、センサの取り付け位置がずれていた。</div>
+    <div class="opts"><button data-ok>主語と述語が対応していない</button><button>ぼかした表現</button><button>構成の奇抜さ</button></div>
+    <span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">修正例</span>直し方を見る<span class="tap"></span></summary><div class="body"><div class="good">この結果の原因は、センサの取り付け位置がずれていたことである。</div><p>「原因は」に対して「ことである」で受けます。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問3</div>
+    <div class="bad">測定値はある程度理論値に近かったような気がする。</div>
+    <div class="opts"><button>心情・感想</button><button data-ok>ぼかした表現</button><button>呼応していない</button></div>
+    <span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">修正例</span>直し方を見る<span class="tap"></span></summary><div class="body"><div class="good">測定値と理論値の差は最大 3% であった。</div><p>「ある程度」「気がする」の代わりに、数値で書きます。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問4</div>
+    <div class="bad">以下に実験結果を示させていただきます。</div>
+    <div class="opts"><button>ぼかした表現</button><button>主語と述語の不一致</button><button data-ok>過剰な敬語</button></div>
+    <span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">修正例</span>直し方を見る<span class="tap"></span></summary><div class="body"><div class="good">実験結果を表1に示す。</div><p>レポートや論文は「である調」で簡潔に書きます。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問5 事実か意見か</div>
+    <p>「新しいアルゴリズムの実行時間は 0.8 秒であった。」は事実? 意見?</p>
+    <div class="opts"><button data-ok>事実</button><button>意見</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問6 事実か意見か</div>
+    <p>「このアルゴリズムは実用に十分な速さである。」は事実? 意見?</p>
+    <div class="opts"><button>事実</button><button data-ok>意見</button></div>
+    <span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">解説</span>解説を見る<span class="tap"></span></summary><div class="body"><p>「十分な速さ」は書き手の判断です。「実行時間は 0.8 秒であり、要求仕様の 1 秒以内を満たす」のように、事実と基準を示すと意見の根拠になります。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問7 書き直し</div>
+    <p>次の文を、首尾一貫した文に直しなさい。</p>
+    <div class="bad">私の目標は、プログラムの処理時間を半分にしたい。</div>
+    <details class="ans"><summary><span class="tag">修正例</span>修正例を見る<span class="tap"></span></summary><div class="body">
+      <div class="good">修正例1:私の目標は、プログラムの処理時間を半分にすることである。</div>
+      <div class="good">修正例2:私は、プログラムの処理時間を半分にしたい。</div>
+      <p>「目標は」は「〜ことである」で受けます。修正例2のように主語を変える方法もあります(ただし「〜したい」は心情表現なので、論文なら「〜を目的とする」がより適切)。</p>
+    </div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>ノートの内容をもとにまとめています。例文の一部は説明のために作成したものです。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+
+(function(){
+  var RULES=[
+    {c:'feel',n:'心情・感想',re:/(と思う|と思います|と思った|と感じ|まいった|うれし|嬉し|楽しかった|残念|驚い|頑張|がんば|大変だった|感動|面白かった)/g,tip:'感想ではなく、事実や根拠を書く'},
+    {c:'vague',n:'ぼかした表現',re:/(かもしれ|だろう|ような気|気がする|ある程度|程度|くらい|ぐらい|おそらく|多分|たぶん|ある意味|ちょっと|かなり|とても|非常に|大体|だいたい|など)/g,tip:'数値や具体的な言葉に置き換えられないか'},
+    {c:'verbose',n:'冗長な表現',re:/(ということ|することができ|を行う|を行った|を行い|という形で|的な|することとした|においては)/g,tip:'もっと短く言えないか(例:「することができる」→「できる」)'},
+    {c:'polite',n:'過剰な敬語',re:/(させていただ|いたします|致します|ございます|おります|いただき|いただけ)/g,tip:'「である調」で簡潔に'}
+  ];
+  var SAMPLES=[
+    ['感想だらけの例','今回の実験はとても大変だったが、なんとか成功してうれしかったと思う。'],
+    ['主述がねじれた例','ここで問題となるのは、交通が渋滞していて時間がかかる。'],
+    ['敬語・冗長の例','以下に測定を行った結果を示させていただきます。測定することができた値はかなり理論値に近かったかもしれません。'],
+    ['よい例','我々は図1のような測定器を試作した。測定値と理論値の差は最大3%であった。']
+  ];
+  var ta=document.getElementById('txt');
+  function esc(s){return s.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function check(){
+    var text=ta.value, sentences=text.split(/(?<=[。．!?!?\n])/), html='', found=[], counts={};
+    sentences.forEach(function(sn){
+      if(!sn) return;
+      var marks=[];
+      RULES.forEach(function(r){r.re.lastIndex=0;var m;while((m=r.re.exec(sn))){marks.push([m.index,m.index+m[0].length,r]);counts[r.n]=(counts[r.n]||0)+1;}});
+      marks.sort(function(a,b){return a[0]-b[0]||b[1]-a[1];});
+      var out='',pos=0;
+      marks.forEach(function(k){if(k[0]<pos)return;out+=esc(sn.slice(pos,k[0]))+'<mark class="'+k[2].c+'" title="'+k[2].n+':'+k[2].tip+'">'+esc(sn.slice(k[0],k[1]))+'</mark>';pos=k[1];});
+      out+=esc(sn.slice(pos));
+      var body=sn.replace(/\s/g,'');
+      if(body.length>70){out='<span class="longs" title="長い文:2つに分けられないか">'+out+'</span>';found.push('長すぎる文('+body.length+'文字):「'+esc(body.slice(0,14))+'…」。70文字を超えたら分けることを検討');}
+      var t=sn.trim();
+      if(/(のは|目標は|理由は|原因は|問題は)/.test(t) && !/(こと|もの|ため|から|点)(である|だ|です|であった|でした)[。．.]?$/.test(t)){
+        found.push('主語と述語の対応を確認:「'+esc(t.slice(0,20))+'…」。「〜は」に対して「〜ことである」などで受けているか');
+      }
+      html+=out.replace(/\n/g,'<br>');
+    });
+    document.getElementById('out').innerHTML=text.trim()?html:'<span class="legend">ここにチェック結果が表示されます。</span>';
+    var li='';
+    RULES.forEach(function(r){if(counts[r.n]) li+='<li><i class="key" style="background:'+{feel:'#C8423B',vague:'#D99A00',verbose:'#1F6FB2',polite:'#8A5CC7'}[r.c]+'"></i><b>'+r.n+'</b> × '+counts[r.n]+':'+r.tip+'</li>';});
+    found.forEach(function(f){li+='<li>⚠ '+f+'</li>';});
+    if(text.trim()&&!li) li='<li class="okmsg">◯ 気になる表現は見つかりませんでした。</li>';
+    document.getElementById('issues').innerHTML=li;
+  }
+  var sb=document.getElementById('samples');
+  SAMPLES.forEach(function(s){var b=document.createElement('button');b.type='button';b.textContent=s[0];b.addEventListener('click',function(){ta.value=s[1];check();});sb.appendChild(b);});
+  ta.addEventListener('input',check);
+  ta.value=SAMPLES[0][1]; check();
+})();
+</script>
+</body>
+</html>

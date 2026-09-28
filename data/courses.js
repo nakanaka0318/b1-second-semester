@@ -18,8 +18,22 @@ window.COURSES = [
       file: "materials/1-1/1-1-2-conditional.html",
       note: "独立な試行・反復試行の定理・条件付き確率・乗法定理。サイコロ表とシミュレーション、答え合わせ付き練習問題10問" }
   ] },
-  { id: "1-2", name: "テクニカルリテラシー",   materials: [] },
-  { id: "1-3", name: "コンピュータアーキテクチャ", materials: [] },
+  { id: "1-2", name: "テクニカルリテラシー",   materials: [
+    { id: "1-2-1-technical-documents", lesson: 1, title: "理系の文書力と技術文書の種類",
+      file: "materials/1-2/1-2-1-technical-documents.html",
+      note: "文書力が必要な理由、技術文書の読み方(行間を読む)、6種類の技術文書。文書あてクイズと理解度チェック付き" },
+    { id: "1-2-2-writing-rules", lesson: 2, title: "理系の文書で必要なこと・不要なこと",
+      file: "materials/1-2/1-2-2-writing-rules.html",
+      note: "事実と意見の区別、不要な表現、首尾一貫しない文の直し方。自分の文を診断できる文章チェッカー付き" }
+  ] },
+  { id: "1-3", name: "コンピュータアーキテクチャ", materials: [
+    { id: "1-3-1-organization-isa", lesson: 1, title: "コンピュータの構成と命令セット",
+      file: "materials/1-3/1-3-1-organization-isa.html",
+      note: "ノイマン型、5大構成要素、語長、機械語とアセンブリ言語、命令セット、RISC/CISC。C言語→機械語の変換デモ付き" },
+    { id: "1-3-2-instruction-cycle", lesson: 2, title: "プロセッサの基本動作と命令サイクル",
+      file: "materials/1-3/1-3-2-instruction-cycle.html",
+      note: "PC・IR・ALU、命令サイクル7段階、PCの計算(+4)、制御方式。1ステップずつ動かせるCPUシミュレータ付き" }
+  ] },
   { id: "1-4", name: "情報通信ネットワーク",   materials: [] },
   { id: "2-1", name: "社会科学基礎",           materials: [] },
   { id: "2-2", name: "微分積分2",              materials: [] },

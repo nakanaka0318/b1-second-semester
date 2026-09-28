@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>プロセッサの基本動作と命令サイクル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+
+/* シミュレータ */
+.stages{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.stages span{font-size:.75rem;padding:3px 8px;border-radius:99px;background:var(--bg);color:var(--sub);border:1px solid var(--line)}
+.stages span.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+.stages span.done{color:var(--ink)}
+.sim{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.cpu{border:2px dashed var(--accent);border-radius:14px;padding:10px}
+.cpu .cl{font-size:.75rem;color:var(--accent);font-weight:700;margin-bottom:6px}
+.reg{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:5px 8px;margin:5px 0;transition:background .2s,border-color .2s}
+.reg .n{font-size:.78rem;color:var(--sub)}
+.reg .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:.9rem;text-align:right;word-break:break-all}
+.reg.hot,.mrow.hot td{background:var(--mark-soft);border-color:var(--mark)}
+.memt{width:100%;font-size:.78rem}
+.memt td,.memt th{padding:3px 5px}
+.memt td{font-family:"JetBrains Mono",monospace}
+.memt tr.sep td{border:0;height:6px;padding:0}
+.memt .pc td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.msg{background:var(--bg);border-radius:10px;padding:10px 14px;margin-top:10px;min-height:4.5em}
+.msg b{color:var(--accent)}
+.vars{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.vars input{width:5em;font:inherit;font-family:"JetBrains Mono",monospace;padding:4px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+@media (max-width:620px){.sim{grid-template-columns:1fr}}
+.cycle{list-style:none;padding:0;margin:10px 0;counter-reset:c}
+.cycle li{counter-increment:c;display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;padding:8px 0;border-bottom:1px dashed var(--line)}
+.cycle li::before{content:counter(c);width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;margin-top:2px}
+.cycle b{display:block}
+.cycle .d{font-size:.9rem;color:var(--sub)}
+.flowv{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0}
+.flowv .b{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-weight:700;font-size:.9rem}
+.flowv .a{color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>プロセッサの基本動作と命令サイクル</h1>
+  <p>コンピュータアーキテクチャ 第2回のノートのまとめです(1.3 プロセッサの基本動作 〜 1.3-4 制御方式)。CPU が1つの命令を「取ってきて・解読して・実行する」流れを、下のシミュレータで1ステップずつ追えます。</p>
+  <div class="demo">
+    <label>CPU シミュレータ:<span class="mono">c = a + b</span> を実行する</label>
+    <div class="vars">
+      <label>a = <input id="va" type="number" value="5" inputmode="numeric"></label>
+      <label>b = <input id="vb" type="number" value="7" inputmode="numeric"></label>
+    </div>
+    <div class="stages" id="stages"></div>
+    <div class="sim">
+      <div class="cpu">
+        <div class="cl">CPU</div>
+        <div class="reg" id="rPC"><span class="n">プログラムカウンタ PC</span><span class="v"></span></div>
+        <div class="reg" id="rIR"><span class="n">命令レジスタ IR</span><span class="v"></span></div>
+        <div class="reg" id="rCTL"><span class="n">制御装置(デコード結果)</span><span class="v"></span></div>
+        <div class="reg" id="rALU"><span class="n">ALU(演算装置)</span><span class="v"></span></div>
+        <div class="reg" id="rR1"><span class="n">汎用レジスタ R1</span><span class="v"></span></div>
+      </div>
+      <div>
+        <div style="font-size:.75rem;color:var(--sub);font-weight:700;margin-bottom:4px">主記憶(1番地 = 1バイト)</div>
+        <div class="tbl" style="margin:0"><table class="memt" id="mem"></table></div>
+      </div>
+    </div>
+    <div class="msg" id="msg" aria-live="polite"></div>
+    <div class="row">
+      <button class="btn" id="bstep" type="button">1ステップ進む</button>
+      <button class="btn sub" id="binst" type="button">1命令ぶん進む</button>
+      <button class="btn sub" id="bauto" type="button">自動再生</button>
+      <button class="btn sub" id="breset" type="button">最初から</button>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#struct">プロセッサの構成</a><a href="#flow">動作の流れ</a><a href="#cycle">命令サイクル</a><a href="#pc">PCの計算</a><a href="#ctl">制御方式</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="struct">
+  <h2><span class="no">1.3-1</span>プロセッサの構成</h2>
+  <ol class="steps">
+    <li>プログラムは CPU の外部にある<b>主記憶</b>に格納されている。CPU は<b>アドレス</b>(番地)を指定して読み書きする。</li>
+    <li>次に実行すべき命令のアドレス → <b>プログラムカウンタ(PC)</b>に格納する。</li>
+    <li>実行すべき命令の本体 → <b>命令レジスタ(IR)</b>に格納する。</li>
+    <li><b>ALU</b>(演算装置)の入出力は<b>汎用レジスタ</b>を使う。</li>
+  </ol>
+  <div class="point"><b>覚え方</b>:PC は「次はどこ?」、IR は「今やる命令そのもの」。PC は住所、IR は手紙の中身です。</div>
+</section>
+
+<section class="task" id="flow">
+  <h2><span class="no">1.3-2</span>プロセッサの動作の流れ</h2>
+  <div class="flowv">
+    <span class="b">主記憶</span><span class="a">→</span><span class="b">IR に読み込み</span><span class="a">→</span><span class="b">デコード</span><span class="a">→</span><span class="b">制御信号</span><span class="a">→</span><span class="b">ALU の演算</span>
+  </div>
+  <p>CPU は主記憶から命令を取り出して IR に入れ、それを解読(デコード)して、各装置を動かす<b>制御信号</b>を作ります。その信号に従って ALU が演算します。</p>
+</section>
+
+<section class="task" id="cycle">
+  <h2><span class="no">1.3-3</span>命令サイクル</h2>
+  <p>1つの命令は、次の7つの段階で実行されます。これをくり返すのが<b>命令サイクル</b>です。上のシミュレータのステップと同じ順番です。</p>
+  <ol class="cycle">
+    <li><div><b>命令の取得(フェッチ = IF)</b><span class="d">PC のアドレスに従って、主記憶から命令を取得する(IR に入れる)</span></div></li>
+    <li><div><b>命令の解読(デコード = ID)</b><span class="d">命令をデコードして制御信号を生成する</span></div></li>
+    <li><div><b>アドレスの計算</b><span class="d">オペランドの読出しや結果の書込みに必要なアドレスを計算する</span></div></li>
+    <li><div><b>オペランドの読出し</b><span class="d">(3) のアドレスを使って、主記憶またはレジスタからオペランドを読み出す</span></div></li>
+    <li><div><b>命令の実行</b><span class="d">(4) のオペランドなどに対して演算する</span></div></li>
+    <li><div><b>結果の格納</b><span class="d">(5) の結果を主記憶(またはレジスタ)に格納する</span></div></li>
+    <li><div><b>プログラムカウンタ(PC)の更新</b><span class="d">次の命令のアドレスを計算する</span></div></li>
+  </ol>
+</section>
+
+<section class="task" id="pc">
+  <h2><span class="no">演習</span>PC の計算方法</h2>
+  <div class="problem">
+    <p>1命令32ビットの固定長命令で、主記憶のアドレスは<b>バイトアドレス方式</b>(1番地 = 1バイト)である。PC の計算方法を答えなさい。</p>
+  </div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>命令の長さを変えると PC はいくつずつ増える?</div>
+    <div class="row"><label for="ilen">1命令の長さ</label>
+      <select id="ilen"><option value="16">16ビット</option><option value="32" selected>32ビット</option><option value="64">64ビット</option></select>
+    </div>
+    <div class="stats" id="pcs"></div>
+  </div>
+  <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+    <p class="ansline"><b>答え:PC ← PC + 4</b></p>
+    <p>32ビット = 4バイト。バイトアドレス方式では1番地に1バイト入るので、1命令は4番地ぶんを使う。よって次の命令は4番地先にあり、PC に 4 を足す。シミュレータでも PC が 0x0000 → 0x0004 → 0x0008 と4ずつ増えていきます。</p>
+  </div></details>
+</section>
+
+<section class="task" id="ctl">
+  <h2><span class="no">1.3-4</span>制御方式</h2>
+  <p>デコードした命令から制御信号を作る方法には2種類あります。</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>マイクロプログラム制御方式</th><th>布線論理制御方式(ワイヤードロジック)</th></tr>
+    <tr><th>しくみ</th><td>制御メモリに格納した<b>マイクロプログラム</b>に基づいて制御信号を生成</td><td><b>フリップフロップ(F/F)</b>と<b>組み合わせ回路</b>からなる<b>順序回路</b>で構成</td></tr>
+    <tr><th>イメージ</th><td>制御の手順を「小さなプログラム」として書いておく</td><td>制御の手順を「配線(回路)」そのもので作る</td></tr>
+    <tr><th>補足</th><td>手順を書き換えやすく、複雑な命令(CISC)向き</td><td>高速で、単純な命令(RISC)向き</td></tr>
+  </table></div>
+  <div class="point"><b>組み合わせ回路と順序回路</b>:組み合わせ回路は入力だけで出力が決まり、<b>値を保持できない</b>。値を覚えておくフリップフロップと組み合わせることで、「今どの段階か」を覚えて順番に動く順序回路になる。</div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox"><div class="qno">問1 レジスタの役割</div>
+    <p>「次に実行すべき命令のアドレス」を格納するのは?</p>
+    <div class="opts"><button>命令レジスタ(IR)</button><button data-ok>プログラムカウンタ(PC)</button><button>汎用レジスタ</button><button>ALU</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問2 レジスタの役割</div>
+    <p>「実行すべき命令の本体」を格納するのは?</p>
+    <div class="opts"><button data-ok>命令レジスタ(IR)</button><button>プログラムカウンタ(PC)</button><button>制御メモリ</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3 命令サイクルの順番</div>
+    <p>命令の取得(フェッチ)の次に行う段階は?</p>
+    <div class="opts"><button>命令の実行</button><button>アドレスの計算</button><button data-ok>命令の解読(デコード)</button><button>PC の更新</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問4 命令サイクルの最後</div>
+    <p>命令サイクルの最後の段階で行うことは?</p>
+    <div class="opts"><button>結果の格納</button><button data-ok>PC を更新して次の命令のアドレスを求める</button><button>制御信号の生成</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="4"><div class="qno">問5 演習:PC の計算</div>
+    <p>1命令32ビットの固定長命令、バイトアドレス方式のとき、PC は1命令ごとにいくつ増える?</p>
+    <div class="check"><input class="ans" placeholder="例 2" aria-label="問5の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:4</b></p><p>32ビット ÷ 8 = 4バイト = 4番地ぶん。</p></div></details></div>
+
+  <div class="qbox" data-ans="104"><div class="qno">問6 PC の計算(応用)</div>
+    <p>問5と同じ条件で、いま PC が 100 番地を指している。次の命令は何番地?</p>
+    <div class="check"><input class="ans" placeholder="例 102" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:104 番地</b></p><p>100 + 4 = 104。100〜103 番地の4バイトに今の命令が入っている。</p></div></details></div>
+
+  <div class="qbox" data-ans="2"><div class="qno">問7 PC の計算(応用)</div>
+    <p>1命令16ビットの固定長命令、バイトアドレス方式なら、PC はいくつずつ増える?</p>
+    <div class="check"><input class="ans" placeholder="例 4" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:2</b></p><p>16 ÷ 8 = 2 バイト。可変長命令(CISC)では命令ごとに増える量が変わるので、デコードしないと次の番地が分からない。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問8 制御方式</div>
+    <p>フリップフロップと組み合わせ回路からなる順序回路で制御信号を作る方式は?</p>
+    <div class="opts"><button>マイクロプログラム制御方式</button><button data-ok>布線論理制御方式</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問9 組み合わせ回路</div>
+    <p>組み合わせ回路の特徴として正しいのは?</p>
+    <div class="opts"><button>値を保持できる</button><button data-ok>値を保持できない(入力だけで出力が決まる)</button><button>制御メモリを持つ</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問10 教科書 P20 [3]</div>
+    <p>命令の実行方法について、「プログラムカウンタ」「オペコード」「オペランド」の単語を使用して簡潔に説明しなさい。</p>
+    <details class="ans"><summary><span class="tag">解答例</span>解答例を見る<span class="tap"></span></summary><div class="body">
+      <p>CPU は、<b>プログラムカウンタ</b>が示すアドレスから主記憶の命令を読み出して命令レジスタに格納し、命令を解読する。<b>オペコード</b>から実行する操作の種類を判断し、<b>オペランド</b>で指定されたレジスタや主記憶から対象のデータを読み出して演算を行い、結果を格納する。最後にプログラムカウンタを次の命令のアドレスに更新し、これをくり返す。</p>
+      <p>シミュレータで1命令ぶん進めると、この文章の流れがそのまま見られます。</p>
+    </div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>シミュレータの命令コードは説明用に作った架空の命令セット(32ビット固定長:オペコード8ビット+レジスタ8ビット+アドレス16ビット)です。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+
+(function(){
+  var ST=['① フェッチ','② デコード','③ アドレス計算','④ オペランド読出','⑤ 実行','⑥ 結果格納','⑦ PC更新'];
+  var OPN={1:'LD',2:'ADD',4:'ST',255:'HALT'};
+  var PROG=[[1,1,0x100],[2,1,0x104],[4,1,0x108],[255,0,0]];
+  var s;
+  function hex(v,w){return '0x'+('00000000'+(v>>>0).toString(16).toUpperCase()).slice(-(w||4));}
+  function enc(i){return ((i[0]<<24)|(i[1]<<16)|i[2])>>>0;}
+  function reset(){
+    s={cur:null,pc:0,ir:null,r1:null,alu:'',ctl:'',stage:0,dec:null,ea:null,opd:null,res:null,halted:false,hot:[],memhot:null,
+       mem:{0x100:+document.getElementById('va').value||0,0x104:+document.getElementById('vb').value||0,0x108:0},
+       msg:'「1ステップ進む」を押すと、命令サイクルを1段階ずつ実行します。PC が 0x0000 を指しているところから始まります。'};
+    render();
+  }
+  function asmOf(i){var n=OPN[i[0]];if(n==='HALT')return 'HALT';var v={0x100:'a',0x104:'b',0x108:'c'}[i[2]];return n+' R1, '+v;}
+  function step(){
+    if(s.halted) return;
+    var k=s.stage; s.cur=k; s.hot=[]; s.memhot=null;
+    if(k===0){
+      var i=PROG[s.pc/4]; s.ir=i; s.memhot=s.pc; s.hot=['rPC','rIR'];
+      s.msg='<b>① 命令の取得(フェッチ)</b>:PC が指す '+hex(s.pc)+' 番地から命令 '+hex(enc(i),8)+' を読み出して、IR に入れます。';
+    } else if(k===1){
+      var i=s.ir; s.dec=i; s.hot=['rIR','rCTL'];
+      var n=OPN[i[0]]; s.ctl=n==='HALT'?'HALT(停止)':n+' / R1 / '+hex(i[2]);
+      if(n==='HALT'){s.halted=true;s.msg='<b>② 命令の解読(デコード)</b>:オペコード '+hex(i[0],2)+' は HALT(停止)。プログラムはここで終わりです。c 番地('+hex(0x108)+')に a + b = '+s.mem[0x108]+' が入りました。';render();return;}
+      var desc={LD:'主記憶から R1 に読み込む(ロード)',ADD:'主記憶の値を R1 に足す',ST:'R1 の値を主記憶に書き込む(ストア)'}[n];
+      s.msg='<b>② 命令の解読(デコード)</b>:オペコード '+hex(i[0],2)+' は <b>'+n+'</b>(= '+desc+')。オペランドは R1 と '+hex(i[2])+' 番地。制御装置が各装置への制御信号を作ります。';
+    } else if(k===2){
+      s.ea=s.dec[2]; s.hot=['rCTL'];
+      s.msg='<b>③ アドレスの計算</b>:オペランドの番地は '+hex(s.ea)+'(変数 '+{0x100:'a',0x104:'b',0x108:'c'}[s.ea]+')。今回は命令に書かれた番地をそのまま使います。';
+    } else if(k===3){
+      var n=OPN[s.dec[0]];
+      if(n==='ST'){s.opd=s.r1;s.hot=['rR1'];s.msg='<b>④ オペランドの読出し</b>:ST は書き込み命令なので、書き込む値を<b>レジスタ R1</b> から読み出します(値 '+s.r1+')。';}
+      else{s.opd=s.mem[s.ea];s.memhot=s.ea;s.msg='<b>④ オペランドの読出し</b>:主記憶の '+hex(s.ea)+' 番地から値 <b>'+s.opd+'</b> を読み出します。';}
+    } else if(k===4){
+      var n=OPN[s.dec[0]]; s.hot=['rALU'];
+      if(n==='ADD'){s.res=s.r1+s.opd;s.alu=s.r1+' + '+s.opd+' = '+s.res;s.msg='<b>⑤ 命令の実行</b>:ALU で R1 の値 '+s.r1+' と読み出した値 '+s.opd+' を足します → <b>'+s.res+'</b>。';}
+      else{s.res=s.opd;s.alu='(そのまま通す) '+s.res;s.msg='<b>⑤ 命令の実行</b>:'+n+' は計算しない命令なので、値 '+s.res+' をそのまま次に渡します。';}
+    } else if(k===5){
+      var n=OPN[s.dec[0]];
+      if(n==='ST'){s.mem[s.ea]=s.res;s.memhot=s.ea;s.msg='<b>⑥ 結果の格納</b>:値 '+s.res+' を<b>主記憶</b>の '+hex(s.ea)+' 番地(変数 c)に書き込みます。';}
+      else{s.r1=s.res;s.hot=['rR1'];s.msg='<b>⑥ 結果の格納</b>:結果 '+s.res+' を<b>レジスタ R1</b> に格納します。';}
+    } else if(k===6){
+      var old=s.pc; s.pc+=4; s.hot=['rPC']; s.alu='';
+      s.msg='<b>⑦ PC の更新</b>:1命令は32ビット = 4バイトなので、PC = '+hex(old)+' + 4 = <b>'+hex(s.pc)+'</b>。次の命令のフェッチに戻ります。';
+    }
+    s.stage=(k+1)%7; render();
+  }
+  function render(){
+    var sh=''; ST.forEach(function(t,i){sh+='<span class="'+(i===s.cur?'on':'')+'">'+t+'</span>';});
+    document.getElementById('stages').innerHTML=sh;
+    function set(id,v){var e=document.getElementById(id);e.querySelector('.v').textContent=v;e.classList.toggle('hot',s.hot.indexOf(id)>=0);}
+    set('rPC',hex(s.pc)); set('rIR',s.ir?hex(enc(s.ir),8)+'('+asmOf(s.ir)+')':'—'); set('rCTL',s.ctl||'—'); set('rALU',s.alu||'—'); set('rR1',s.r1===null?'—':String(s.r1));
+    var h='<tr><th>番地</th><th>内容</th><th>意味</th></tr>';
+    PROG.forEach(function(i,k){var a=k*4;h+='<tr class="mrow'+(a===s.memhot?' hot':'')+(a===s.pc&&!s.halted?' pc':'')+'"><td>'+hex(a)+'</td><td>'+hex(enc(i),8)+'</td><td>'+asmOf(i)+'</td></tr>';});
+    h+='<tr class="sep"><td colspan="3"></td></tr>';
+    [[0x100,'a'],[0x104,'b'],[0x108,'c']].forEach(function(d){h+='<tr class="mrow'+(d[0]===s.memhot?' hot':'')+'"><td>'+hex(d[0])+'</td><td>'+s.mem[d[0]]+'</td><td>変数 '+d[1]+'</td></tr>';});
+    document.getElementById('mem').innerHTML=h;
+    document.getElementById('msg').innerHTML=s.msg;
+    document.getElementById('bstep').disabled=s.halted; document.getElementById('binst').disabled=s.halted;
+  }
+  var timer=null, ab=document.getElementById('bauto');
+  function stop(){clearInterval(timer);timer=null;ab.textContent='自動再生';}
+  document.getElementById('bstep').addEventListener('click',function(){stop();step();});
+  document.getElementById('binst').addEventListener('click',function(){stop();do{step();}while(s.stage!==0&&!s.halted);});
+  ab.addEventListener('click',function(){
+    if(timer){stop();return;}
+    if(s.halted) reset();
+    ab.textContent='一時停止';
+    timer=setInterval(function(){step();if(s.halted)stop();},1100);
+  });
+  document.getElementById('breset').addEventListener('click',function(){stop();reset();});
+  ['va','vb'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){stop();reset();});});
+  reset();
+
+  /* ===== PC の計算 ===== */
+  var il=document.getElementById('ilen');
+  function drawPC(){
+    var b=+il.value, by=b/8, h='';
+    h+='<div class="stat"><div class="k">1命令のバイト数</div><div class="v">'+b+' ÷ 8 = '+by+'</div></div>';
+    h+='<div class="stat hl"><div class="k">PC の更新</div><div class="v">PC ← PC + '+by+'</div></div>';
+    h+='<div class="stat"><div class="k">命令の番地</div><div class="v">'+[0,1,2,3].map(function(k){return k*by;}).join(', ')+', …</div></div>';
+    document.getElementById('pcs').innerHTML=h;
+  }
+  il.addEventListener('change',drawPC); drawPC();
+})();
+</script>
+</body>
+</html>

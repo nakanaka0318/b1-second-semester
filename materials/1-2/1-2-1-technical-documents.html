@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>理系の文書力と技術文書の種類</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+
+.game .card{background:var(--bg);border-radius:12px;padding:14px 16px;font-size:1.02rem;min-height:4.5em}
+.game .gopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-top:10px}
+.game .gopts button{font:inherit;font-size:.9rem;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.game .gopts button:hover:not(:disabled){border-color:var(--accent)}
+.game .gopts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.game .gopts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.game .gfb{margin-top:8px;font-size:.92rem;min-height:1.6em}
+.levels{list-style:none;padding:0;margin:10px 0}
+.levels li{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;margin:4px 0;background:var(--bg);cursor:pointer;border:1.5px solid transparent}
+.levels li[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.levels .lv{flex:none;font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--accent);width:2.2em}
+.meter{height:10px;border-radius:99px;background:var(--dim);overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.gap{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0}
+.gap .eq{font-family:"JetBrains Mono",monospace;font-size:.95rem;margin:4px 0}
+.gap .hole{display:inline-block;border:1.5px dashed var(--mark);border-radius:6px;padding:0 10px;color:var(--mark);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>理系の文書力と技術文書の種類</h1>
+  <p>テクニカルリテラシー 第1回のノートのまとめです。理系の学生にとって「読む力・書く力」がなぜ大事なのか、大学・大学院でどんな技術文書を書くのかを整理します。</p>
+  <div class="demo game">
+    <label>この文書はどれ?(技術文書あてクイズ)</label>
+    <div class="card" id="gcard"></div>
+    <div class="gopts" id="gopts"></div>
+    <div class="gfb" id="gfb" aria-live="polite"></div>
+    <div class="row"><button class="btn" id="gnext" type="button">次の問題</button><span class="legend" id="gscore"></span></div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#why">なぜ文書力?</a><a href="#read">読み方</a><a href="#types">技術文書の種類</a><a href="#write">作文力</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="why">
+  <h2><span class="no">1</span>理系の学生に文書力が必要な理由</h2>
+  <div class="tbl"><table>
+    <tr><th>分野</th><th>必要な力</th></tr>
+    <tr><td><b>理学系</b></td><td>研究をまとめ、他の人が書いた理論的な内容・技術的な内容を<b>正しく理解する</b></td></tr>
+    <tr><td><b>工学系</b></td><td>技術者として、文書に書かれた手法やシステムを<b>自分で実現できる</b></td></tr>
+    <tr><td><b>情報系</b></td><td>読んだ内容を<b>プログラムとして実現できる</b></td></tr>
+  </table></div>
+  <div class="warn"><b>「なんとなくわかった」は ✕</b>:読み終わったら「これでシステムやプログラムを作れるか?」と<b>自問自答</b>する。作れないなら、まだ理解できていない。</div>
+
+  <div class="panel">
+    <div class="ptitle"><span class="badge">チェック</span>いまの理解はどのレベル?</div>
+    <p class="legend" style="margin:0">最近読んだ教科書の1節を思い浮かべて、当てはまるものをタップしてください。</p>
+    <ul class="levels" id="levels" role="radiogroup">
+      <li role="radio" aria-checked="false" tabindex="0" data-l="1"><span class="lv">Lv1</span>一通り読んだ(なんとなくわかった)</li>
+      <li role="radio" aria-checked="false" tabindex="0" data-l="2"><span class="lv">Lv2</span>用語の意味を自分の言葉で説明できる</li>
+      <li role="radio" aria-checked="false" tabindex="0" data-l="3"><span class="lv">Lv3</span>省略された式変形や理由を自分で補える</li>
+      <li role="radio" aria-checked="false" tabindex="0" data-l="4"><span class="lv">Lv4</span>その内容を使ってプログラム・実験を実際に作れる</li>
+    </ul>
+    <div class="meter"><i id="lvm" style="width:0"></i></div>
+    <div class="uinfo" id="lvmsg" style="margin-top:10px;background:var(--bg);border-radius:10px;padding:10px 14px" aria-live="polite">レベルを選ぶと、次にやることが表示されます。</div>
+  </div>
+</section>
+
+<section class="task" id="read">
+  <h2><span class="no">2</span>技術的な文章の読み方</h2>
+  <ol class="steps">
+    <li>理論的な説明や<b>技術用語</b>が出てきたら、意味を調べて正確に理解する。</li>
+    <li><b>数式</b>は、何を表しているのか、どういう物理的な意味を持つのかを理解しながら読む。</li>
+    <li>スペースの都合で、<b>簡単な式変形や説明は省略</b>されていることが多い。省略された部分は自分で補って確かめる(行間を読む)。</li>
+  </ol>
+  <h3>やってみよう:省略された「行間」を補う</h3>
+  <div class="gap">
+    <div class="eq">x² − 5x + 6 = 0 より  <span class="hole">?</span>  よって x = 2, 3</div>
+    <details><summary><span class="tag">行間</span>省略された式<span class="tap"></span></summary><div class="body"><p class="mono">(x − 2)(x − 3) = 0</p><p>因数分解が省略されています。教科書では「より」の一言で飛ばされることがよくあります。</p></div></details>
+  </div>
+  <div class="gap">
+    <div class="eq">(a + b)² − (a − b)² = 4ab  <span class="hole">?</span></div>
+    <details><summary><span class="tag">行間</span>省略された式<span class="tap"></span></summary><div class="body"><p class="mono">= (a² + 2ab + b²) − (a² − 2ab + b²) = 4ab</p><p>展開して a² と b² が消える部分が省略されています。</p></div></details>
+  </div>
+  <div class="gap">
+    <div class="eq">32ビット固定長命令なので  <span class="hole">?</span>  PC ← PC + 4</div>
+    <details><summary><span class="tag">行間</span>省略された説明<span class="tap"></span></summary><div class="body"><p>32ビット = 4バイト。バイトアドレス方式では1番地 = 1バイトなので、1命令は4番地ぶん。</p><p>コンピュータアーキテクチャの授業でも、この「行間」が問われました。</p></div></details>
+  </div>
+</section>
+
+<section class="task" id="types">
+  <h2><span class="no">3</span>大学・大学院で書く技術文書</h2>
+  <div class="tbl"><table>
+    <tr><th></th><th>文書</th><th>内容・特徴</th></tr>
+    <tr><td>1</td><td><b>実験レポート</b></td><td>実験の<b>結果と考察</b>をまとめる</td></tr>
+    <tr><td>2</td><td><b>卒業論文・修士論文</b></td><td>自分の研究についてまとめる。ページ数の制限はほぼない</td></tr>
+    <tr><td>3</td><td><b>学会の予稿</b></td><td>発表の事前資料。2段組みで2ページ程度</td></tr>
+    <tr><td>4</td><td><b>学会の技術研究報告</b></td><td>学会の研究会で発表するための資料</td></tr>
+    <tr><td>5</td><td><b>国際会議の論文</b></td><td>英語で書く。2段組みで4〜6ページ程度。査読がある</td></tr>
+    <tr><td>6</td><td><b>原著論文</b></td><td>オリジナルな研究の論文。査読がある</td></tr>
+  </table></div>
+  <div class="point"><b>査読</b>:専門家が内容を読んで、掲載してよいかを審査すること。下の番号ほど求められる水準が高くなります。</div>
+</section>
+
+<section class="task" id="write">
+  <h2><span class="no">4</span>理系に必要な作文力</h2>
+  <p>論理的・技術的な内容を、<b>正確に・誤解なく</b>読み手に伝える力です。目安は次のとおり。</p>
+  <div class="tbl"><table>
+    <tr><th>分野</th><th>読み手が…できるくらいに書く</th></tr>
+    <tr><td>実験系</td><td>読者がその<b>実験を追試(再現)できる</b>くらい</td></tr>
+    <tr><td>情報系</td><td>読者が<b>プログラムを書ける</b>くらい</td></tr>
+  </table></div>
+  <p>「読む力」の基準(作れるまで理解する)と、「書く力」の基準(相手が作れるように書く)は、表と裏の関係になっています。</p>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox"><div class="qno">問1 理解の基準</div>
+    <p>情報系の技術者が技術文書を「理解できた」と言える目安はどれ?</p>
+    <div class="opts"><button>最後まで読み終えた</button><button>なんとなく内容がわかった</button><button data-ok>内容をプログラムとして実現できる</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問2 読み方</div>
+    <p>教科書で式変形が1行で飛ばされていた。どうするのがよい?</p>
+    <div class="opts"><button>結果だけ覚えて先に進む</button><button data-ok>省略された変形を自分で補って確かめる</button><button>その部分は読まない</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3 技術文書の種類</div>
+    <p>「オリジナルな研究の論文で、査読がある」のはどれ?</p>
+    <div class="opts"><button>学会の予稿</button><button>実験レポート</button><button data-ok>原著論文</button><button>卒業論文</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問4 技術文書の種類</div>
+    <p>「英語で、2段組み4〜6ページ程度」なのはどれ?</p>
+    <div class="opts"><button data-ok>国際会議の論文</button><button>学会の予稿</button><button>修士論文</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問5 実験レポート</div>
+    <p>実験レポートで中心となる2つは?</p>
+    <div class="opts"><button>感想と反省</button><button data-ok>結果と考察</button><button>目次と参考文献</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問6 作文力の基準</div>
+    <p>実験系の文書は、読者が何をできるくらいに書くべき?</p>
+    <div class="opts"><button>感動できる</button><button data-ok>同じ実験を追試(再現)できる</button><button>結論だけ覚えられる</button></div>
+    <span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問7 記述</div>
+    <p>理系の学生にとって「文書を読む力」と「文書を書く力」がそれぞれなぜ必要か、自分の分野(情報系)に当てはめて2〜3文で説明しなさい。</p>
+    <details class="ans"><summary><span class="tag">解答例</span>解答例を見る<span class="tap"></span></summary><div class="body">
+      <p>情報系では、論文や仕様書に書かれた手法を読んで、それをプログラムとして実現する必要があるため、「なんとなく」ではなく作れるレベルまで正確に理解する読む力が必要である。また、自分の研究やシステムを他の人に伝えるときには、読者がそれを読んでプログラムを書けるくらい正確に、誤解なく書く力が必要である。</p>
+    </div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>ノートの内容をもとにまとめています。技術文書の種類の細かい条件(ページ数など)は、学会や大学によって異なります。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+
+(function(){
+  /* ===== 技術文書あてクイズ ===== */
+  var TYPES=['実験レポート','卒業論文・修士論文','学会の予稿','学会の技術研究報告','国際会議の論文','原著論文'];
+  var Q=[
+    ['物理実験で測定した値をグラフにし、結果と考察を書いて提出した。',0],
+    ['4年間の研究の集大成として、ページ数の制限なく自分の研究をまとめた。',1],
+    ['学会で発表する前に、2段組み2ページで発表内容の要点をまとめた事前資料を出した。',2],
+    ['学会の研究会で発表するための報告資料を作った。',3],
+    ['海外の会議で発表するため、英語で2段組み6ページの論文を書き、査読を受けた。',4],
+    ['オリジナルな研究成果を学術雑誌に投稿し、専門家の査読を経て掲載された。',5],
+    ['大学院の2年間の研究をまとめて提出した。',1],
+    ['化学実験の手順と結果をまとめ、なぜその結果になったかを考察した。',0]
+  ];
+  var order=[],idx=0,right=0,tried=0,answered=false;
+  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function next(){
+    if(!order.length||idx>=order.length){order=shuffle(Q.map(function(_,i){return i;}));idx=0;}
+    var q=Q[order[idx++]]; answered=false;
+    document.getElementById('gcard').textContent=q[0];
+    document.getElementById('gfb').textContent='';
+    var box=document.getElementById('gopts'); box.innerHTML='';
+    TYPES.forEach(function(t,i){
+      var b=document.createElement('button'); b.type='button'; b.textContent=t;
+      b.addEventListener('click',function(){
+        if(answered) return; answered=true; tried++;
+        var ok=i===q[1]; if(ok) right++;
+        b.classList.add(ok?'ok':'ng');
+        if(!ok) box.children[q[1]].classList.add('ok');
+        document.getElementById('gfb').innerHTML=ok?'<b style="color:var(--ok)">◯ 正解!</b>':'<b style="color:var(--warn)">✕</b> 正解は「'+TYPES[q[1]]+'」';
+        document.getElementById('gscore').textContent=tried+'問中 '+right+'問正解';
+      });
+      box.appendChild(b);
+    });
+  }
+  document.getElementById('gnext').addEventListener('click',next); next();
+
+  /* ===== 理解レベル ===== */
+  var MSG={
+    1:'まだ「なんとなく」の段階です。まず出てきた用語を1つずつ調べ、自分の言葉で書き出してみましょう。',
+    2:'用語は押さえられています。次は、教科書で省略されている式変形や「なぜそうなるか」を自分で補ってみましょう。',
+    3:'行間まで読めています。あと一歩。小さなプログラムや具体的な例を自分で作って、本当に動くか確かめましょう。',
+    4:'「作れる」レベル=理解できている状態です。今度はそれを他の人が作れるように書く(=書く力)に挑戦しましょう。'
+  };
+  var lis=document.querySelectorAll('#levels li');
+  function choose(l){lis.forEach(function(x){x.setAttribute('aria-checked',x.getAttribute('data-l')===l?'true':'false');});
+    document.getElementById('lvm').style.width=(l*25)+'%'; document.getElementById('lvmsg').textContent=MSG[l];}
+  lis.forEach(function(li){li.addEventListener('click',function(){choose(li.getAttribute('data-l'));});
+    li.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(li.getAttribute('data-l'));}});});
+})();
+</script>
+</body>
+</html>
