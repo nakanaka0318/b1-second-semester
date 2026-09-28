@@ -1,9 +1,12 @@
 # B1後期 教材ポータル
 
 Claude Code で作った各科目の教材へ遷移するためのホームページです。
+**公開ページ: https://nakanaka0318.github.io/b1-second-semester/**
+
 トップページ `index.html` から科目を選ぶと、授業回ごとの教材が表示されます。
 教材はページを移動せず、ポータルの中でそのまま開きます(上部バーで「一覧に戻る・前/次の教材・元のページ」)。
 
+<!-- AUTO-GENERATED:START (scripts/build-readme.js が自動更新します。直接編集しないでください) -->
 ## 科目一覧
 
 | 番号 | 科目 | ページ | 教材 |
@@ -26,10 +29,10 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 
 ### 1-1 確率統計
 
-| 番号 | 教材 | ファイル |
-|------|------|----------|
-| 1-1-1 | 独立な試行と条件付き確率 | [materials/1-1/1-1-1-conditional.html](materials/1-1/1-1-1-conditional.html) |
-| 1-1-2 | 確率の考え方と確率空間 | [materials/1-1/1-1-2-probability-space.html](materials/1-1/1-1-2-probability-space.html) |
+| 番号 | 教材 | ファイル | 元のページ |
+|------|------|----------|------------|
+| 1-1-1 | 確率の考え方と確率空間 | [materials/1-1/1-1-1-probability-space.html](materials/1-1/1-1-1-probability-space.html) | – |
+| 1-1-2 | 独立な試行と条件付き確率 | [materials/1-1/1-1-2-conditional.html](materials/1-1/1-1-2-conditional.html) | – |
 
 ### 5-2 プログラミング演習
 
@@ -37,11 +40,13 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 |------|------|----------|------------|
 | 5-2-1 | 演算子と型修飾子 | [materials/5-2/5-2-1-operators.html](materials/5-2/5-2-1-operators.html) | [claude.ai](https://claude.ai/artifact/WPM49GQkEvCe24SHigcLRs) |
 | 5-2-1 | 課題1 解説 ― 文字と文字コード | [materials/5-2/5-2-1-kadai1.html](materials/5-2/5-2-1-kadai1.html) | [claude.ai](https://claude.ai/artifact/RLJRE4NrTHtg6a7vnc27yN) |
+<!-- AUTO-GENERATED:END -->
 
 ## 教材の追加方法
 
 1. 教材の HTML を `materials/<科目番号>/` に置く(claude.ai の教材は他サイトに埋め込めない設定のため、HTML をコピーして置きます)
 2. `data/courses.js` の該当科目の `materials` に追加する
+3. push する(公開ページと、この README の一覧は自動で更新されます)
 
 ```js
 { id: "5-2-2-xxx", lesson: 2, title: "教材タイトル",
@@ -62,10 +67,14 @@ materials/<番号>/    教材の HTML 本体
 data/courses.js     科目と教材のデータ(ここだけ編集すればOK)
 assets/style.css    共通スタイル(ライト/ダーク両対応)
 assets/app.js       描画スクリプト
+scripts/build-readme.js  README の一覧を data/courses.js から生成
+.github/workflows/  README 自動更新の GitHub Actions
 ```
 
-## 公開(GitHub Pages)
+## 自動更新のしくみ
 
-リポジトリの Settings → Pages で、Branch をこのブランチ(または main)の `/ (root)` に設定すると、
-`https://nakanaka0318.github.io/b1-second-semester/` で公開されます。
+- **公開ページ**:GitHub Pages がこのブランチから配信しているので、push するたびに自動で再公開されます(数十秒〜数分)。
+- **README の一覧**:`data/courses.js` が変わると GitHub Actions(`.github/workflows/update-readme.yml`)が `scripts/build-readme.js` を実行し、README の科目一覧・教材一覧を作り直してコミットします。
+- 手元で README を更新したいときは `node scripts/build-readme.js` を実行してください。
+
 ビルド不要の静的サイトなので、`index.html` をブラウザで直接開いても動きます。
