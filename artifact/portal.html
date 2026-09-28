@@ -1,0 +1,343 @@
+<title>B1後期 教材ポータル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.7;
+}
+a{color:var(--accent)}
+.wrap{max-width:880px;margin:0 auto;padding:32px 16px 64px}
+.mono{font-family:"JetBrains Mono",Consolas,monospace}
+
+/* header */
+header h1{font-size:1.8rem;line-height:1.3;margin:0 0 6px}
+header p{margin:0;color:var(--sub)}
+.crumb{font-size:.9rem;margin-bottom:14px}
+.crumb a{text-decoration:none}
+.crumb a:hover{text-decoration:underline}
+.code-badge{
+  display:inline-block;font-family:"JetBrains Mono",monospace;font-size:1rem;font-weight:700;
+  color:var(--accent);background:var(--accent-soft);border-radius:8px;padding:2px 10px;margin-right:8px;vertical-align:middle
+}
+
+/* search */
+.search{margin:24px 0 8px}
+.search input{
+  width:100%;font:inherit;padding:11px 14px;border:2px solid var(--line);border-radius:12px;
+  background:var(--paper);color:var(--ink)
+}
+.search input:focus{outline:none;border-color:var(--accent)}
+
+/* course grid */
+h2.sec{font-size:1.1rem;margin:36px 0 12px;padding-bottom:6px;border-bottom:3px solid var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.card{
+  display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;
+  transition:border-color .15s, transform .15s
+}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.card .cid{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--accent);font-size:.95rem}
+.card .cname{font-weight:700;font-size:1.1rem;line-height:1.4}
+.card .count{margin-top:auto;font-size:.82rem;color:var(--sub)}
+.card.has .count{color:var(--mark)}
+.card.has .count b{color:var(--ink)}
+.empty-msg{color:var(--sub);padding:16px 0}
+
+/* recent / material list */
+.mat{
+  display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:8px 0
+}
+.mat:hover{border-color:var(--accent)}
+.mat:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mat .mid{
+  flex:none;font-family:"JetBrains Mono",monospace;font-size:.8rem;font-weight:700;
+  background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:2px 8px;margin-top:2px
+}
+.mat .mt{font-weight:700}
+.mat .mn{font-size:.85rem;color:var(--sub)}
+.mat .arrow{margin-left:auto;flex:none;color:var(--sub)}
+
+/* lessons */
+.lessons{list-style:none;padding:0;margin:0}
+.lesson{border-bottom:1px solid var(--line);padding:14px 0}
+.lesson h3{margin:0;font-size:1rem;display:flex;gap:10px;align-items:baseline}
+.lesson h3 .ln{font-family:"JetBrains Mono",monospace;color:var(--sub);font-size:.85rem;font-weight:400}
+.lesson.none h3{color:var(--sub);font-weight:400}
+.lesson.none h3::after{content:"準備中";font-size:.75rem;border:1px solid var(--line);border-radius:99px;padding:0 8px}
+.toggle{margin-top:14px;font:inherit;font-size:.9rem;background:none;border:1px solid var(--line);color:var(--sub);border-radius:99px;padding:4px 14px;cursor:pointer}
+.toggle:hover{border-color:var(--accent);color:var(--accent)}
+
+footer{margin-top:56px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+/* viewer(ポータル内で教材を表示) */
+[hidden]{display:none !important}
+body.viewing{overflow:hidden}
+.viewer{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+.vbar{
+  flex:none;display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:var(--paper);border-bottom:1px solid var(--line)
+}
+.vback{flex:none;text-decoration:none;font-weight:700;font-size:.9rem;padding:4px 10px;border-radius:8px}
+.vback:hover{background:var(--accent-soft)}
+.vhead{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+.vhead .mid{
+  flex:none;font-family:"JetBrains Mono",monospace;font-size:.78rem;font-weight:700;
+  background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 7px
+}
+.vtitle{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vtools{flex:none;display:flex;align-items:center;gap:4px}
+.vnav,.vorig{
+  font-size:.85rem;text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--ink)
+}
+a.vnav:hover,.vorig:hover{border-color:var(--accent);color:var(--accent)}
+.vnav.off{color:var(--sub);opacity:.45}
+.vframe{flex:1;width:100%;border:0;background:var(--bg)}
+@media (max-width:560px){
+  .vhead .mid{display:none}
+  .vnav{padding:4px 8px}
+}
+
+/* アーティファクト用の追加 */
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
+body{background:var(--bg)}
+.vbar{padding-top:calc(8px + env(safe-area-inset-top, 0px))}
+.vnav.off{pointer-events:none}
+
+</style>
+
+<div class="wrap" id="home">
+<header>
+  <h1>B1後期 教材ポータル</h1>
+  <p>Claude Code で作った各科目の教材です。科目を選ぶと、回ごとの教材がこのページの中で開きます。</p>
+</header>
+<div class="search"><input id="q" type="search" placeholder="科目名・教材名で絞り込み(例: プログラミング、OSI)" aria-label="科目を検索"></div>
+<h2 class="sec">科目一覧</h2>
+<div class="grid" id="grid"></div>
+<h2 class="sec">最近追加した教材</h2>
+<div id="recent"></div>
+</div>
+
+<div class="wrap" id="course" hidden>
+<nav class="crumb"><a href="#top">← 教材ポータル</a></nav>
+<header>
+  <h1 id="cname"></h1>
+  <p id="csub"></p>
+</header>
+<h2 class="sec">授業ごとの教材</h2>
+<ul class="lessons" id="lessons"></ul>
+<button class="toggle" id="toggle" type="button"></button>
+</div>
+
+<section class="viewer" id="viewer" hidden>
+  <div class="vbar">
+    <a class="vback" id="vback" href="#top" aria-label="教材一覧に戻る">← 一覧</a>
+    <div class="vhead"><span class="mid" id="vid"></span><span class="vtitle" id="vtitle"></span></div>
+    <div class="vtools">
+      <a class="vnav" id="vprev">‹ 前</a><a class="vnav" id="vnext">次 ›</a>
+      <a class="vorig" id="vorig" href="#top" target="_blank" rel="noopener" title="元のページを新しいタブで開く">↗</a>
+    </div>
+  </div>
+  <iframe id="vframe" class="vframe" title="教材"></iframe>
+</section>
+
+<script>
+/*
+ * 教材データ
+ * 教材を追加するときは、教材の HTML を materials/<科目番号>/ に置き、該当する科目の materials に
+ *   { id: "5-2-2-xxx", lesson: 回, title: "タイトル", file: "materials/5-2/5-2-2-xxx.html",
+ *     url: "https://claude.ai/artifact/...", note: "ひとこと説明" }
+ * を足すだけでOKです。トップページと科目ページの両方に自動で反映されます。
+ * file があるとポータル内で表示し、url は「元のページ」へのリンクになります。
+ * file を省略すると url を新しいタブで開きます。
+ */
+window.LESSON_COUNT = 15;
+
+window.COURSES = [
+  { id: "1-1", name: "確率統計",               materials: [
+    { id: "1-1-1-probability-space", lesson: 1, title: "確率の考え方と確率空間",
+      file: "materials/1-1/1-1-1-probability-space.html",
+      note: "数学的・統計的・主観的確率、σ集合体、確率測度。σ集合体チェッカーと大数の法則のグラフ付き" },
+    { id: "1-1-2-conditional", lesson: 2, title: "独立な試行と条件付き確率",
+      file: "materials/1-1/1-1-2-conditional.html",
+      note: "独立な試行・反復試行の定理・条件付き確率・乗法定理。サイコロ表とシミュレーション、答え合わせ付き練習問題10問" }
+  ] },
+  { id: "1-2", name: "テクニカルリテラシー",   materials: [
+    { id: "1-2-1-technical-documents", lesson: 1, title: "理系の文書力と技術文書の種類",
+      file: "materials/1-2/1-2-1-technical-documents.html",
+      note: "文書力が必要な理由、技術文書の読み方(行間を読む)、6種類の技術文書。文書あてクイズと理解度チェック付き" },
+    { id: "1-2-2-writing-rules", lesson: 2, title: "理系の文書で必要なこと・不要なこと",
+      file: "materials/1-2/1-2-2-writing-rules.html",
+      note: "事実と意見の区別、不要な表現、首尾一貫しない文の直し方。自分の文を診断できる文章チェッカー付き" }
+  ] },
+  { id: "1-3", name: "コンピュータアーキテクチャ", materials: [
+    { id: "1-3-1-organization-isa", lesson: 1, title: "コンピュータの構成と命令セット",
+      file: "materials/1-3/1-3-1-organization-isa.html",
+      note: "ノイマン型、5大構成要素、語長、機械語とアセンブリ言語、命令セット、RISC/CISC。C言語→機械語の変換デモ付き" },
+    { id: "1-3-2-instruction-cycle", lesson: 2, title: "プロセッサの基本動作と命令サイクル",
+      file: "materials/1-3/1-3-2-instruction-cycle.html",
+      note: "PC・IR・ALU、命令サイクル7段階、PCの計算(+4)、制御方式。1ステップずつ動かせるCPUシミュレータ付き" }
+  ] },
+  { id: "1-4", name: "情報通信ネットワーク",   materials: [
+    { id: "1-4-1-network-osi", lesson: 1, title: "ネットワーク基礎とOSI参照モデル",
+      file: "materials/1-4/1-4-1-network-osi.html",
+      note: "#1 ネットワークの規模・歴史・プロトコル・OSI参照モデル。スライドの穴埋め、ヘッダが付く様子を追えるカプセル化の図付き" },
+    { id: "1-4-2-tcpip", lesson: 2, title: "TCP/IP基礎",
+      file: "materials/1-4/1-4-2-tcpip.html",
+      note: "#2 TCP/IPの歴史・RFC・階層モデル・アドレス・パケット構造。回線交換とパケット交換のシミュレーション付き" },
+    { id: "1-4-3-physical-layer", lesson: 3, title: "物理層と伝送媒体",
+      file: "materials/1-4/1-4-3-physical-layer.html",
+      note: "#3 ビットの表現・マンチェスター符号・ケーブル・電波・変調・ネットワーク機器。波形を描くツール付き" }
+  ] },
+  { id: "2-1", name: "社会科学基礎",           materials: [] },
+  { id: "2-2", name: "微分積分2",              materials: [] },
+  { id: "3-2", name: "中国語",                 materials: [] },
+  { id: "3-3", name: "物理学2",                materials: [] },
+  { id: "4-2", name: "線形代数2",              materials: [] },
+  { id: "4-3", name: "物理学演習",             materials: [] },
+  { id: "5-1", name: "創造的思考法",           materials: [] },
+  { id: "5-2", name: "プログラミング演習",     materials: [
+    { id: "5-2-1-operators", lesson: 1, title: "演算子と型修飾子",
+      file: "materials/5-2/5-2-1-operators.html",
+      url: "https://claude.ai/artifact/WPM49GQkEvCe24SHigcLRs",
+      note: "代入・論理・ビット演算子、優先順位、signed/unsigned、const と練習問題16問" },
+    { id: "5-2-1-kadai1", lesson: 1, title: "課題1 解説 ― 文字と文字コード",
+      file: "materials/5-2/5-2-1-kadai1.html",
+      url: "https://claude.ai/artifact/RLJRE4NrTHtg6a7vnc27yN",
+      note: "文字列と ASCII コード、大文字変換、^ で大文字の位置を示す課題の解説" }
+  ] },
+  { id: "5-3", name: "プラティカルICT",        materials: [] }
+];
+
+</script>
+<script>
+/* アーティファクト版ポータル(1ページで トップ → 科目 → 教材 を # で切り替える) */
+(function () {
+  var courses = window.COURSES || [];
+  var MAXL = window.LESSON_COUNT || 15;
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function findMat(id) {
+    for (var i = 0; i < courses.length; i++)
+      for (var j = 0; j < courses[i].materials.length; j++)
+        if (courses[i].materials[j].id === id) return [courses[i], courses[i].materials[j]];
+    return null;
+  }
+  function matLink(c, m, showCourse) {
+    var inPortal = !!(m.file && m.id);
+    return '<a class="mat" href="' + (inPortal ? "#" + esc(m.id) : esc(m.url)) + '"' + (inPortal ? "" : ' target="_blank" rel="noopener"') + '>' +
+      '<span class="mid">' + esc(c.id + "-" + m.lesson) + '</span>' +
+      '<span><div class="mt">' + esc(m.title) + '</div><div class="mn">' +
+      (showCourse ? esc(c.name) + " 第" + m.lesson + "回" + (m.note ? " ・ " : "") : "") + esc(m.note || "") + '</div></span>' +
+      '<span class="arrow" aria-hidden="true">' + (inPortal ? "›" : "↗") + '</span></a>';
+  }
+
+  /* ---------- トップ ---------- */
+  var q = document.getElementById("q");
+  function drawHome() {
+    var f = (q.value || "").trim().toLowerCase(), h = "";
+    courses.forEach(function (c) {
+      var hay = (c.id + " " + c.name + " " + c.materials.map(function (m) { return m.title; }).join(" ")).toLowerCase();
+      if (f && hay.indexOf(f) === -1) return;
+      var n = c.materials.length;
+      h += '<a class="card' + (n ? " has" : "") + '" href="#c' + esc(c.id) + '"><span class="cid">' + esc(c.id) + '</span>' +
+        '<span class="cname">' + esc(c.name) + '</span><span class="count">' + (n ? "教材 <b>" + n + "</b> 件" : "教材はまだありません") + "</span></a>";
+    });
+    document.getElementById("grid").innerHTML = h || '<p class="empty-msg">該当する科目がありません。</p>';
+  }
+  q.addEventListener("input", drawHome);
+  var all = [];
+  courses.forEach(function (c) { c.materials.forEach(function (m) { all.push(matLink(c, m, true)); }); });
+  document.getElementById("recent").innerHTML = all.length ? all.reverse().slice(0, 8).join("") : '<p class="empty-msg">まだ教材がありません。</p>';
+  drawHome();
+
+  /* ---------- 科目 ---------- */
+  var hideEmpty = true;
+  function drawCourse(c) {
+    document.getElementById("cname").innerHTML = '<span class="code-badge">' + esc(c.id) + "</span>" + esc(c.name);
+    var n = c.materials.length, max = MAXL, h = "";
+    document.getElementById("csub").textContent = n ? "教材 " + n + " 件" : "教材はまだありません。追加されるとここに表示されます。";
+    c.materials.forEach(function (m) { if (m.lesson > max) max = m.lesson; });
+    for (var i = 1; i <= max; i++) {
+      var ms = c.materials.filter(function (m) { return m.lesson === i; });
+      if (!ms.length && hideEmpty && n) continue;
+      h += '<li class="lesson' + (ms.length ? "" : " none") + '"><h3><span class="ln">' + esc(c.id + "-" + i) + "</span>第" + i + "回</h3>" +
+        ms.map(function (m) { return matLink(c, m, false); }).join("") + "</li>";
+    }
+    document.getElementById("lessons").innerHTML = h;
+    var t = document.getElementById("toggle");
+    t.hidden = !n;
+    t.textContent = hideEmpty ? "準備中の回も表示" : "教材がある回だけ表示";
+    t.onclick = function () { hideEmpty = !hideEmpty; drawCourse(c); };
+  }
+
+  /* ---------- 教材ビューア ---------- */
+  var frame = document.getElementById("vframe"), loaded = null;
+  function openMat(c, m) {
+    var list = c.materials.filter(function (x) { return x.file; }), k = list.indexOf(m);
+    document.getElementById("vid").textContent = c.id + "-" + m.lesson;
+    document.getElementById("vtitle").textContent = m.title;
+    document.getElementById("vback").href = "#c" + c.id;
+    var o = document.getElementById("vorig"); o.hidden = !m.url; if (m.url) o.href = m.url;
+    function nav(id, x, txt) {
+      var e = document.getElementById(id);
+      if (x) { e.href = "#" + x.id; e.title = x.title; e.classList.remove("off"); e.removeAttribute("aria-disabled"); }
+      else { e.removeAttribute("href"); e.classList.add("off"); e.setAttribute("aria-disabled", "true"); }
+      e.textContent = txt;
+    }
+    nav("vprev", list[k - 1], "‹ 前"); nav("vnext", list[k + 1], "次 ›");
+    if (loaded !== m.file) {
+      loaded = m.file;
+      var fresh = frame.cloneNode(false); fresh.removeAttribute("src"); fresh.removeAttribute("srcdoc");
+      fresh.title = m.title; frame.parentNode.replaceChild(fresh, frame); frame = fresh;
+      /* 同じアーティファクト内のファイルを読み込んで表示(読めない環境では直接開く) */
+      fetch(m.file).then(function (r) { if (!r.ok) throw 0; return r.text(); })
+        .then(function (t) { if (loaded === m.file) frame.srcdoc = t; })
+        .catch(function () { if (loaded === m.file) frame.src = m.file; });
+    }
+  }
+
+  /* ---------- ルーティング ---------- */
+  var views = { home: document.getElementById("home"), course: document.getElementById("course"), viewer: document.getElementById("viewer") };
+  function show(v) {
+    Object.keys(views).forEach(function (k) { views[k].hidden = k !== v; });
+    document.body.classList.toggle("viewing", v === "viewer");
+  }
+  function route() {
+    var h = decodeURIComponent(location.hash.slice(1));
+    var c = h.charAt(0) === "c" ? courses.filter(function (x) { return "c" + x.id === h; })[0] : null;
+    if (c) { drawCourse(c); show("course"); window.scrollTo(0, 0); return; }
+    var fm = h ? findMat(h) : null;
+    if (fm && fm[1].file) { openMat(fm[0], fm[1]); show("viewer"); return; }
+    show("home");
+  }
+  window.addEventListener("hashchange", route);
+  route();
+})();
+
+</script>

@@ -1,7 +1,8 @@
 # B1後期 教材ポータル
 
 Claude Code で作った各科目の教材へ遷移するためのホームページです。
-**公開ページ: https://nakanaka0318.github.io/b1-second-semester/**
+**メインの公開先(claude.ai アーティファクト・非公開): https://claude.ai/artifact/RmTnBwpxoUcbqwfh3KBCRd**
+(GitHub Pages 版: https://nakanaka0318.github.io/b1-second-semester/)
 
 トップページ `index.html` から科目を選ぶと、授業回ごとの教材が表示されます。
 教材はページを移動せず、ポータルの中でそのまま開きます(上部バーで「一覧に戻る・前/次の教材・元のページ」)。
@@ -92,6 +93,11 @@ assets/app.js       描画スクリプト
 scripts/build-readme.js  README の一覧を data/courses.js から生成
 .github/workflows/  README 自動更新の GitHub Actions
 ```
+
+## アーティファクト版の更新手順(Claude 向け)
+
+1. `node scripts/build-artifact.js` で `artifact/portal.html` を作り直す(付属ファイルの一覧も表示される)
+2. Artifact ツールで `artifact/portal.html` を公開する。**`url` に上のアーティファクトの URL を指定**し、`files` に表示された materials の対応表を渡す(URL を指定しないと別のアーティファクトになる)
 
 ## 自動更新のしくみ
 
