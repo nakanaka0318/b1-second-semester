@@ -57,7 +57,12 @@ window.COURSES = [
       file: "materials/1-4/1-4-3-physical-layer.html",
       note: "#3 ビットの表現・マンチェスター符号・ケーブル・電波・変調・ネットワーク機器。波形を描くツール付き" }
   ] },
-  { id: "2-1", name: "社会科学基礎",           materials: [] },
+  { id: "2-1", name: "社会科学基礎",           materials: [
+    { id: "2-1-1-cold-war", refs: [{ label: "スライド 第1・2回", dir: "refs/2-1-1", pages: 7 }],
+      lesson: 1, title: "冷戦の時代",
+      file: "materials/2-1/2-1-1-cold-war.html",
+      note: "共産主義と資本主義、冷戦の始まり、安全保障のジレンマ、キューバ危機、ベトナム戦争、イメージ戦争。年表・ジレンマ体験ゲーム付き" }
+  ] },
   { id: "2-2", name: "微分積分2",              materials: [] },
   { id: "3-2", name: "中国語",                 materials: [] },
   { id: "3-3", name: "物理学2",                materials: [] },

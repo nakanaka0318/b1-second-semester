@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>冷戦の時代</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+:root{--east:#C0392B;--east-soft:#FBE9E7;--west:#1F6FB2;--west-soft:#E3EEF8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--east:#F0817A;--east-soft:#3A1E20;--west:#6DB3F2;--west-soft:#1B2D46}}
+:root[data-theme="dark"]{--east:#F0817A;--east-soft:#3A1E20;--west:#6DB3F2;--west-soft:#1B2D46}
+.sw{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.sw button{font:inherit;font-size:.85rem;font-weight:700;padding:5px 12px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tline{position:relative;margin:10px 0 0;padding-left:18px;border-left:3px solid var(--line);max-height:420px;overflow-y:auto}
+.ev{position:relative;margin:0 0 8px;padding:6px 10px;border-radius:10px;background:var(--bg);cursor:pointer;border:1.5px solid transparent}
+.ev::before{content:"";position:absolute;left:-26px;top:12px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:3px solid var(--sub)}
+.ev.e::before{border-color:var(--east)}.ev.w::before{border-color:var(--west)}
+.ev .y{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--accent);margin-right:8px}
+.ev .t{font-weight:700}
+.ev .tag{font-size:.7rem;border-radius:99px;padding:0 7px;margin-left:6px;border:1px solid var(--line);color:var(--sub);font-weight:400}
+.ev .d{display:none;font-size:.9rem;color:var(--sub);margin-top:4px}
+.ev[aria-expanded="true"]{border-color:var(--accent);background:var(--paper)}
+.ev[aria-expanded="true"] .d{display:block}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.cmp .h{font-weight:700;text-align:center;padding:6px;border-radius:8px}
+.cmp .h.e{background:var(--east-soft);color:var(--east)}.cmp .h.w{background:var(--west-soft);color:var(--west)}
+.sort .card2{background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-weight:700;text-align:center;font-size:1.05rem}
+.sort .bb{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.sort .bb button{font:inherit;font-weight:700;padding:10px;border-radius:10px;border:2px solid;cursor:pointer;background:var(--paper)}
+.sort .bb .e{border-color:var(--east);color:var(--east)}.sort .bb .w{border-color:var(--west);color:var(--west)}
+.sort .bins{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.sort .bin{min-height:3em;border-radius:10px;padding:6px 8px;font-size:.8rem;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start}
+.sort .bin.e{background:var(--east-soft)}.sort .bin.w{background:var(--west-soft)}
+.sort .bin span{background:var(--paper);border-radius:6px;padding:1px 6px}
+.meter{height:12px;border-radius:99px;background:var(--dim);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:99px;transition:width .35s}
+.dl{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:.85rem;margin-top:8px}
+.log{font-size:.88rem;background:var(--bg);border-radius:10px;padding:8px 12px;margin-top:8px;max-height:9em;overflow-y:auto}
+.log div{padding:2px 0;border-bottom:1px dashed var(--line)}
+.bars .lbl{font-family:inherit;font-size:12px;fill:var(--ink)}
+.bars .val{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.vn svg{width:100%;max-width:520px;display:block;margin:0 auto}
+.vn text{font-size:13px;fill:var(--ink);font-weight:700}
+.vn .sm{font-size:11px;font-weight:400;fill:var(--sub)}
+.think{background:var(--paper);border:2px dashed var(--accent);border-radius:12px;padding:12px 16px;margin:14px 0}
+.think b{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>冷戦の時代</h1>
+  <p>社会科学基礎2 第1・2回「戦争と平和を考える」のまとめです。二度の世界大戦のあとも戦争がなくならなかったのはなぜか。米ソの対立=冷戦の中で起きた出来事を追いながら考えます。</p>
+  <div class="demo">
+    <label>冷戦年表:出来事をタップすると説明が出ます</label>
+    <div class="sw" id="tf"><button data-f="all">すべて</button><button data-f="eu">ヨーロッパ</button><button data-f="asia">アジア</button><button data-f="am">アメリカ大陸</button><button data-f="us">米国内・宣伝</button></div>
+    <div class="tline" id="tline"></div>
+    <div class="legend"><span style="color:var(--west)">●</span> 西側(米国など)の動き <span style="color:var(--east);margin-left:10px">●</span> 東側(ソ連など)の動き <span style="margin-left:10px">○</span> その他</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#bg">前回のまとめ</a><a href="#ism">共産主義と資本主義</a><a href="#cw">冷戦とは</a><a href="#dilemma">安全保障のジレンマ</a><a href="#eu">欧州と日本</a><a href="#cuba">キューバ危機</a><a href="#vn">ベトナム戦争</a><a href="#image">イメージ戦争</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="bg">
+  <h2><span class="no">1</span>前回(社会科学基礎1)のまとめ</h2>
+  <div class="tbl"><table>
+    <tr><th></th><th>戦争の目的</th></tr>
+    <tr><td><b>第一次世界大戦</b></td><td>国力の拡大。勝てば領土が増えた。軍事同盟によって多くの国が参戦した</td></tr>
+    <tr><td><b>第二次世界大戦</b></td><td>枢軸国:経済的困窮から抜け出すための国力拡大/連合国:枢軸国の国力拡大への懸念</td></tr>
+  </table></div>
+  <h3>第二次世界大戦後の変化</h3>
+  <ul>
+    <li><b>無条件降伏</b>によって、戦争の「コスパ」が下がった(負ければすべてを失う)。</li>
+    <li>国際軍事裁判や国連での侵略の定義によって、<b>侵略戦争が違法化</b>された。</li>
+    <li>その結果、国力・領土拡大のための戦争はほぼ消えつつある。</li>
+  </ul>
+  <div class="think"><b>この回の問い</b>:それでも、なぜ戦後も戦争はなくならなかったのか? → 第二次世界大戦後の戦争の特徴を見ていきます。</div>
+</section>
+
+<section class="task" id="ism">
+  <h2><span class="no">2</span>共産主義と資本主義</h2>
+  <ul>
+    <li><b>共産主義</b>:労働者が資本家に対して起こす革命から生まれた経済体制。目的は<b>貧富の差の解消</b>。マルクスとエンゲルスが体系化した。</li>
+    <li>発展の段階:資本主義 → <b>社会主義</b>(移行期)→ <b>共産主義</b>。共産主義では利益だけでなく消費にも差をつけない(人民服)。争いがなくなるので政府も不要になる、とされた。</li>
+    <li>完全な共産主義国家を作った国はない。</li>
+  </ul>
+  <div class="cmp">
+    <div class="h e">(国家)共産主義</div><div class="h w">資本主義</div>
+    <div>主役は<b>労働者</b></div><div>主役は<b>資本家</b></div>
+    <div><b>統制経済</b>(国が計画)</div><div><b>自由経済</b>(市場で決まる)</div>
+    <div>私有財産の<b>否定</b></div><div>私有財産を<b>認める</b></div>
+    <div><b>一党独裁</b></div><div><b>政党結社の自由</b></div>
+  </div>
+  <h3>なぜ対立するのか</h3>
+  <ol>
+    <li><b>経済体制の違い</b>:共産主義の敵は資本家。共産主義は世界に広げる必要がある(国際共産主義運動)。一方、資本主義にとって共産主義は自由貿易体制を否定する敵。</li>
+    <li><b>理念の違い</b>:共産主義は究極の「大きな政府」。革命で成立したため自由な選挙を否定し、国家の関与が強まって独裁・粛清につながる。アメリカ民主主義の最も大事な理念は「<b>自由</b>」と「<b>真実</b>」。</li>
+  </ol>
+  <div class="panel sort">
+    <div class="ptitle"><span class="badge">試す</span>共産主義?資本主義? 仕分けてみよう</div>
+    <div class="card2" id="scard"></div>
+    <div class="bb"><button class="e" data-s="e" type="button">共産主義</button><button class="w" data-s="w" type="button">資本主義</button></div>
+    <div class="fb" id="sfb" aria-live="polite" style="margin-top:6px"></div>
+    <div class="bins"><div class="bin e" id="bine"></div><div class="bin w" id="binw"></div></div>
+  </div>
+</section>
+
+<section class="task" id="cw">
+  <h2><span class="no">3</span>冷戦(Cold War)とは</h2>
+  <ul>
+    <li>米・ソ両超大国を中心とする東西の軍事ブロックの間の、<b>戦争には至らない</b>軍事的・政治的緊張状態。</li>
+    <li>第二次世界大戦後、約40年続いた。イデオロギーと経済体制の対立でもある。</li>
+    <li>見方を変えると、米ソ両国による世界の共同統治であり、一種の<b>覇権システム</b>としても機能した。</li>
+  </ul>
+  <h3>冷戦のきっかけ:互いの不信感</h3>
+  <div class="tbl"><table>
+    <tr><th>米国の不信</th><th>ソ連の不信</th></tr>
+    <tr><td>ヤルタ協定を無視してポーランドを共産化した/ソ連の膨張主義と、東アジアでの共産主義国家の建国への危機感</td><td>米国の軍拡への不安(原爆投下)</td></tr>
+  </table></div>
+  <p>その結果、両国は<b>安全保障のジレンマ</b>に陥った。</p>
+  <h3>ただし、米国の政策として進められた面も強い</h3>
+  <ul>
+    <li><b>軍産複合体</b>の支配:第二次世界大戦で発達した軍需産業のために、戦後も需要が必要だった。</li>
+    <li>イタリア・フランス・ギリシャなどで共産主義勢力が台頭 → 左翼政権を作らせずに欧州を安定させることが米国の利益になった。</li>
+  </ul>
+</section>
+
+<section class="task" id="dilemma">
+  <h2><span class="no">4</span>安全保障のジレンマ</h2>
+  <p>自国の安全を確保しようとして力を追求すると、それが他国の安全を脅かし、他国も力を追求せざるをえなくなる。その結果、安全保障はいつまでたっても確立されない。冷戦下の「力の追求」とは、<b>共産主義の拡張</b>と<b>軍備増強</b>だった。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>あなたは A 国のリーダー。隣の B 国は「相手が軍拡したら自分も軍拡する」国です</div>
+    <div class="dl">
+      <span>A 国(あなた)の軍備</span><div class="meter"><i id="ma" style="background:var(--west)"></i></div><b class="mono" id="va"></b>
+      <span>B 国の軍備</span><div class="meter"><i id="mb" style="background:var(--east)"></i></div><b class="mono" id="vb"></b>
+      <span>A 国の安心度</span><div class="meter"><i id="ms" style="background:var(--ok)"></i></div><b class="mono" id="vs"></b>
+      <span>緊張度・軍事費</span><div class="meter"><i id="mt" style="background:var(--mark)"></i></div><b class="mono" id="vt"></b>
+    </div>
+    <div class="row"><button class="btn" id="dup" type="button">軍備を増やす</button><button class="btn sub" id="dkeep" type="button">据え置く</button><button class="btn sub" id="ddown" type="button">軍備を減らす</button><button class="btn sub" id="dreset" type="button">最初から</button></div>
+    <div class="log" id="dlog" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="eu">
+  <h2><span class="no">5</span>冷戦の表面化と固定化(ヨーロッパ・日本)</h2>
+  <ul>
+    <li><b>1946年3月 チャーチル「鉄のカーテン」演説</b>:「バルト海のシュテッティンからアドリア海のトリエステにかけて、大陸を遮断する鉄のカーテンが降ろされた」。この時点で共産化されていたのはポーランドのみ(チェコスロバキアは囲い込まれつつあった)。</li>
+    <li><b>封じ込め政策</b>:共産主義を拡大させないための、冷戦期の米国の基本政策。</li>
+    <li><b>1947年3月 トルーマン・ドクトリン</b>:ギリシャとトルコへの反共産主義の援助を発表。自由主義陣営(自由な選挙、言論・信教の自由…)と、ソ連(少数者が多数者を力で抑圧する社会)を対比した。</li>
+    <li><b>1947年6月 マーシャル・プラン</b>:米国による欧州への経済援助(約130億ドル)。ソ連・ポーランド・チェコなどは会議に参加したが受け入れを拒否 → 東西の線引きが表面化。</li>
+    <li>→ <b>1949年 NATO(北大西洋条約機構)</b>、<b>1955年 ワルシャワ条約機構</b>が成立。</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th>ソ連による周辺国の共産化</th><th>民主化への武力介入</th></tr>
+    <tr><td>1945 ポーランド/1948 チェコ/1949 ハンガリー・東ドイツ</td><td>1956 ハンガリー動乱/1968 プラハの春(チェコスロバキア)</td></tr>
+  </table></div>
+  <p>ソ連にとっては、ドイツとの間に共産主義国家(緩衝地帯)を作ることが安全保障上必要だった、という見方もあります。</p>
+  <h3>ドイツの分割</h3>
+  <div class="cmp">
+    <div class="h w">西ドイツ</div><div class="h e">東ドイツ</div>
+    <div>ドイツ連邦共和国<br>首都 ボン<br>資本主義</div><div>ドイツ民主共和国<br>首都 ベルリン(東ベルリン)<br>共産主義</div>
+  </div>
+  <p>ベルリンは4か国に分割占領され、東西冷戦の象徴となった。</p>
+  <h3>日本占領における反共政策(逆コース)</h3>
+  <ul>
+    <li>1946年 公職追放 → 1950年 <b>レッドパージ</b>(共産主義者の追放)へ転換</li>
+    <li>第二次東京裁判の中止・容疑者の釈放、警察予備隊の創設、寛大な講和</li>
+    <li>→ 日本を「<b>共産主義の防波堤</b>」にする意図</li>
+  </ul>
+  <h3>朝鮮戦争</h3>
+  <ul>
+    <li>1950年、北朝鮮が突然38度線を越えて韓国に侵攻。北朝鮮を中国が、韓国を国連軍(実態は多国籍軍)が支援。</li>
+    <li>1953年に休戦協定。<b>戦争は法的には終わっておらず、休戦状態が今も続いている</b>(板門店)。</li>
+  </ul>
+  <h3>米国のマッカーシズム</h3>
+  <p>1950年代、共和党上院議員マッカーシーを中心とした狂信的な反共運動。協力者にニクソン、レーガン。容疑をかけられた人にチャップリン、オッペンハイマー。</p>
+</section>
+
+<section class="task" id="cuba">
+  <h2><span class="no">6</span>キューバ危機と「核抑止」</h2>
+  <p>冷戦を通じて、米ソの間で<b>核戦争の危機が最も高まった</b>事件。</p>
+  <ol class="steps">
+    <li><b>1959年 キューバ革命</b>:カストロが社会主義政権を樹立し、米国資本の資産を没収。</li>
+    <li><b>1961年4月 ピッグス湾事件</b>:米国が亡命キューバ人を使ってカストロ政権の打倒を図るが失敗。</li>
+    <li><b>1961年11月〜 マングース作戦</b>:カストロ暗殺計画を含む政権転覆作戦。キューバはソ連に接近し、ソ連が軍事援助を始める。</li>
+    <li><b>1962年10月16日</b>:米国の偵察機が、キューバに建設中の核ミサイル基地を確認。</li>
+    <li><b>恐怖の13日間</b>:ミサイルは発射から約15分でワシントンに届く。米国は海上でソ連船の検疫(海上封鎖)を行い、最終的にフルシチョフがミサイル撤去を発表。</li>
+  </ol>
+  <div class="warn"><b>年号の注意</b>:スライドではピッグス湾事件が「1960年4月」、マングース作戦が「1960年11月」となっていますが、一般的な年表ではどちらも <b>1961年</b> です。テストではスライドと授業の説明を優先してください。</div>
+  <div class="think"><b>考えよう</b>:たとえキューバに核弾頭が配備されたとしても、米国がキューバを攻撃することは許されるのか? 「相手が攻撃できる力を持った」ことは、先に攻撃する理由になるだろうか。</div>
+</section>
+
+<section class="task" id="vn">
+  <h2><span class="no">7</span>ベトナム戦争</h2>
+  <p>南ベトナムの共産化を恐れた米国が介入した戦争。<b>世界で初めて戦場の映像が国民に公開された戦争</b>(沢田教一「安全への逃避」)で、国内外の反対運動により米軍は撤退した。</p>
+  <div class="panel vn">
+    <div class="ptitle"><span class="badge">図</span>ベトナム戦争の構図</div>
+    <svg viewBox="0 0 520 250" role="img" aria-label="ソ連・中国が北ベトナムとベトコンを支援し、米国が南ベトナムを支援する構図">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" style="fill:var(--sub)"/></marker></defs>
+      <rect x="20" y="20" width="150" height="46" rx="10" style="fill:var(--east-soft);stroke:var(--east);stroke-width:2"/><text x="95" y="48" text-anchor="middle">ソ連・中国</text>
+      <rect x="350" y="20" width="150" height="46" rx="10" style="fill:var(--west-soft);stroke:var(--west);stroke-width:2"/><text x="425" y="48" text-anchor="middle">米国</text>
+      <rect x="20" y="180" width="150" height="46" rx="10" style="fill:var(--east-soft);stroke:var(--east);stroke-width:2"/><text x="95" y="208" text-anchor="middle">北ベトナム</text>
+      <rect x="180" y="104" width="160" height="54" rx="10" style="fill:var(--east-soft);stroke:var(--east);stroke-width:2"/><text x="260" y="127" text-anchor="middle">ベトコン</text><text x="260" y="146" text-anchor="middle" class="sm">南ベトナム解放民族戦線</text>
+      <rect x="350" y="180" width="150" height="46" rx="10" style="fill:var(--west-soft);stroke:var(--west);stroke-width:2"/><text x="425" y="208" text-anchor="middle">南ベトナム</text>
+      <line x1="95" y1="68" x2="95" y2="176" style="stroke:var(--sub);stroke-width:2" marker-end="url(#ar)"/><text x="104" y="125" class="sm">支援</text>
+      <line x1="150" y1="68" x2="205" y2="102" style="stroke:var(--sub);stroke-width:2" marker-end="url(#ar)"/>
+      <line x1="425" y1="68" x2="425" y2="176" style="stroke:var(--sub);stroke-width:2" marker-end="url(#ar)"/><text x="434" y="125" class="sm">支援・介入</text>
+      <line x1="330" y1="160" x2="358" y2="180" style="stroke:var(--mark);stroke-width:2.5;stroke-dasharray:5 3" marker-end="url(#ar)"/><text x="336" y="182" class="sm" text-anchor="end">闘争</text>
+      <line x1="174" y1="203" x2="346" y2="203" style="stroke:var(--mark);stroke-width:2.5;stroke-dasharray:5 3" marker-end="url(#ar)"/><text x="260" y="196" class="sm" text-anchor="middle">戦闘</text>
+    </svg>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>年</th><th>出来事</th></tr>
+    <tr><td>1945.8</td><td>ベトミン(共産党中心の民族統一戦線)が「ベトナム民主共和国」の独立を宣言 → 直後からフランスと武力紛争</td></tr>
+    <tr><td>—</td><td>フランスは南に「ベトナム国」を作り、旧王朝の皇帝バオダイを擁立</td></tr>
+    <tr><td>1954</td><td>ジュネーヴ協定:2年後に統一選挙を行う約束で停戦 → しかし選挙は行われず、米国が南に傀儡政権を樹立。南北分断が固定化</td></tr>
+    <tr><td>1960</td><td>南ベトナム解放民族戦線(ベトコン)結成。ケネディ大統領が軍事顧問団を大量派遣</td></tr>
+    <tr><td>1964.8</td><td><b>トンキン湾事件</b> → 米国が北爆を開始。ジョンソン大統領が地上軍投入を決定</td></tr>
+    <tr><td>1968〜</td><td>戦況はベトコン側に有利に。世界で反戦運動が高まり、ジョンソンは大統領選に出ないと表明</td></tr>
+    <tr><td>1973</td><td>ニクソン大統領(1969年就任)のもとで「名誉ある撤退」。米軍撤退</td></tr>
+    <tr><td>1975</td><td>サイゴン陥落</td></tr>
+    <tr><td>1976</td><td>南北統一。ベトナム社会主義共和国が樹立</td></tr>
+  </table></div>
+  <div class="warn"><b>年号の注意</b>:スライドでは「1975年ニクソン大統領誕生後、名誉ある撤退」とありますが、ニクソンの就任は <b>1969年</b>、米軍の撤退は <b>1973年</b>(パリ和平協定)です。</div>
+  <div class="point"><b>まとめ</b>:キューバ危機もベトナム戦争も、背景にはアメリカの、共産主義の拡大に対する<b>必要以上の恐怖感</b>があった。</div>
+</section>
+
+<section class="task" id="image">
+  <h2><span class="no">8</span>冷戦の別の側面:イメージ戦争</h2>
+  <p>冷戦は、2つの社会体制のどちらが優れているかを世界に見せる、いわば<b>イメージ戦争</b>の側面も持っていた。</p>
+  <ul>
+    <li><b>宇宙開発競争</b>:1961年 ソ連のガガーリンが初の有人宇宙飛行 → 1969年 米国のアポロ11号が初の月面着陸。</li>
+    <li><b>オリンピック</b>:メダルの数が国の力の宣伝になった。1984年のロサンゼルス五輪は、ソ連をはじめ東側諸国がボイコットする中で開かれ、派手な演出で西側の豊かさを見せつけた。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">データ</span>1976年 モントリオール五輪 メダル数 上位10か国</div>
+    <div class="sw" id="msort"><button data-k="3">合計で並べる</button><button data-k="0">金メダルで並べる</button></div>
+    <svg class="chart bars" id="mchart" viewBox="0 0 600 330" role="img" aria-label="メダル数の横棒グラフ"></svg>
+    <div class="legend2"><span><i style="background:var(--east)"></i>東側(共産主義国)</span><span><i style="background:var(--west)"></i>西側(資本主義国)</span></div>
+    <p class="legend">人口約1,700万人の東ドイツが、アメリカより多くの金メダルを取りました。国家を挙げた選手育成は、東側の体制の「成果」として宣伝されました。棒にカーソルを合わせると内訳が出ます。</p>
+  </div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox"><div class="qno">問1</div><p>冷戦の説明として正しいのは?</p>
+    <div class="opts"><button>米ソが直接全面戦争をした状態</button><button data-ok>米ソを中心とする東西陣営の、戦争には至らない軍事的・政治的緊張状態</button><button>国連とソ連の対立</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問2</div><p>自国の安全のために力を追求すると他国も力を追求し、結局安全が確立されない状態を何という?</p>
+    <div class="opts"><button>封じ込め政策</button><button data-ok>安全保障のジレンマ</button><button>核抑止</button><button>逆コース</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3</div><p>「鉄のカーテン」演説をしたのは誰?</p>
+    <div class="opts"><button>トルーマン</button><button data-ok>チャーチル</button><button>マッカーシー</button><button>フルシチョフ</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問4</div><p>米国による欧州への経済援助で、東西陣営の線引きを表面化させたのは?</p>
+    <div class="opts"><button>トルーマン・ドクトリン</button><button data-ok>マーシャル・プラン</button><button>ジュネーヴ協定</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問5</div><p>占領期の日本で行われた「逆コース」の目的は?</p>
+    <div class="opts"><button>日本を再び軍事大国にするため</button><button data-ok>日本を共産主義の防波堤にするため</button><button>ソ連と同盟を結ぶため</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問6</div><p>朝鮮戦争の現在の状態は?</p>
+    <div class="opts"><button>1953年の平和条約で完全に終結した</button><button data-ok>1953年の休戦協定のまま、休戦状態が続いている</button><button>今も戦闘が続いている</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問7</div><p>米軍がベトナム戦争に本格介入するきっかけになった事件は?</p>
+    <div class="opts"><button>ピッグス湾事件</button><button data-ok>トンキン湾事件</button><button>プラハの春</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問8</div><p>ベトナム戦争が「それまでの戦争と違った」点として、授業で強調されたのは?</p>
+    <div class="opts"><button>核兵器が使われた</button><button data-ok>戦場の映像が初めて国民に公開された</button><button>国連軍が参加した</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問9</div><p>NATO に対抗して東側が1955年に作った軍事同盟は?</p>
+    <div class="opts"><button data-ok>ワルシャワ条約機構</button><button>コミンフォルム</button><button>東南アジア条約機構</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="13"><div class="qno">問10</div><p>キューバ危機は「恐怖の◯日間」と呼ばれる。◯に入る数字は?</p>
+    <div class="check"><input class="ans" placeholder="例 7" aria-label="問10の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox"><div class="qno">問11 記述</div><p>第二次世界大戦後、国力・領土拡大のための戦争がほぼ消えつつある理由を2つ挙げなさい。</p>
+    <details class="ans"><summary><span class="tag">解答例</span>解答例を見る<span class="tap"></span></summary><div class="body">
+      <p>① 無条件降伏によって、戦争に負けたときの損失が大きくなり、戦争の「コスパ」が下がったこと。② 国際軍事裁判や国連での侵略の定義によって、侵略戦争が違法とされたこと。</p>
+    </div></details></div>
+
+  <div class="qbox"><div class="qno">問12 考察</div><p>冷戦が「米国の政策として進められた側面が強い」と言われるのはなぜか、2つの理由を説明しなさい。</p>
+    <details class="ans"><summary><span class="tag">解答例</span>解答例を見る<span class="tap"></span></summary><div class="body">
+      <p>① 第二次世界大戦で発達した軍産複合体にとって、戦後も軍需の需要が必要だったため。② イタリア・フランス・ギリシャなどで共産主義勢力が台頭しており、左翼政権を誕生させずに欧州を安定させることが米国の利益になったため。</p>
+    </div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>名城大学「社会科学基礎2」第1・2回のスライドをもとに作成しました。年号は一般的な年表で確認し、スライドと異なる箇所は本文中に注記しています。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  /* ===== 年表 ===== */
+  var EV=[
+    [1945,'ヤルタ会談後、ソ連がポーランドを共産化','eu','e','米国は「ヤルタ協定を無視した」と不信感を強めた。冷戦のきっかけの一つ。'],
+    [1945,'ベトナム民主共和国の独立宣言','asia','','ベトミンが独立を宣言。直後からフランスとの武力紛争が始まる。'],
+    [1946,'チャーチル「鉄のカーテン」演説','eu','w','「バルト海のシュテッティンからアドリア海のトリエステにかけて…」。共産主義の拡張への懸念を示した。'],
+    [1946,'日本で公職追放','asia','w','占領初期は軍国主義者の追放が中心だった。'],
+    [1947,'トルーマン・ドクトリン','eu','w','ギリシャ・トルコへの反共援助を発表。封じ込め政策の始まり。'],
+    [1947,'マーシャル・プラン','eu','w','欧州への約130億ドルの経済援助。ソ連・東欧は受け入れを拒否し、東西の線引きが表面化。'],
+    [1948,'チェコスロバキアの共産化','eu','e','ソ連による周辺国の共産化が進む。'],
+    [1949,'NATO 成立','eu','w','北大西洋条約機構。西側の軍事同盟。'],
+    [1949,'東ドイツ・ハンガリーの共産化','eu','e','ドイツは西ドイツ(首都ボン)と東ドイツに分かれる。'],
+    [1950,'朝鮮戦争勃発','asia','e','北朝鮮が38度線を越えて韓国に侵攻。北を中国、韓国を国連軍(実態は多国籍軍)が支援。'],
+    [1950,'日本でレッドパージ・警察予備隊','asia','w','逆コース。日本を共産主義の防波堤にする意図。'],
+    [1950,'マッカーシズム(1950年代)','us','w','米国内での狂信的な反共運動。チャップリンやオッペンハイマーが容疑をかけられた。'],
+    [1953,'朝鮮戦争休戦協定','asia','','休戦状態のまま現在まで続いている(板門店)。'],
+    [1954,'ジュネーヴ協定','asia','','ベトナムで、2年後の統一選挙を約束して停戦。しかし選挙は行われなかった。'],
+    [1955,'ワルシャワ条約機構成立','eu','e','東側の軍事同盟。'],
+    [1956,'ハンガリー動乱','eu','e','民主化の動きにソ連が武力介入。'],
+    [1959,'キューバ革命','am','e','カストロが社会主義政権を樹立し、米国資本の資産を没収。'],
+    [1960,'ベトコン結成','asia','e','南ベトナム解放民族戦線。米国の傀儡政権に対する闘争を始める。'],
+    [1961,'ガガーリン、初の有人宇宙飛行','us','e','宇宙開発競争でソ連が先行。'],
+    [1961,'ピッグス湾事件','am','w','米国が亡命キューバ人を使ってカストロ政権の打倒を図るが失敗。(スライドでは1960年)'],
+    [1962,'キューバ危機(恐怖の13日間)','am','','核ミサイル基地の建設が発覚。米ソ核戦争の危機が最も高まった。フルシチョフが撤去を発表。'],
+    [1964,'トンキン湾事件・北爆開始','asia','w','米国がベトナム戦争に本格介入。'],
+    [1968,'プラハの春','eu','e','チェコスロバキアの民主化にソ連が武力介入。'],
+    [1969,'アポロ11号 月面着陸','us','w','宇宙開発競争で米国が巻き返す。'],
+    [1973,'米軍、ベトナムから撤退','asia','w','ニクソン大統領の「名誉ある撤退」。'],
+    [1975,'サイゴン陥落','asia','e','南ベトナム政府が崩壊。'],
+    [1976,'ベトナム社会主義共和国 成立','asia','e','南北統一。'],
+    [1976,'モントリオール五輪','us','','メダル数でソ連1位・東ドイツ2位。体制の優劣を示す「イメージ戦争」。'],
+    [1984,'ロサンゼルス五輪','us','w','東側諸国がボイコット。西側の豊かさを見せつけた。']
+  ];
+  var TAG={eu:'ヨーロッパ',asia:'アジア',am:'アメリカ大陸',us:'米国内・宣伝'}, tl=document.getElementById('tline'), filt='all';
+  function drawTL(){
+    tl.innerHTML=EV.filter(function(e){return filt==='all'||e[2]===filt;}).map(function(e,i){
+      return '<div class="ev '+e[3]+'" role="button" tabindex="0" aria-expanded="false"><span class="y">'+e[0]+'</span><span class="t">'+e[1]+'</span><span class="tag">'+TAG[e[2]]+'</span><div class="d">'+e[4]+'</div></div>';}).join('');
+    tl.querySelectorAll('.ev').forEach(function(el){function t(){el.setAttribute('aria-expanded',el.getAttribute('aria-expanded')==='true'?'false':'true');}
+      el.addEventListener('click',t);el.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();t();}});});
+    document.querySelectorAll('#tf button').forEach(function(b){b.type='button';b.setAttribute('aria-pressed',b.getAttribute('data-f')===filt?'true':'false');});
+  }
+  document.querySelectorAll('#tf button').forEach(function(b){b.addEventListener('click',function(){filt=b.getAttribute('data-f');drawTL();});});
+  drawTL();
+
+  /* ===== 仕分け ===== */
+  var CARDS=[['統制経済','e'],['自由経済','w'],['私有財産の否定','e'],['私有財産を認める','w'],['一党独裁','e'],['政党結社の自由','w'],['主役は労働者','e'],['主役は資本家','w'],['自由貿易体制','w'],['人民服','e'],['究極の大きな政府','e'],['「自由」と「真実」が最も大事な理念','w']];
+  var order=CARDS.map(function(_,i){return i;}).sort(function(){return Math.random()-.5;}), ci=0, done=0;
+  function nextCard(){var sc=document.getElementById('scard'); if(ci>=order.length){sc.textContent='全部仕分けました!('+done+' / '+CARDS.length+' 問を一発正解)';document.querySelectorAll('.sort .bb button').forEach(function(b){b.disabled=true;});return;} sc.textContent=CARDS[order[ci]][0];}
+  var first=true;
+  document.querySelectorAll('.sort .bb button').forEach(function(b){b.addEventListener('click',function(){
+    if(ci>=order.length) return; var c=CARDS[order[ci]], ok=b.getAttribute('data-s')===c[1], fb=document.getElementById('sfb');
+    if(ok){ if(first) done++; var s=document.createElement('span'); s.textContent=c[0]; document.getElementById(c[1]==='e'?'bine':'binw').appendChild(s); fb.className='fb ok'; fb.textContent='◯ 正解'; ci++; first=true; nextCard(); }
+    else { first=false; fb.className='fb ng'; fb.textContent='✕ もう一方です'; }
+  });});
+  nextCard();
+
+  /* ===== 安全保障のジレンマ ===== */
+  var A,B,round,prevA,log;
+  function clamp(v){return Math.max(0,Math.min(10,v));}
+  function dReset(){A=3;B=3;round=0;prevA=0;log=[];dDraw('両国とも軍備 3。ボタンで A 国の方針を決めてください。');}
+  function dDraw(msg){
+    if(msg) log.unshift(msg);
+    var sec=clamp(5+(A-B)*1.5), ten=clamp((A+B)/2);
+    [['ma','va',A],['mb','vb',B],['ms','vs',sec],['mt','vt',ten]].forEach(function(x){document.getElementById(x[0]).style.width=(x[2]*10)+'%';document.getElementById(x[1]).textContent=Math.round(x[2]);});
+    document.getElementById('dlog').innerHTML=log.slice(0,8).map(function(l){return '<div>'+l+'</div>';}).join('');
+  }
+  function turn(d){
+    round++; var oldSec=clamp(5+(A-B)*1.5); A=clamp(A+d);
+    var msg='<b>'+round+'年目</b>:A 国は軍備を'+(d>0?'増やした':d<0?'減らした':'据え置いた')+'。';
+    var mid=clamp(5+(A-B)*1.5);
+    if(d>0){B=clamp(B+1);msg+='B 国は脅威を感じ、すぐに軍備を増やした。';}
+    else if(d<0&&prevA<=0){B=clamp(B-1);msg+='B 国も様子を見て軍備を減らした。';}
+    else if(d<0){msg+='B 国はまだ警戒していて、軍備を減らさない。';}
+    else msg+='B 国も据え置いた。';
+    prevA=d;
+    var sec=clamp(5+(A-B)*1.5);
+    msg+=' → 安心度 '+Math.round(oldSec)+'→'+Math.round(sec)+(d>0?'(一瞬 '+Math.round(mid)+' まで上がったが、元に戻った)':'')+'、緊張度 '+Math.round((A+B)/2);
+    if(A>=10&&B>=10) msg+=' <b>…両国とも軍備が最大に。安心は得られないまま、軍事費と緊張だけが最大です。</b>';
+    dDraw(msg);
+  }
+  document.getElementById('dup').addEventListener('click',function(){turn(1);});
+  document.getElementById('dkeep').addEventListener('click',function(){turn(0);});
+  document.getElementById('ddown').addEventListener('click',function(){turn(-1);});
+  document.getElementById('dreset').addEventListener('click',dReset);
+  dReset();
+
+  /* ===== メダル ===== */
+  var M=[['ソビエト連邦','e',49,41,35],['東ドイツ','e',40,25,25],['アメリカ合衆国','w',34,35,25],['西ドイツ','w',10,12,17],['日本','w',9,6,10],['ポーランド','e',7,6,13],['ブルガリア','e',6,9,7],['キューバ','e',6,4,3],['ルーマニア','e',4,9,14],['ハンガリー','e',4,5,13]];
+  var sv=document.getElementById('mchart'), key=3;
+  function drawM(){
+    var W=Math.max(320,Math.round(sv.clientWidth||600)), L=108, R=90, T=6, rh=31, H=T+M.length*rh+4;
+    sv.setAttribute('viewBox','0 0 '+W+' '+H);
+    var rows=M.map(function(m){return {n:m[0],b:m[1],g:m[2],s:m[3],br:m[4],t:m[2]+m[3]+m[4]};});
+    rows.sort(function(a,b){return key===0?(b.g-a.g||b.t-a.t):(b.t-a.t);});
+    var max=125, pw=W-L-R, h='';
+    [0,25,50,75,100,125].forEach(function(v){var x=L+pw*v/max;h+='<line class="grid" x1="'+x+'" x2="'+x+'" y1="'+T+'" y2="'+(H-4)+'"/>';});
+    rows.forEach(function(r,i){
+      var y=T+i*rh+5, v=key===0?r.g:r.t, w=Math.max(2,pw*v/max), col=r.b==='e'?'var(--east)':'var(--west)';
+      h+='<text class="lbl" x="'+(L-8)+'" y="'+(y+15)+'" text-anchor="end">'+r.n+'</text>';
+      h+='<rect x="'+L+'" y="'+y+'" width="'+w+'" height="21" rx="4" style="fill:'+col+'"><title>'+r.n+':金 '+r.g+'・銀 '+r.s+'・銅 '+r.br+'(計 '+r.t+')</title></rect>';
+      h+='<text class="val" x="'+(L+w+6)+'" y="'+(y+15)+'">'+(key===0?'金 '+r.g:'計 '+r.t+'(金 '+r.g+')')+'</text>';
+    });
+    sv.innerHTML=h;
+    document.querySelectorAll('#msort button').forEach(function(b){b.type='button';b.setAttribute('aria-pressed',+b.getAttribute('data-k')===key?'true':'false');});
+  }
+  document.querySelectorAll('#msort button').forEach(function(b){b.addEventListener('click',function(){key=+b.getAttribute('data-k');drawM();});});
+  window.addEventListener('resize',drawM); drawM();
+})();
+</script>
+</body>
+</html>
