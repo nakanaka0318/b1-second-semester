@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>全確率の定理とベイズの定理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+:root{--ca:#1F6FB2;--cb:#C77700;--cc:#1C8A5A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ca:#6DB3F2;--cb:#F2BE3A;--cc:#5CC993}}
+:root[data-theme="dark"]{--ca:#6DB3F2;--cb:#F2BE3A;--cc:#5CC993}
+.ct td,.ct th{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+.ct td.on{background:var(--mark-soft);font-weight:700}
+.ct td.base{box-shadow:inset 0 0 0 2px var(--accent)}
+.mrow{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:center;margin:8px 0}
+.mrow .lab{font-size:.82rem;color:var(--sub)}
+.stack{display:flex;height:34px;border-radius:6px;overflow:hidden;gap:2px;background:var(--paper)}
+.stack span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;min-width:0;transition:flex-basis .3s}
+.mc{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.mc .m{background:var(--bg);border-radius:10px;padding:8px 10px;border-top:4px solid}
+.mc .m b{font-size:.95rem}
+.mc label{display:block;font-size:.78rem;color:var(--sub);margin-top:4px}
+.mc input[type=range]{width:100%;min-width:0}
+@media (max-width:560px){.mc{grid-template-columns:1fr}}
+.tree2{font-family:"JetBrains Mono",monospace;font-size:.85rem;background:var(--bg);border-radius:10px;padding:10px 14px;line-height:1.9;overflow-x:auto;white-space:pre}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>全確率の定理とベイズの定理</h1>
+  <p>確率統計 第3回のノートのまとめです。「原因がいくつかあって、結果だけが見えている」とき、どの原因から起きたのかを確率で逆算するのがベイズの定理です。まず工場の不良品で体験してみましょう。</p>
+  <div class="demo">
+    <label>不良品はどの機械で作られた?(ノートの例題が初期値)</label>
+    <div class="mc">
+      <div class="m" style="border-color:var(--ca)"><b>機械 A</b><label for="sa">生産の割合 <span id="sav"></span></label><input id="sa" type="range" min="0" max="100" value="10"><label for="da">不良品の割合 <span id="dav"></span></label><input id="da" type="range" min="0" max="10" step="0.5" value="3"></div>
+      <div class="m" style="border-color:var(--cb)"><b>機械 B</b><label for="sb">生産の割合 <span id="sbv"></span></label><input id="sb" type="range" min="0" max="100" value="30"><label for="db">不良品の割合 <span id="dbv"></span></label><input id="db" type="range" min="0" max="10" step="0.5" value="2"></div>
+      <div class="m" style="border-color:var(--cc)"><b>機械 C</b><label>生産の割合 <span id="scv"></span>(残り全部)</label><div class="legend" style="margin:6px 0 2px">A と B の残り</div><label for="dc">不良品の割合 <span id="dcv"></span></label><input id="dc" type="range" min="0" max="10" step="0.5" value="1"></div>
+    </div>
+    <div class="mrow"><span class="lab">作った製品<br>10000 個</span><div class="stack" id="bar1"></div></div>
+    <div class="mrow"><span class="lab">そのうち不良品<br><b id="ndef"></b> 個</span><div class="stack" id="bar2"></div></div>
+    <div class="stats" id="bst"></div>
+    <div class="legend">生産量は B・C の方が多いので、不良率が一番高い A でも、不良品の「犯人」としては一番ありそうとは限りません。スライダーを動かして確かめましょう。</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#table">クロス表</a><a href="#draw">くじの順番</a><a href="#total">全確率の定理</a><a href="#bayes">ベイズの定理</a><a href="#ex">例題</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="table">
+  <h2><span class="no">1</span>クロス表と条件付き確率(前回の復習)</h2>
+  <p>45人に質問して、○か×で答えてもらった結果です。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>条件を選ぶと、その中での割合が出ます</div>
+    <div class="row"><label for="cg">条件</label><select id="cg"><option value="r0">男</option><option value="r1">女</option><option value="c0">○と答えた</option><option value="c1">×と答えた</option><option value="all">条件なし(全員)</option></select>
+      <label for="ce">求める事象</label><select id="ce"><option value="c0">○と答えた</option><option value="c1">×と答えた</option><option value="r0">男</option><option value="r1">女</option></select></div>
+    <div class="tbl"><table class="ct" id="ct"></table></div>
+    <div class="formula" id="cf" aria-live="polite"></div>
+  </div>
+  <p>ノートでは、男である事象を A₁、○と答える事象を A₂ として次のように求めています。</p>
+  <div class="formula">P(A₁) = <span class="frac"><span>25</span><span>45</span></span>, P(A₂) = <span class="frac"><span>10</span><span>45</span></span>, P(A₁∩A₂) = <span class="frac"><span>7</span><span>45</span></span> → P(A₂|A₁) = <span class="frac"><span>P(A₁∩A₂)</span><span>P(A₁)</span></span> = <span class="frac"><span>7</span><span>25</span></span></div>
+</section>
+
+<section class="task" id="draw">
+  <h2><span class="no">2</span>くじ引きの順番は公平?</h2>
+  <div class="problem"><p>白玉3個・赤玉7個の袋から、A、B の順に1個ずつ取り出す(戻さない)。</p></div>
+  <div class="tree2">A が白 3/10 ─ B が白 2/9  → 3/10 × 2/9 = 6/90
+           └ B が赤 7/9  → 3/10 × 7/9 = 21/90
+A が赤 7/10 ─ B が白 3/9  → 7/10 × 3/9 = 21/90
+           └ B が赤 6/9  → 7/10 × 6/9 = 42/90</div>
+  <ul>
+    <li>(1) A が白:<span class="mono">3/10</span></li>
+    <li>(2) B が白:A が赤だった場合と白だった場合を足す。<span class="mono">7/10 × 3/9 + 3/10 × 2/9 = 21/90 + 6/90 = 27/90 = 3/10</span></li>
+  </ul>
+  <div class="point"><b>ポイント</b>:A も B も白を引く確率は同じ 3/10。くじは引く順番に関係なく公平です。(2) の「場合分けして足す」が、次の全確率の定理です。</div>
+  <h3>逆向き:B が白だったとき、A も白だった確率</h3>
+  <div class="formula">P(A白 | B白) = <span class="frac"><span>P(A白)·P(B白|A白)</span><span>P(A白)·P(B白|A白) + P(A赤)·P(B白|A赤)</span></span> = <span class="frac"><span>2/30</span><span>2/30 + 7/30</span></span> = <span class="frac"><span>2</span><span>9</span></span></div>
+  <p>B の結果を知ると、A についての確率が 3/10 から 2/9 に変わります。これがベイズの定理の考え方です。</p>
+</section>
+
+<section class="task" id="total">
+  <h2><span class="no">定理</span>全確率の定理</h2>
+  <p>事象 A<sub>i</sub>(i = 1, 2, …, n)が互いに排反であって、かつ A₁ ∪ A₂ ∪ … ∪ A<sub>n</sub> = Ω であるとき、任意の事象 E の起こる確率 P(E) は</p>
+  <div class="formula">P(E) = P(A₁)·P(E|A₁) + P(A₂)·P(E|A₂) + … + P(A<sub>n</sub>)·P(E|A<sub>n</sub>) = <span class="mono">Σ</span><sub>i=1</sub><sup>n</sup> P(A<sub>i</sub>)·P(E|A<sub>i</sub>)</div>
+  <p>Ω を重ならない「原因」A₁, …, A<sub>n</sub> に分けて、それぞれから E が起きる確率を足し合わせる、という意味です。ページ上部の「不良品の割合」がまさにこれです。</p>
+</section>
+
+<section class="task" id="bayes">
+  <h2><span class="no">2.3</span>ベイズの定理</h2>
+  <p>事象 E が n 個の排反な事象 A<sub>i</sub>(A₁ ∪ … ∪ A<sub>n</sub> = Ω)のどれかによって起こるとき、E が A<sub>k</sub> によって起こった確率 P(A<sub>k</sub>|E) は</p>
+  <div class="formula">P(A<sub>k</sub>|E) = <span class="frac"><span>P(A<sub>k</sub>)·P(E|A<sub>k</sub>)</span><span>P(A₁)·P(E|A₁) + … + P(A<sub>n</sub>)·P(E|A<sub>n</sub>)</span></span> = <span class="frac"><span>P(A<sub>k</sub>)·P(E|A<sub>k</sub>)</span><span><span class="mono">Σ</span> P(A<sub>i</sub>)·P(E|A<sub>i</sub>)</span></span></div>
+  <div class="tbl"><table>
+    <tr><th>用語</th><th>意味</th><th>例題では</th></tr>
+    <tr><td><b>事前確率</b> P(A<sub>k</sub>)</td><td>結果 E を知る<b>前</b>の、原因 A<sub>k</sub> の確率</td><td>製品が A 製である確率 10%</td></tr>
+    <tr><td><b>事後確率</b> P(A<sub>k</sub>|E)</td><td>結果 E を知った<b>後</b>の、原因 A<sub>k</sub> の確率</td><td>不良品だと分かった後、A 製である確率 1/5</td></tr>
+  </table></div>
+  <div class="point"><b>覚え方</b>:分子は「その原因から E が起きる道」、分母は「E が起きるすべての道」(=全確率の定理の P(E))。上の工場の図でいえば、2本目の棒のうち A の部分の割合です。</div>
+</section>
+
+<section class="task" id="ex">
+  <h2><span class="no">例題</span>3台の機械と不良品</h2>
+  <div class="problem"><p>3台の機械 A、B、C が、それぞれ生産量の 10%、30%、60% を作っている。不良品の割合は A が 3%、B が 2%、C が 1% である。製品を1つ取り出したら不良品だった。それが A で作られた製品である確率を求めよ。</p></div>
+  <details class="ans"><summary><span class="tag">解答</span>解き方<span class="tap"></span></summary><div class="body">
+    <p class="ansline"><b>答え:1/5</b></p>
+    <ol class="steps">
+      <li>不良品が A、B、C から出る確率:<span class="mono">A = P(A)·P(E|A) = 1/10 × 3/100</span>、<span class="mono">B = 3/10 × 2/100</span>、<span class="mono">C = 6/10 × 1/100</span></li>
+      <li>ベイズの定理:<span class="mono">P(A|E) = (1/10 × 3/100) ÷ (1/10 × 3/100 + 3/10 × 2/100 + 6/10 × 1/100)</span></li>
+      <li>分母・分子に 1000 を掛けると <span class="mono">3 ÷ (3 + 6 + 6) = 3/15 = 1/5</span></li>
+    </ol>
+    <p>同じように、B だったら <span class="mono">6/15 = 2/5</span>、C だったら <span class="mono">6/15 = 2/5</span>。3つ足すと 1 になります。</p>
+  </div></details>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+  <p>答えを分数か小数で入力して「判定」を押してください。</p>
+
+  <div class="qbox" data-ans="3/20"><div class="qno">問1 クロス表</div><p>上のクロス表で、女のうち○と答えた人の割合 P(A₂|A₁ᶜ) は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問1の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:3/20</b></p><p>女は20人、そのうち○は3人。</p></div></details></div>
+
+  <div class="qbox" data-ans="7/10"><div class="qno">問2 クロス表(逆向き)</div><p>○と答えた人が男である確率 P(A₁|A₂) は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問2の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:7/10</b></p><p>○は10人、そのうち男は7人。P(A₂|A₁) = 7/25 とは違う値になることに注意。条件と事象を入れ替えると、確率は一般に変わります。</p></div></details></div>
+
+  <div class="qbox" data-ans="1/5"><div class="qno">問3 くじの順番</div><p>当たり2本・はずれ8本のくじを、A、B の順に1本ずつ引く(戻さない)。B が当たる確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問3の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:1/5</b></p><p>全確率の定理:<span class="mono">2/10 × 1/9 + 8/10 × 2/9 = 2/90 + 16/90 = 18/90 = 1/5</span>。A と同じです。</p></div></details></div>
+
+  <div class="qbox" data-ans="1/9"><div class="qno">問4 ベイズの定理</div><p>問3で B が当たったと分かった。A も当たっていた確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問4の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:1/9</b></p><p><span class="mono">(2/90) ÷ (18/90) = 2/18 = 1/9</span>。</p></div></details></div>
+
+  <div class="qbox" data-ans="3/200"><div class="qno">問5 全確率の定理</div><p>例題の工場で、製品を1つ取り出したとき不良品である確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 0.02" aria-label="問5の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:3/200(= 0.015 = 1.5%)</b></p><p><span class="mono">0.1 × 0.03 + 0.3 × 0.02 + 0.6 × 0.01 = 0.003 + 0.006 + 0.006 = 0.015</span>。ベイズの定理の分母と同じです。</p></div></details></div>
+
+  <div class="qbox" data-ans="2/3"><div class="qno">問6 2つの箱</div><p>箱1には赤玉2個・白玉3個、箱2には赤玉4個・白玉1個が入っている。コインを投げて箱を選び、1個取り出したら赤だった。箱2を選んでいた確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 3/5" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:2/3</b></p><p><span class="mono">(1/2 × 4/5) ÷ (1/2 × 2/5 + 1/2 × 4/5) = (4/10) ÷ (6/10) = 2/3</span>。</p></div></details></div>
+
+  <div class="qbox" data-ans="1/6"><div class="qno">問7 病気の検査(有名な例)</div><p>ある病気にかかっている人は全体の 1%。検査は、病気の人を 99% の確率で陽性と判定するが、病気でない人も 5% の確率で陽性と判定してしまう。陽性と判定された人が本当に病気である確率は?</p>
+    <div class="check"><input class="ans" placeholder="例 0.9" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:1/6(約 17%)</b></p>
+      <p><span class="mono">(0.01 × 0.99) ÷ (0.01 × 0.99 + 0.99 × 0.05) = 0.0099 ÷ 0.0594 = 1/6</span>。</p>
+      <p>「99% 当たる検査」なのに、陽性でも病気の確率は 17% ほど。もともと病気の人が少ない(事前確率が小さい)ため、病気でない多数の人の誤判定の方が多くなるからです。ページ上部の図で、A を「病気(1%)」、不良品を「陽性」と考えると同じ構造です。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問8 用語</div><p>「結果 E が起きたと分かった後の、原因 A<sub>k</sub> の確率」P(A<sub>k</sub>|E) を何という?</p>
+    <div class="opts"><button>事前確率</button><button data-ok>事後確率</button><button>同時確率</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>数値はすべて計算で確認しています。ノートの例題・計算結果と一致しています。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  /* ===== 工場 ===== */
+  var sa=document.getElementById('sa'), sb=document.getElementById('sb'), da=document.getElementById('da'), db=document.getElementById('db'), dc=document.getElementById('dc');
+  function pct(v){return (Math.round(v*10)/10)+'%';}
+  function drawF(e){
+    var a=+sa.value, b=+sb.value;
+    if(a+b>100){ if(e&&e.target===sa) b=100-a, sb.value=b; else a=100-b, sa.value=a; }
+    var c=100-a-b, ra=+da.value, rb=+db.value, rc=+dc.value;
+    document.getElementById('sav').textContent=a+'%'; document.getElementById('sbv').textContent=b+'%'; document.getElementById('scv').textContent=c+'%';
+    document.getElementById('dav').textContent=pct(ra); document.getElementById('dbv').textContent=pct(rb); document.getElementById('dcv').textContent=pct(rc);
+    var N=10000, na=N*a/100, nb=N*b/100, nc=N*c/100, fa=na*ra/100, fb=nb*rb/100, fc=nc*rc/100, F=fa+fb+fc;
+    function seg(n,tot,col,lab){if(!n)return '';return '<span style="flex:0 0 calc('+(n/tot*100)+'% - 2px);background:var('+col+')" title="'+lab+'">'+(n/tot>.09?lab:'')+'</span>';}
+    document.getElementById('bar1').innerHTML=seg(na,N,'--ca','A '+Math.round(na))+seg(nb,N,'--cb','B '+Math.round(nb))+seg(nc,N,'--cc','C '+Math.round(nc));
+    document.getElementById('bar2').innerHTML=F?seg(fa,F,'--ca','A '+Math.round(fa))+seg(fb,F,'--cb','B '+Math.round(fb))+seg(fc,F,'--cc','C '+Math.round(fc)):'<span style="flex:1;color:var(--sub)">不良品なし</span>';
+    document.getElementById('ndef').textContent=Math.round(F);
+    function post(x){return F?(x/F):0;}
+    var st='<div class="stat"><div class="k">不良品の確率 P(E)(全確率の定理)</div><div class="v">'+(F/N*100).toFixed(2)+'%</div></div>';
+    [['A',fa,'--ca'],['B',fb,'--cb'],['C',fc,'--cc']].forEach(function(m){st+='<div class="stat"><div class="k" style="color:var('+m[2]+')">不良品が '+m[0]+' 製の確率(事後確率)</div><div class="v">'+(post(m[1])*100).toFixed(1)+'%</div></div>';});
+    document.getElementById('bst').innerHTML=st;
+  }
+  [sa,sb,da,db,dc].forEach(function(x){x.addEventListener('input',drawF);}); drawF();
+
+  /* ===== クロス表 ===== */
+  var T=[[7,18],[3,17]], RN=['男','女'], CN=['○','×'];
+  var cg=document.getElementById('cg'), ce=document.getElementById('ce');
+  function inSet(code,r,c){if(code==='all')return true;var i=+code[1];return code[0]==='r'?r===i:c===i;}
+  function name(code){return code==='all'?'全員':code[0]==='r'?RN[+code[1]]:CN[+code[1]]+'と答えた人';}
+  function drawT(){
+    var g=cg.value, e=ce.value, base=0, hit=0, h='<tr><th></th><th>○</th><th>×</th><th>計</th></tr>';
+    for(var r=0;r<2;r++){h+='<tr><th>'+RN[r]+'</th>';for(var c=0;c<2;c++){var inb=inSet(g,r,c), ine=inSet(e,r,c); if(inb){base+=T[r][c]; if(ine) hit+=T[r][c];} h+='<td class="'+(inb?'base':'')+(inb&&ine?' on':'')+'">'+T[r][c]+'</td>';} h+='<td>'+(T[r][0]+T[r][1])+'</td></tr>';}
+    h+='<tr><th>計</th><td>10</td><td>35</td><td>45</td></tr>';
+    document.getElementById('ct').innerHTML=h;
+    document.getElementById('cf').innerHTML=name(g)+'('+base+'人)のうち「'+name(e)+'」は '+hit+'人 → '+fracHTML(hit,base||1)+(hit&&base?' ≈ '+(hit/base).toFixed(3):'');
+  }
+  cg.addEventListener('change',drawT); ce.addEventListener('change',drawT); drawT();
+})();
+</script>
+</body>
+</html>

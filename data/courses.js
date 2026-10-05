@@ -21,7 +21,11 @@ window.COURSES = [
     { id: "1-1-2-conditional", refs: [{ label: "ノート", files: ["refs/1-1-2-note.jpg"] }],
       lesson: 2, title: "独立な試行と条件付き確率",
       file: "materials/1-1/1-1-2-conditional.html",
-      note: "独立な試行・反復試行の定理・条件付き確率・乗法定理。サイコロ表とシミュレーション、答え合わせ付き練習問題10問" }
+      note: "独立な試行・反復試行の定理・条件付き確率・乗法定理。サイコロ表とシミュレーション、答え合わせ付き練習問題10問" },
+    { id: "1-1-3-bayes", refs: [{ label: "ノート", files: ["refs/1-1-3-note.jpg"] }],
+      lesson: 3, title: "全確率の定理とベイズの定理",
+      file: "materials/1-1/1-1-3-bayes.html",
+      note: "クロス表、くじの順番、全確率の定理、ベイズの定理、事前確率・事後確率。不良品の原因を探る工場シミュレーション付き" }
   ] },
   { id: "1-2", name: "テクニカルリテラシー",   materials: [
     { id: "1-2-1-technical-documents", refs: [{ label: "ノート", files: ["refs/1-2-1-note.jpg"] }],
@@ -31,7 +35,11 @@ window.COURSES = [
     { id: "1-2-2-writing-rules", refs: [{ label: "ノート", files: ["refs/1-2-2-note.jpg"] }],
       lesson: 2, title: "理系の文書で必要なこと・不要なこと",
       file: "materials/1-2/1-2-2-writing-rules.html",
-      note: "事実と意見の区別、不要な表現、首尾一貫しない文の直し方。自分の文を診断できる文章チェッカー付き" }
+      note: "事実と意見の区別、不要な表現、首尾一貫しない文の直し方。自分の文を診断できる文章チェッカー付き" },
+    { id: "1-2-3-document-structure", refs: [{ label: "ノート", files: ["refs/1-2-3-note.jpg"] }],
+      lesson: 3, title: "文章の構造と逆茂木型の文",
+      file: "materials/1-2/1-2-3-document-structure.html",
+      note: "隠れた主語、首尾一貫の心得、文・パラグラフ・節・章、逆茂木型の文。17の句に分けた例文を解体できる図付き" }
   ] },
   { id: "1-3", name: "コンピュータアーキテクチャ", materials: [
     { id: "1-3-1-organization-isa", refs: [{ label: "ノート①", files: ["refs/1-3-1-note-a.jpg"] }, { label: "ノート②(二重線より上)", files: ["refs/1-3-x-note-b.jpg"] }],

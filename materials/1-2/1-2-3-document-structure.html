@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>文章の構造と逆茂木型の文</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+:root{--ga:#1F6FB2;--ga-soft:#E3EEF8;--gb:#B4560B;--gb-soft:#FCEBDD}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ga:#6DB3F2;--ga-soft:#1B2D46;--gb:#F0A060;--gb-soft:#3A2818}}
+:root[data-theme="dark"]{--ga:#6DB3F2;--ga-soft:#1B2D46;--gb:#F0A060;--gb-soft:#3A2818}
+.sent{line-height:2.5;font-size:1.02rem;margin:6px 0}
+.ph{display:inline;padding:3px 3px;border-radius:5px;transition:opacity .25s,background .25s;cursor:pointer}
+.ph sup{font-family:"JetBrains Mono",monospace;font-size:.62rem;color:var(--sub);margin-right:1px}
+.ph.ga{background:var(--ga-soft)}.ph.gb{background:var(--gb-soft)}
+.ph.main{background:var(--mark-soft);font-weight:700;box-shadow:inset 0 -2px 0 var(--mark)}
+.sent.trunk .ph:not(.main){opacity:.15}
+.sent.plain .ph{background:none;box-shadow:none;font-weight:400}
+.modes{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.modes button{font:inherit;font-size:.85rem;font-weight:700;padding:5px 12px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rw{background:var(--accent-soft);border-radius:10px;padding:10px 14px;margin-top:8px}
+.rw ol{margin:4px 0;padding-left:1.4em}
+.nest{display:flex;flex-direction:column;gap:0}
+.box{border:2px solid var(--line);border-radius:12px;padding:8px 10px 10px;margin-top:6px;cursor:pointer;background:var(--paper)}
+.box > .bt{font-weight:700;font-size:.88rem;display:flex;gap:8px;align-items:baseline}
+.box > .bt i{font-style:normal;font-size:.75rem;color:var(--sub);font-weight:400}
+.box.on{border-color:var(--accent);background:var(--accent-soft)}
+.box .box{background:var(--bg)}
+.box .box.on{background:var(--accent-soft)}
+.sents{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.sents span{font-size:.75rem;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.ends{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:1.02rem;background:var(--bg);border-radius:10px;padding:10px 14px;margin:6px 0}
+.ends .gap{color:var(--sub);letter-spacing:.2em}
+.ends b{background:var(--mark-soft);border-radius:4px;padding:0 4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>文章の構造と逆茂木型の文</h1>
+  <p>テクニカルリテラシー 第3回のノートのまとめです。前回の「首尾一貫しない文」の続きと、文 → パラグラフ → 節 → 章 という文章の組み立て、そして読み手を迷わせる「逆茂木(さかもぎ)型の文」を扱います。</p>
+  <div class="demo">
+    <label>逆茂木型の文を解体する(ノートの例1)。番号をタップすると、何にかかっているかが出ます</label>
+    <div class="modes" id="modes"><button data-m="plain">そのまま読む</button><button data-m="group">修飾のまとまりを色分け</button><button data-m="trunk">幹だけ残す</button></div>
+    <div class="sent plain" id="sent"></div>
+    <div class="msg" id="smsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.92rem;min-height:3em" aria-live="polite"></div>
+    <div class="rw" id="rw" hidden><b>書き直し例:短い文に分ける</b><ol>
+      <li>A は、高校卒業後すぐに K 市の T 自動車に入社し、営業部門に配属された。</li>
+      <li>B も高卒直後に ○ 市の T 自動車に入社して、経理を手伝っていた。</li>
+      <li>B は2年前、一家の K 市転居にともなって、K 市の T 自動車に転勤してきた。</li>
+      <li>A は B と知り合って、やがて結婚した。</li>
+    </ol></div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#cont">前回の続き</a><a href="#tips">首尾一貫の心得</a><a href="#struct">文章の構造</a><a href="#saka">逆茂木型の文</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="cont">
+  <h2><span class="no">1</span>前回の続き:隠れた主語</h2>
+  <div class="bad">例2:極めて興味深いが、機器の誤差だと考えている。</div>
+  <p>1つの文の中で、隠れた主語が途中で入れ替わっています。</p>
+  <div class="tbl"><table>
+    <tr><th>部分</th><th>隠れた主語</th></tr>
+    <tr><td>極めて興味深い(が)</td><td>「<b>実験結果</b>」が興味深い</td></tr>
+    <tr><td>機器の誤差だと考えている</td><td>「<b>私</b>」が考えている</td></tr>
+  </table></div>
+  <div class="good">修正例1:(この実験結果は極めて興味深いが、)〜誤差に<b>よるもの</b>だと考えられる。</div>
+  <div class="good">修正例2:(この実験結果は極めて興味深いが、)〜誤差に<b>起因するもの</b>だと考えられる。</div>
+  <div class="point"><b>実験の考察で使える表現</b>:「〜による」「〜に起因する」をうまく使うと、主語を「結果」にそろえたまま原因を書けます。</div>
+</section>
+
+<section class="task" id="tips">
+  <h2><span class="no">2</span>心得:首尾一貫させるために</h2>
+  <ol class="steps">
+    <li>内容を整理し、<b>短い文に分割</b>して書く。</li>
+    <li>一つ一つの文で「<b>主語は何か</b>」を明確に意識して書く。</li>
+    <li>文を書くたびに、<b>主部と述部の対応</b>を確認する。</li>
+    <li>例えば、<b>最初の方と最後の方だけ</b>を読んでみる。</li>
+  </ol>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>最初と最後だけ読むと…</div>
+    <div class="ends" id="ends"></div>
+    <div class="row"><button class="btn sub" id="endsprev" type="button">‹</button><button class="btn" id="endsfull" type="button">全文を表示</button><button class="btn sub" id="endsnext" type="button">›</button><span class="legend" id="endsno"></span></div>
+    <div class="msg" id="endsmsg" style="background:var(--bg);border-radius:10px;padding:8px 12px;font-size:.9rem" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="struct">
+  <h2><span class="no">3</span>文章の構造</h2>
+  <p>文章は、小さいまとまりから大きいまとまりへ、入れ子になっています。箱をタップすると説明が出ます。</p>
+  <div class="panel">
+    <div class="nest" id="nest">
+      <div class="box" data-k="doc"><div class="bt">文章<i>ドキュメント</i></div>
+        <div class="box" data-k="ch"><div class="bt">章<i>チャプター</i></div>
+          <div class="box" data-k="sec"><div class="bt">節<i>セクション 例「3 文章の構造」</i></div>
+            <div class="box" data-k="sub"><div class="bt">小節<i>サブセクション 例「3.1 文とは」</i></div>
+              <div class="box" data-k="para"><div class="bt">パラグラフ<i>段落</i></div>
+                <div class="sents"><span style="border-color:var(--mark);font-weight:700">中心文</span><span>文</span><span>文</span><span>文</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="msg" id="nmsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;margin-top:10px;font-size:.92rem;min-height:4em" aria-live="polite"></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>単位</th><th>説明</th></tr>
+    <tr><td><b>文</b>(センテンス)</td><td>主部と述部を含む、言語表現上のまとまり。理系文書では句点(。)かピリオドで区切るのが基本</td></tr>
+    <tr><td><b>パラグラフ</b>(段落)</td><td>文を組み合わせた内容のまとまり。最後の文で改行し、日本語では最初の文の頭を字下げすることがほとんど。理系文書では<b>内容のつながり</b>を重視して分ける。述べる内容を1文で書いた<b>中心文</b>があり、それが<b>前の方</b>にあるのが望ましい(ポイント先行主義)</td></tr>
+    <tr><td><b>節</b>(セクション)</td><td>パラグラフを組み合わせた大きなまとまり。理系文書では節番号と見出しを付けることが多い。中に<b>小節</b>(サブセクション)を含むことも多い</td></tr>
+    <tr><td><b>章</b>(チャプター)</td><td>節を組み合わせて結論を述べるまとまり。それぞれの章に導入部と結論がある。理系文書で章を使うのは博士論文や書籍など。卒論・修論は章の形式をとることもあるが、内容的には章と呼べるものになっていないことが多い</td></tr>
+    <tr><td><b>文章</b>(ドキュメント)</td><td>文章などが含まれる書物や電子ファイル</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="saka">
+  <h2><span class="no">4</span>逆茂木型の文(逆茂木文)</h2>
+  <p><b>逆茂木</b>(さかもぎ)とは、とがった枝を外に向けて並べた、木でできた障害物のこと。修飾句が幹(主語と述語)に何重にも突き刺さって、読み手の前に障害物のように立ちはだかる文を<b>逆茂木型の文</b>といいます。</p>
+  <div class="bad">高校卒業後すぐに K 市の T 自動車に入社し営業部門に配属された A は、○ 市の T 自動車にこれも高卒直後に入社して経理を手伝い 2 年前、一家の K 市転居にともなって K 市の T 自動車に転勤してきた B と知り合って、やがて結婚した。</div>
+  <ul>
+    <li>読み手は ⑥(○ 市の T 自動車に)や ⑩(2 年前)、⑪ のあたりで、「誰の話か」が分からなくなって混乱する。</li>
+    <li>幹は「<b>A は B と知り合って、やがて結婚した。</b>」だけ。その前に長い修飾句がぶら下がっている。</li>
+    <li>直し方:修飾句を独立した短い文にして、時間の順に並べる(ページ上部の「幹だけ残す」→ 書き直し例)。</li>
+  </ul>
+  <div class="point"><b>見分け方</b>:「〜した A は」「〜してきた B と」のように、名詞の前に長い説明(連体修飾)が付いていたら要注意。説明が1行を超えたら、別の文に分けることを考えましょう。</div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox"><div class="qno">問1</div><p>「極めて興味深いが、機器の誤差だと考えている。」の問題点は?</p>
+    <div class="opts"><button>敬語が多すぎる</button><button data-ok>前半と後半で隠れた主語が入れ替わっている</button><button>文が長すぎる</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問2</div><p>パラグラフの「中心文」はどこに置くのが望ましい?</p>
+    <div class="opts"><button data-ok>パラグラフの前の方</button><button>パラグラフの最後</button><button>どこでもよい</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3</div><p>「重要なことを先に言う」原則を何という?</p>
+    <div class="opts"><button>起承転結</button><button data-ok>ポイント先行主義</button><button>首尾一貫</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問4</div><p>「3.1 文とは」のような見出しが付くまとまりは?</p>
+    <div class="opts"><button>章</button><button>パラグラフ</button><button data-ok>小節(サブセクション)</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問5</div><p>理系文書で「章」を用いるのが一般的なのは?</p>
+    <div class="opts"><button>実験レポート</button><button data-ok>博士論文や書籍</button><button>学会の予稿</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問6</div><p>逆茂木型の文の説明として正しいのは?</p>
+    <div class="opts"><button>主語と述語が対応していない文</button><button data-ok>長い修飾句が幹に何重にも付いて、読み手を迷わせる文</button><button>敬語の使いすぎで回りくどい文</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問7 書き直し</div><p>次の逆茂木型の文を、2〜3の短い文に書き直しなさい。</p>
+    <div class="bad">昨年度に研究室で開発されセンサの感度不足が課題とされていた測定装置を改良した。</div>
+    <details class="ans"><summary><span class="tag">修正例</span>修正例を見る<span class="tap"></span></summary><div class="body">
+      <div class="good">昨年度、研究室で測定装置が開発された。この装置はセンサの感度不足が課題とされていた。本研究では、この測定装置を改良した。</div>
+      <p>「測定装置」の前の修飾句(昨年度に研究室で開発され/センサの感度不足が課題とされていた)をそれぞれ独立した文にしました。主語(本研究では/私たちは)も明確になります。</p>
+    </div></details></div>
+
+  <div class="qbox"><div class="qno">問8 考察の表現</div><p>「測定値が理論値より小さかったのは、配線の抵抗だと思う。」を、考察にふさわしい表現に直しなさい。</p>
+    <details class="ans"><summary><span class="tag">修正例</span>修正例を見る<span class="tap"></span></summary><div class="body">
+      <div class="good">測定値が理論値より小さかったのは、配線の抵抗に起因すると考えられる。</div>
+      <p>「〜だと思う」(感想・主語が私)を「〜に起因すると考えられる」に変えると、主語を「測定値の結果」にそろえたまま原因を述べられます。</p>
+    </div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>ノートの内容をもとにまとめています。問7・問8 と「最初と最後だけ読む」の例文の一部は説明のために作成したものです。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  /* ===== 逆茂木の解体 ===== */
+  var P=[
+    ['高校卒業後すぐに','a','③「入社し」にかかる(いつ入社したか)'],
+    ['K 市の T 自動車に','a','③「入社し」にかかる(どこに入社したか)'],
+    ['入社し、','a','①〜④ はまとめて ⑤「A」の説明(どんな A か)'],
+    ['営業部門に配属された','a','①〜④ はまとめて ⑤「A」の説明。ここまで読んで、やっと主語が出てくる'],
+    ['A は、','m','<b>幹(主語)</b>。①〜④ がすべてこの A を説明している'],
+    ['○ 市の T 自動車に','b','⑧「入社して」にかかる。ここで「また会社の話? A の話の続き?」と混乱しやすい'],
+    ['これも高卒直後に','b','⑧「入社して」にかかる'],
+    ['入社して','b','⑥〜⑬ はまとめて ⑭「B」の説明'],
+    ['経理を手伝い','b','⑥〜⑬ はまとめて ⑭「B」の説明'],
+    ['2 年前、','b','⑬「転勤してきた」にかかる。ここでも「誰の2年前?」と迷う'],
+    ['一家の K 市転居にともなって','b','⑬「転勤してきた」にかかる(なぜ転勤したか)'],
+    ['K 市の T 自動車に','b','⑬「転勤してきた」にかかる(どこへ)'],
+    ['転勤してきた','b','⑥〜⑬ の最後。ここまでが ⑭「B」の説明'],
+    ['B と','m','<b>幹</b>。⑥〜⑬ がすべてこの B を説明している'],
+    ['知り合って、','m','<b>幹(述語)</b>。A は B と知り合った'],
+    ['やがて','m','<b>幹</b>。⑰ にかかる'],
+    ['結婚した。','m','<b>幹(述語)</b>。A は B と知り合って、やがて結婚した']
+  ];
+  var circ='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰';
+  var sent=document.getElementById('sent'), msg=document.getElementById('smsg'), mode='plain';
+  sent.innerHTML=P.map(function(p,i){return '<span class="ph '+(p[1]==='a'?'ga':p[1]==='b'?'gb':'main')+'" data-i="'+i+'" tabindex="0" role="button"><sup>'+circ[i]+'</sup>'+p[0]+'</span>';}).join('');
+  function say(i){msg.innerHTML='<b>'+circ[i]+' '+P[i][0]+'</b>:'+P[i][2];}
+  sent.querySelectorAll('.ph').forEach(function(s){var i=+s.getAttribute('data-i');s.addEventListener('click',function(){say(i);});s.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();say(i);}});});
+  var MSG={plain:'まずはそのまま読んでみてください。⑥ や ⑩ あたりで「誰の話か」分からなくなりませんか?',
+    group:'<span style="color:var(--ga);font-weight:700">青</span> = A を説明する修飾句(①〜④)、<span style="color:var(--gb);font-weight:700">橙</span> = B を説明する修飾句(⑥〜⑬)、<b>黄色の下線</b> = 幹。B の説明が8つもあり、これが逆茂木(障害物)になっています。',
+    trunk:'幹だけ読むと「A は B と知り合って、やがて結婚した。」これが文の骨組みです。下に、修飾句を独立させた書き直し例を出しました。'};
+  function setMode(m){mode=m;sent.className='sent '+(m==='plain'?'plain':m==='trunk'?'trunk':'');
+    document.querySelectorAll('#modes button').forEach(function(b){b.type='button';b.setAttribute('aria-pressed',b.getAttribute('data-m')===m?'true':'false');});
+    msg.innerHTML=MSG[m]; document.getElementById('rw').hidden=m!=='trunk';}
+  document.querySelectorAll('#modes button').forEach(function(b){b.addEventListener('click',function(){setMode(b.getAttribute('data-m'));});});
+  setMode('plain');
+
+  /* ===== 最初と最後だけ読む ===== */
+  var E=[
+    ['ここで問題となるのは、','交通が渋滞していて','時間がかかる。','「問題となるのは…時間がかかる」とつながらない → 「…時間がかかることである」'],
+    ['この結果の原因は、','センサの取り付け位置が','ずれていた。','「原因は…ずれていた」とつながらない → 「…ずれていたことである」'],
+    ['本実験の目的は、','抵抗の温度変化を測定し、その特性を','明らかにする。','「目的は…明らかにする」とつながらない → 「…明らかにすることである」'],
+    ['我々は、','図1のような測定器を','試作した。','「我々は…試作した」で正しくつながっている(よい例)']
+  ];
+  var ei=0, full=false;
+  function drawE(){var e=E[ei];
+    document.getElementById('ends').innerHTML='<b>'+e[0]+'</b>'+(full?'<span>'+e[1]+'</span>':'<span class="gap">………</span>')+'<b>'+e[2]+'</b>';
+    document.getElementById('endsmsg').textContent=e[3]; document.getElementById('endsno').textContent=(ei+1)+' / '+E.length;
+    document.getElementById('endsfull').textContent=full?'最初と最後だけ':'全文を表示';}
+  document.getElementById('endsfull').addEventListener('click',function(){full=!full;drawE();});
+  document.getElementById('endsprev').addEventListener('click',function(){ei=(ei+E.length-1)%E.length;full=false;drawE();});
+  document.getElementById('endsnext').addEventListener('click',function(){ei=(ei+1)%E.length;full=false;drawE();});
+  drawE();
+
+  /* ===== 文章の構造 ===== */
+  var N={doc:'<b>文章(ドキュメント)</b>:文章などが含まれる書物や電子ファイル全体。',
+    ch:'<b>章(チャプター)</b>:節を組み合わせて結論を述べるまとまり。各章に導入部と結論がある。博士論文や書籍で使う。',
+    sec:'<b>節(セクション)</b>:パラグラフを組み合わせた大きなまとまり。理系文書では「3 文章の構造」のように節番号と見出しを付けることが多い。',
+    sub:'<b>小節(サブセクション)</b>:節の中のまとまり。例「3.1 文とは」。',
+    para:'<b>パラグラフ(段落)</b>:文を組み合わせた内容のまとまり。中心文を前の方に置く(ポイント先行主義)。内容のつながりを重視して分ける。'};
+  var boxes=document.querySelectorAll('#nest .box');
+  boxes.forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();boxes.forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('nmsg').innerHTML=N[b.getAttribute('data-k')];});});
+  document.querySelector('#nest .box[data-k="para"]').click();
+})();
+</script>
+</body>
+</html>

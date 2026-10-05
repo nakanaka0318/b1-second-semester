@@ -12,8 +12,8 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 
 | 番号 | 科目 | ページ | 教材 |
 |------|------|--------|------|
-| 1-1 | 確率統計 | [courses/1-1.html](courses/1-1.html) | 2件 |
-| 1-2 | テクニカルリテラシー | [courses/1-2.html](courses/1-2.html) | 2件 |
+| 1-1 | 確率統計 | [courses/1-1.html](courses/1-1.html) | 3件 |
+| 1-2 | テクニカルリテラシー | [courses/1-2.html](courses/1-2.html) | 3件 |
 | 1-3 | コンピュータアーキテクチャ | [courses/1-3.html](courses/1-3.html) | 2件 |
 | 1-4 | 情報通信ネットワーク | [courses/1-4.html](courses/1-4.html) | 3件 |
 | 2-1 | 社会科学基礎 | [courses/2-1.html](courses/2-1.html) | 1件 |
@@ -34,6 +34,7 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 |------|------|----------|------------|
 | 1-1-1 | 確率の考え方と確率空間 | [materials/1-1/1-1-1-probability-space.html](materials/1-1/1-1-1-probability-space.html) | – |
 | 1-1-2 | 独立な試行と条件付き確率 | [materials/1-1/1-1-2-conditional.html](materials/1-1/1-1-2-conditional.html) | – |
+| 1-1-3 | 全確率の定理とベイズの定理 | [materials/1-1/1-1-3-bayes.html](materials/1-1/1-1-3-bayes.html) | – |
 
 ### 1-2 テクニカルリテラシー
 
@@ -41,6 +42,7 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 |------|------|----------|------------|
 | 1-2-1 | 理系の文書力と技術文書の種類 | [materials/1-2/1-2-1-technical-documents.html](materials/1-2/1-2-1-technical-documents.html) | – |
 | 1-2-2 | 理系の文書で必要なこと・不要なこと | [materials/1-2/1-2-2-writing-rules.html](materials/1-2/1-2-2-writing-rules.html) | – |
+| 1-2-3 | 文章の構造と逆茂木型の文 | [materials/1-2/1-2-3-document-structure.html](materials/1-2/1-2-3-document-structure.html) | – |
 
 ### 1-3 コンピュータアーキテクチャ
 
