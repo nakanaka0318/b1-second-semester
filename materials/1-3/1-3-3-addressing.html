@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>アドレッシングと記憶装置</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.sw{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.sw button{font:inherit;font-size:.85rem;font-weight:700;padding:5px 11px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.asim{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.regs .r{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:5px 10px;margin:4px 0}
+.regs .r .n{font-size:.8rem;color:var(--sub)}
+.regs .r input{width:5em;font:inherit;font-family:"JetBrains Mono",monospace;font-weight:700;text-align:right;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);padding:2px 6px}
+.regs .r.hot{background:var(--mark-soft);border-color:var(--mark)}
+.regs .r.dst{background:var(--accent-soft);border-color:var(--accent)}
+.instr{font-family:"JetBrains Mono",monospace;font-size:1.05rem;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:8px 12px;margin:6px 0}
+.instr .op{color:var(--c-kw);font-weight:700}.instr .md{color:var(--c-str)}
+.mem{width:100%;font-size:.8rem}
+.mem td,.mem th{padding:2px 6px;font-family:"JetBrains Mono",monospace}
+.mem tr.ea td{background:var(--accent-soft);font-weight:700;box-shadow:inset 0 0 0 2px var(--accent)}
+.mem tr.ptr td{background:var(--mark-soft)}
+.steps2{margin:8px 0 0;padding-left:1.3em;font-size:.92rem}
+.steps2 li{margin:3px 0}
+@media (max-width:600px){.asim{grid-template-columns:1fr}}
+.arr{display:flex;gap:2px;margin:8px 0;flex-wrap:wrap}
+.arr div{flex:1;min-width:52px;text-align:center;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);font-family:"JetBrains Mono",monospace;font-size:.75rem;padding:4px 2px}
+.arr div b{display:block;font-size:.9rem}
+.arr div.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.hier{display:flex;flex-direction:column;align-items:center;gap:3px;margin:8px 0}
+.hier div{border-radius:6px;color:#fff;font-weight:700;font-size:.82rem;padding:6px 8px;text-align:center;background:var(--accent);cursor:pointer}
+.hier div[aria-pressed="true"]{outline:3px solid var(--mark);outline-offset:2px}
+.bus{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.meter{height:12px;border-radius:99px;background:var(--dim);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:99px;transition:width .3s}
+.dl{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:.85rem;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>アドレッシングと記憶装置</h1>
+  <p>コンピュータアーキテクチャ 第3回のノートのまとめです(1.4 アドレッシング 〜 1.6 接続方式)。命令のオペランドから「本当に読みに行く番地(実効アドレス)」をどう決めるかを、下のシミュレータで方式ごとに比べてみましょう。</p>
+  <div class="demo">
+    <label>アドレッシング・シミュレータ:<span class="mono">LD R1, X</span> で R1 に何が入る?</label>
+    <div class="sw" id="modes"></div>
+    <div class="asim">
+      <div>
+        <div class="instr" id="instr"></div>
+        <div class="regs">
+          <div class="r" id="rX"><span class="n">オペランドのアドレス部 X</span><input id="ix" type="number" value="102" aria-label="X"></div>
+          <div class="r" id="rPC"><span class="n">プログラムカウンタ PC</span><input id="ipc" type="number" value="100" aria-label="PC"></div>
+          <div class="r" id="rR2"><span class="n">インデックスレジスタ R2</span><input id="ir2" type="number" value="4" aria-label="R2"></div>
+          <div class="r" id="rR3"><span class="n">レジスタ R3</span><input id="ir3" type="number" value="106" aria-label="R3"></div>
+          <div class="r dst" id="rR1"><span class="n">結果:R1 に入る値</span><b class="mono" id="r1v"></b></div>
+        </div>
+      </div>
+      <div><div style="font-size:.75rem;color:var(--sub);font-weight:700">主記憶</div><div class="tbl" style="margin:0"><table class="mem" id="mem"></table></div></div>
+    </div>
+    <ol class="steps2" id="how"></ol>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#addr">アドレス</a><a href="#space">アドレス空間</a><a href="#modes2">アドレッシング方式</a><a href="#mem">記憶装置</a><a href="#bus">接続方式</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="addr">
+  <h2><span class="no">1.4-1</span>アドレス</h2>
+  <div class="tbl"><table>
+    <tr><th>用語</th><th>意味</th></tr>
+    <tr><td><b>絶対アドレス</b></td><td>主記憶で記憶場所を示す番地そのもの</td></tr>
+    <tr><td><b>実効アドレス</b></td><td>命令やデータが実際に格納されているアドレス(中身は絶対アドレス)。アドレッシング方式によって計算して求める</td></tr>
+    <tr><td><b>相対アドレス</b></td><td><b>基点</b>からの距離(差)でアドレスを表したもの</td></tr>
+  </table></div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>C 言語の配列は相対アドレス:<span class="mono">int room[5];</span></div>
+    <div class="row"><label for="base">先頭アドレス room =</label><input id="base" class="ans" type="number" value="1000" style="width:7em"><label for="idx">添字</label><select id="idx"><option>0</option><option>1</option><option>2</option><option selected>3</option><option>4</option></select></div>
+    <div class="arr" id="arr"></div>
+    <div class="formula" id="arrf" aria-live="polite"></div>
+  </div>
+  <p>配列名 <span class="mono">room</span> は先頭アドレス(基点)を表し、<span class="mono">room[3]</span> のアドレスは <span class="mono">room + 3</span>(基点から3つ先)です。int が4バイトなら、実際の番地は 先頭 + 3 × 4 になります。</p>
+</section>
+
+<section class="task" id="space">
+  <h2><span class="no">1.4-2</span>アドレス空間</h2>
+  <ul>
+    <li>1命令 = 1語の固定長命令なら、一般的に<b>アドレス空間は1語</b>のビット数で表せる範囲。</li>
+    <li>しかし命令にはオペコードも入るので、<b>オペランドのビット数 &lt; アドレス空間</b>のビット数になる → オペランドだけでは全番地を指せない。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">計算</span>ノートの例:16ビット固定長命令で、オペコードが4ビットの場合</div>
+    <div class="row"><label for="wl">1語(命令長)</label><select id="wl"><option>8</option><option selected>16</option><option>32</option></select><label for="ol">オペコード</label><select id="ol"><option>2</option><option selected>4</option><option>6</option><option>8</option></select><span class="legend">ビット</span></div>
+    <div class="stats" id="sps"></div>
+  </div>
+  <p>だから、オペランドの値をそのまま番地として使うだけでなく、レジスタや PC と組み合わせて実効アドレスを作る工夫(アドレッシング方式)が必要になります。</p>
+</section>
+
+<section class="task" id="modes2">
+  <h2><span class="no">1.4-3</span>アドレッシングの種類</h2>
+  <div class="tbl"><table>
+    <tr><th>方式</th><th>オペランドのアドレス部に入っているもの</th><th>実効アドレス</th></tr>
+    <tr><td><b>即値</b></td><td>データそのもの。主記憶を参照せずに命令を実行</td><td>なし(例外)</td></tr>
+    <tr><td><b>直接アドレス指定</b></td><td>処理対象データの主記憶アドレス</td><td>X</td></tr>
+    <tr><td><b>間接アドレス指定</b></td><td>「データが格納された主記憶のアドレス」が格納された主記憶アドレス(直接と意味が違う)</td><td>主記憶[X]</td></tr>
+    <tr><td><b>レジスタアドレス指定</b></td><td>レジスタ番号。そのレジスタに処理対象データの主記憶アドレスが入っている</td><td>レジスタの値</td></tr>
+    <tr><td><b>インデックス・アドレス指定</b></td><td>2部構成:① レジスタ番号 ② 基点からの距離(変位)</td><td>インデックスレジスタ + 変位</td></tr>
+    <tr><td><b>自己相対アドレス指定</b></td><td>PC からの距離</td><td>PC の値 + アドレス部</td></tr>
+  </table></div>
+  <div class="point"><b>補足</b>:教科書によっては、レジスタにデータそのものが入っている方式を「レジスタアドレス指定」、レジスタに番地が入っている方式(上の表・ノートの定義)を「レジスタ間接アドレス指定」と呼び分けることがあります。</div>
+</section>
+
+<section class="task" id="mem">
+  <h2><span class="no">1.5</span>記憶装置</h2>
+  <ul>
+    <li>記憶<b>容量</b>と処理<b>速度</b>は<b>トレードオフ</b>(大容量なものほど遅く、速いものほど小容量・高価)→ 特性に応じて役割分担する。</li>
+    <li><b>内部記憶装置</b>:主記憶やキャッシュメモリ</li>
+    <li><b>外部記憶装置</b>:ハードディスクや USB メモリ</li>
+    <li><b>記憶階層</b>:CPU の近く → 高速(小容量)、CPU から遠く → 大容量(低速)</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">見る</span>記憶階層(タップで目安を表示)</div>
+    <div class="hier" id="hier"></div>
+    <div class="msg" id="hmsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.9rem" aria-live="polite"></div>
+    <p class="legend">数値は一般的なパソコンでのおおよその目安です。</p>
+  </div>
+</section>
+
+<section class="task" id="bus">
+  <h2><span class="no">1.6</span>接続方式</h2>
+  <ul>
+    <li><b>バス接続方式</b>:バス線に各装置の入力と出力を接続する。バス線は<b>同時期に1つの装置しか使えない</b>(バス線にデータを入れられるのは1台だけ)。</li>
+    <li><b>ノイマン・ボトルネック</b>:CPU の処理能力を上げても、バスのデータ転送能力を上げないと、全体として性能が向上しない。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>CPU だけ速くしても…</div>
+    <div class="dl">
+      <label for="cpu">CPU の処理能力</label><input id="cpu" type="range" min="1" max="10" value="4"><b class="mono" id="cpuv"></b>
+      <label for="bw">バスの転送能力</label><input id="bw" type="range" min="1" max="10" value="4"><b class="mono" id="bwv"></b>
+      <span>全体の性能</span><div class="meter"><i id="tot" style="background:var(--ok)"></i></div><b class="mono" id="totv"></b>
+    </div>
+    <div class="msg" id="bmsg" style="background:var(--bg);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:.9rem" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox"><div class="qno">問1</div><p>主記憶を参照せずに命令を実行できるアドレッシング方式は?</p>
+    <div class="opts"><button data-ok>即値</button><button>直接アドレス指定</button><button>間接アドレス指定</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問2</div><p>実効アドレスが「PC の値 + オペランドのアドレス部」になる方式は?</p>
+    <div class="opts"><button>インデックス・アドレス指定</button><button data-ok>自己相対アドレス指定</button><button>直接アドレス指定</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3</div><p>オペランドのアドレス部が「レジスタ番号」と「基点からの距離」の2部構成なのは?</p>
+    <div class="opts"><button>即値</button><button data-ok>インデックス・アドレス指定</button><button>間接アドレス指定</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="107"><div class="qno">問4 シミュレータで確認</div><p>シミュレータの初期状態の主記憶で、X = 100 として<b>直接アドレス指定</b>なら R1 に入る値は?</p>
+    <div class="check"><input class="ans" placeholder="例 42" aria-label="問4の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:107</b></p><p>実効アドレス = 100。主記憶[100] = 107。</p></div></details></div>
+
+  <div class="qbox" data-ans="58"><div class="qno">問5 シミュレータで確認</div><p>同じく X = 100 で<b>間接アドレス指定</b>なら R1 に入る値は?</p>
+    <div class="check"><input class="ans" placeholder="例 42" aria-label="問5の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:58</b></p><p>主記憶[100] = 107 が実効アドレス。主記憶[107] = 58。</p></div></details></div>
+
+  <div class="qbox" data-ans="1012"><div class="qno">問6 相対アドレス</div><p><span class="mono">int room[5];</span> の先頭アドレスが 1000 番地、int が4バイトのとき、<span class="mono">room[3]</span> の番地は?</p>
+    <div class="check"><input class="ans" placeholder="例 1004" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:1012</b></p><p>1000 + 3 × 4 = 1012。</p></div></details></div>
+
+  <div class="qbox" data-ans="4096"><div class="qno">問7 アドレス空間</div><p>16ビット固定長命令でオペコードが4ビットのとき、オペランドだけで指せる番地は何通り?</p>
+    <div class="check"><input class="ans" placeholder="例 256" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:4096</b></p><p>オペランドは 12 ビット → 2<sup>12</sup> = 4096 通り(000〜FFF)。アドレス空間 16 ビット(0000〜FFFF、65536 通り)の 1/16 しか指せません。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問8 記憶階層</div><p>CPU に近い記憶装置ほど、どうなる?</p>
+    <div class="opts"><button>大容量で低速</button><button data-ok>高速で小容量</button><button>高速で大容量</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問9 記憶装置</div><p>内部記憶装置に分類されるのは?</p>
+    <div class="opts"><button>ハードディスク</button><button>USB メモリ</button><button data-ok>キャッシュメモリ</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問10 記述</div><p>ノイマン・ボトルネックとは何か、説明しなさい。</p>
+    <details class="ans"><summary><span class="tag">解答例</span>解答例を見る<span class="tap"></span></summary><div class="body"><p>ノイマン型コンピュータでは、CPU と主記憶の間の命令やデータのやり取りがバスを通るため、CPU の処理能力を上げても、バスのデータ転送能力を上げなければ、全体としての性能が向上しないこと。</p></div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>シミュレータの命令は説明用に作った架空のものです。記憶階層の数値はおおよその目安です。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  /* ===== アドレッシング・シミュレータ ===== */
+  var MEM={100:107,101:42,102:110,103:7,104:99,105:13,106:101,107:58,108:3,109:104,110:25,111:64};
+  var MODES=[['imm','即値','#X'],['dir','直接','X'],['ind','間接','(X)'],['reg','レジスタ','(R3)'],['idx','インデックス','X(R2)'],['rel','自己相対','X(PC)']];
+  var mode='dir', ix=document.getElementById('ix'), ipc=document.getElementById('ipc'), ir2=document.getElementById('ir2'), ir3=document.getElementById('ir3');
+  var mb=document.getElementById('modes');
+  MODES.forEach(function(m){var b=document.createElement('button');b.type='button';b.textContent=m[1];b.setAttribute('data-m',m[0]);b.addEventListener('click',function(){mode=m[0];run();});mb.appendChild(b);});
+  function M(a){return MEM.hasOwnProperty(a)?MEM[a]:null;}
+  function run(){
+    var X=+ix.value, PC=+ipc.value, R2=+ir2.value, R3=+ir3.value, ea=null, ptr=null, val=null, st=[], hot=[];
+    mb.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-m')===mode?'true':'false');});
+    var m=MODES.filter(function(x){return x[0]===mode;})[0];
+    document.getElementById('instr').innerHTML='<span class="op">LD</span> R1, <span class="md">'+m[2].replace('X',X)+'</span>';
+    if(mode==='imm'){val=X;hot=['rX'];st=['オペランドの値 '+X+' が<b>データそのもの</b>。','主記憶は見ない → R1 = '+X];}
+    else if(mode==='dir'){ea=X;hot=['rX'];st=['実効アドレス = X = <b>'+X+'</b>','主記憶['+X+'] を読む'];}
+    else if(mode==='ind'){ptr=X;ea=M(X);hot=['rX'];st=['まず主記憶['+X+'] を読む → '+(ea===null?'範囲外':ea)+'(これは<b>番地</b>)','実効アドレス = <b>'+ea+'</b> → 主記憶['+ea+'] を読む'];}
+    else if(mode==='reg'){ea=R3;hot=['rR3'];st=['オペランドはレジスタ番号 R3','R3 の値 '+R3+' を実効アドレスにする → 主記憶['+R3+'] を読む'];}
+    else if(mode==='idx'){ea=R2+X;hot=['rX','rR2'];st=['実効アドレス = インデックスレジスタ R2('+R2+')+ 変位 X('+X+')= <b>'+ea+'</b>','主記憶['+ea+'] を読む'];}
+    else {ea=PC+X;hot=['rX','rPC'];st=['実効アドレス = PC('+PC+')+ X('+X+')= <b>'+ea+'</b>','主記憶['+ea+'] を読む'];}
+    if(mode!=='imm'){val=ea===null?null:M(ea); st.push(val===null?'<span style="color:var(--warn)">その番地は表の範囲(100〜111)外です。X などを変えてみよう</span>':'→ R1 = <b>'+val+'</b>');}
+    document.getElementById('how').innerHTML=st.map(function(s){return '<li>'+s+'</li>';}).join('');
+    document.getElementById('r1v').textContent=val===null?'—':val;
+    ['rX','rPC','rR2','rR3'].forEach(function(id){document.getElementById(id).classList.toggle('hot',hot.indexOf(id)>=0);});
+    var h='<tr><th>番地</th><th>内容</th></tr>';
+    Object.keys(MEM).forEach(function(a){a=+a;h+='<tr class="'+(a===ea?'ea':a===ptr?'ptr':'')+'"><td>'+a+'</td><td>'+MEM[a]+'</td></tr>';});
+    document.getElementById('mem').innerHTML=h;
+  }
+  [ix,ipc,ir2,ir3].forEach(function(e){e.addEventListener('input',run);}); run();
+
+  /* ===== 配列 ===== */
+  var base=document.getElementById('base'), idx=document.getElementById('idx');
+  function arr(){var b=+base.value||0,k=+idx.value,h='';for(var i=0;i<5;i++)h+='<div class="'+(i===k?'on':'')+'"><b>room['+i+']</b>'+(b+i*4)+'</div>';
+    document.getElementById('arr').innerHTML=h;
+    document.getElementById('arrf').innerHTML='room['+k+'] のアドレス = room + '+k+' = '+b+' + '+k+' × 4(int のバイト数)= <b>'+(b+k*4)+'</b>';}
+  base.addEventListener('input',arr); idx.addEventListener('change',arr); arr();
+
+  /* ===== アドレス空間 ===== */
+  function sp(){var w=+document.getElementById('wl').value,o=+document.getElementById('ol').value,p=w-o;
+    function hx(n){return n<=0?'—':'0 〜 '+((1<<n)-1).toString(16).toUpperCase().padStart(Math.ceil(n/4),'F').replace(/^/,'');}
+    function rng(n){return '('+'0'.repeat(Math.ceil(n/4))+' 〜 '+((2**n)-1).toString(16).toUpperCase().padStart(Math.ceil(n/4),'0')+')₁₆';}
+    document.getElementById('sps').innerHTML=
+      '<div class="stat"><div class="k">アドレス空間('+w+' ビット)</div><div class="v">'+(2**w).toLocaleString()+' 通り</div><div class="k mono">'+rng(w)+'</div></div>'+
+      '<div class="stat hl"><div class="k">オペランド('+w+' − '+o+' = '+p+' ビット)</div><div class="v">'+(p>0?(2**p).toLocaleString()+' 通り':'なし')+'</div><div class="k mono">'+(p>0?rng(p):'')+'</div></div>'+
+      '<div class="stat"><div class="k">直接指せる割合</div><div class="v">'+(p>0?'1 / '+(2**o):'—')+'</div></div>';}
+  document.getElementById('wl').addEventListener('change',sp); document.getElementById('ol').addEventListener('change',sp); sp();
+
+  /* ===== 記憶階層 ===== */
+  var H=[['レジスタ','CPU の中','約 0.3 ns','数百バイト',30],['キャッシュメモリ','CPU の中/すぐそば(内部記憶)','約 1〜10 ns','数十 KB 〜 数十 MB',48],['主記憶(メモリ)','マザーボード上(内部記憶)','約 100 ns','数 GB 〜 数十 GB',66],['SSD','外部記憶','約 0.1 ms(10万 ns)','数百 GB 〜 数 TB',84],['ハードディスク','外部記憶','約 10 ms(1000万 ns)','数 TB',100]];
+  var hr=document.getElementById('hier');
+  H.forEach(function(x,i){var d=document.createElement('div');d.setAttribute('role','button');d.tabIndex=0;d.style.width=x[4]+'%';d.style.opacity=(1-i*0.13);d.textContent=x[0];
+    function sel(){hr.querySelectorAll('div').forEach(function(y){y.setAttribute('aria-pressed','false');});d.setAttribute('aria-pressed','true');
+      document.getElementById('hmsg').innerHTML='<b>'+x[0]+'</b>('+x[1]+')<br>読み書きの時間:'+x[2]+' / 容量:'+x[3]+'<br>'+(i===0?'CPU にいちばん近く、いちばん速い。':i===4?'CPU からいちばん遠く、大容量だがいちばん遅い。':'上より大容量で遅く、下より小容量で速い。');}
+    d.addEventListener('click',sel);d.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();sel();}});hr.appendChild(d);});
+  hr.firstChild.click();
+
+  /* ===== ボトルネック ===== */
+  var cpu=document.getElementById('cpu'), bw=document.getElementById('bw');
+  function bn(){var c=+cpu.value,b=+bw.value,t=Math.min(c,b);
+    document.getElementById('cpuv').textContent=c;document.getElementById('bwv').textContent=b;document.getElementById('tot').style.width=(t*10)+'%';document.getElementById('totv').textContent=t;
+    document.getElementById('bmsg').textContent=c>b?'CPU は速いのに、バスがデータを運びきれず待たされています(ノイマン・ボトルネック)。バスの転送能力を上げないと性能は '+b+' のまま。':c<b?'今は CPU の処理能力が全体の性能を決めています。':'CPU とバスの能力がつり合っています。';}
+  cpu.addEventListener('input',bn); bw.addEventListener('input',bn); bn();
+})();
+</script>
+</body>
+</html>

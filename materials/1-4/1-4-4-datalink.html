@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>データリンク層</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+:root{--u1:#1F6FB2;--u2:#C77700;--u3:#1C8A5A;--u4:#8A5CC7}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--u1:#6DB3F2;--u2:#F2BE3A;--u3:#5CC993;--u4:#B99AF0}}
+:root[data-theme="dark"]{--u1:#6DB3F2;--u2:#F2BE3A;--u3:#5CC993;--u4:#B99AF0}
+.sw{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.sw button{font:inherit;font-size:.85rem;font-weight:700;padding:5px 11px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.swsim{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;align-items:start}
+.swsim svg{width:100%;display:block}
+.swsim .ln{stroke:var(--line);stroke-width:3}
+.swsim .ln.fw{stroke:var(--accent);stroke-width:5}
+.swsim .ln.fl{stroke:var(--mark);stroke-width:5;stroke-dasharray:8 5}
+.swsim .ln.src{stroke:var(--ok);stroke-width:5}
+.swsim .pc{fill:var(--paper);stroke:var(--line);stroke-width:2}
+.swsim .pc.s{stroke:var(--ok);stroke-width:3}.swsim .pc.d{stroke:var(--accent);stroke-width:3}
+.swsim .sw2{fill:var(--ink)}
+.swsim text{font-size:12px;fill:var(--ink);font-family:"JetBrains Mono",monospace}
+.swsim text.w{fill:var(--paper);font-weight:700;font-family:inherit}
+.mt td{font-family:"JetBrains Mono",monospace;font-size:.78rem}
+.mt tr.new td{background:var(--mark-soft)}
+@media (max-width:600px){.swsim{grid-template-columns:1fr}}
+.medium{display:flex;height:34px;border-radius:8px;overflow:hidden;margin:8px 0;background:var(--dim)}
+.medium span{flex:1;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem}
+.frame{display:flex;flex-wrap:wrap;gap:2px;margin:8px 0}
+.frame span{padding:6px 6px;border-radius:5px;color:#fff;font-size:.72rem;font-weight:700;text-align:center;line-height:1.3}
+.frame small{display:block;font-weight:400;opacity:.9}
+.macin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.05rem;padding:7px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;max-width:280px}
+.octs{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.octs div{text-align:center;border-radius:6px;padding:4px 6px;font-family:"JetBrains Mono",monospace;font-size:.8rem}
+.octs .v{background:var(--accent-soft)}.octs .s{background:var(--mark-soft)}
+.octs b{display:block;font-size:1rem}
+.grid8 svg{width:100%;max-width:440px;display:block;margin:0 auto}
+.grid8 text{font-size:11px;fill:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>データリンク層</h1>
+  <p>情報通信ネットワーク 第4回(#4 データリンク層)のまとめです。同じネットワークの中で、ケーブルや電波で直接つながった機器同士がどうやって確実にフレームを届けているのかを学びます。スライドの空欄は <span style="display:inline-block;min-width:2.4em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0">?</span> になっていて、タップすると答えが出ます。</p>
+  <div class="demo">
+    <label>スイッチのアドレス学習:送信元と宛先を選んで送ってみよう</label>
+    <div class="row"><label for="ssrc">送信元</label><select id="ssrc"></select><label for="sdst">宛先</label><select id="sdst"></select><button class="btn" id="ssend" type="button">送信</button><button class="btn sub" id="sreset" type="button">テーブルを消す</button></div>
+    <div class="swsim"><svg id="ssvg" viewBox="0 0 360 260" role="img" aria-label="スイッチと4台のPC"></svg>
+      <div><div style="font-size:.78rem;font-weight:700;color:var(--sub)">MAC アドレステーブル</div><div class="tbl" style="margin:4px 0"><table class="mt" id="stab"></table></div></div></div>
+    <div class="msg" id="smsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.92rem" aria-live="polite"></div>
+  </div>
+</header>
+
+<div class="blbar"><span class="t">穴埋め:<span id="blcount"></span></span><button class="btn sub" id="blhide" type="button">すべて隠す</button><button class="btn sub" id="blshow" type="button">すべて表示</button></div>
+
+<nav class="toc">
+  <a href="#role">役割</a><a href="#mac">MACアドレス</a><a href="#bridge">ブリッジ</a><a href="#share">媒体共有</a><a href="#csma">CSMA/CD</a><a href="#eth">Ethernet</a><a href="#wl">無線</a><a href="#ma">多元接続</a><a href="#pub">公衆アクセス網</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="role">
+  <h2><span class="no">1</span>データリンク層の役割</h2>
+  <ul>
+    <li>TCP/IP 階層モデルではネットワークインタフェース層にあたる。送信時はインターネット層から受け取ったパケットを<b>フレーム</b>として組み立て、受信時は物理層から受け取ったビット列をフレームとして認識する。</li>
+    <li>2つの副層からなる。
+      <ul><li><b>LLC</b>(Logical Link Control)副層 … <b class="bl">ソフトウェア的な</b> 部分。機器に依存しない論理的な処理(データをどう扱うか)。物理層の違いを吸収する。</li>
+      <li><b>MAC</b>(Media Access Control)副層 … <b class="bl">ハードウェア的な</b> 部分。物理層とのデータの受け渡し(データをどう送るか)。</li></ul></li>
+    <li>物理層から MAC 副層までをまとめて通信規格として標準化:有線LAN = IEEE 802.3、無線LAN(Wi-Fi)= IEEE 802.11、無線PAN(Bluetooth 等)= IEEE 802.15、無線MAN(WiMAX)= IEEE 802.16。LLC は IEEE 802.2。</li>
+  </ul>
+  <p>同一ネットワーク内で、通信媒体で <b class="bl">直接接続</b> された機器同士の通信を、確実かつ効率的に行う機能を提供する。</p>
+  <div class="tbl"><table>
+    <tr><th>送信時</th><th>受信時</th></tr>
+    <tr><td>送信元と宛先の <b class="bl">MACアドレス</b> をヘッダに設定/データが壊れていないか確かめる情報(FCS)をトレーラの <b class="bl">末尾</b> に追加</td><td>宛先 MAC アドレスを見て、自分宛てか確認/FCS で伝送中にデータが壊れていないかチェック → ペイロードをインターネット層へ</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="mac">
+  <h2><span class="no">2</span>MAC アドレス</h2>
+  <ul>
+    <li>データリンクに接続しているノードを特定する識別子。製造時に NIC の ROM に焼き込まれ、世界中で重複しない。通常ユーザは設定しない。</li>
+    <li>最近のスマートフォンは、プライバシー対策としてランダムに設定する場合がある。</li>
+    <li><b class="bl">48 ビット</b> の長さ。前半 24 ビット = <b>ベンダ識別子</b>(IEEE が割り当てた製造メーカー番号)、後半 24 ビット = <b>ベンダ内での識別子</b>(製造番号)。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>MAC アドレスを分解する</div>
+    <input id="macin" class="macin" value="00:00:5E:00:53:FF" aria-label="MACアドレス" autocomplete="off" spellcheck="false">
+    <div class="sw" id="macex"><button data-v="00:00:5E:00:53:FF">説明用の例</button><button data-v="3A:7C:91:0B:22:5D">スマホのランダムMAC</button><button data-v="FF:FF:FF:FF:FF:FF">ブロードキャスト</button></div>
+    <div class="octs" id="octs"></div>
+    <div class="stats" id="macst"></div>
+  </div>
+</section>
+
+<section class="task" id="bridge">
+  <h2><span class="no">3</span>ブリッジ/レイヤ2スイッチ</h2>
+  <ul>
+    <li><b class="bl">ブリッジ</b>:データリンク層でネットワークを接続する装置。フレームをメモリに蓄積して相手側に送り出す。末尾の FCS をチェックし、壊れたフレームは転送しない。</li>
+    <li><b class="bl">レイヤ2スイッチ</b>(スイッチングハブ):見た目はハブ(リピータハブ)と区別がつかないが、全ポートがブリッジのように動く。現在はほとんどがこれ。</li>
+    <li><b>アドレス学習機能とフィルタリング機能</b>:受信したフレームの送信元 MAC アドレスを内部のテーブルに一定時間記録(<b class="bl">アドレス学習</b>)し、宛先の機器がつながるポートにだけ転送する。テーブルにない宛先なら<b>全ポートへ送信</b>。ページ上部で試せます。</li>
+  </ul>
+</section>
+
+<section class="task" id="share">
+  <h2><span class="no">4</span>ネットワークトポロジーと媒体の使い方</h2>
+  <p><b>ネットワークトポロジー</b>:ネットワークの接続形態(物理的な配線の形と論理的な形の両方を表す)。</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>媒体共有型</th><th>媒体非共有型</th></tr>
+    <tr><td>しくみ</td><td>通信媒体を複数ノードで共有</td><td>媒体を共有せず専有(ノードとスイッチのポートが1対1)</td></tr>
+    <tr><td>例</td><td>初期の Ethernet(バス型)、FDDI(リング型)</td><td>現在の Ethernet(スター型)</td></tr>
+    <tr><td>通信</td><td><b class="bl">半二重通信</b>:送信と受信を同時にできない → 通信の優先権を制御する仕組みが必要</td><td><b class="bl">全二重通信</b>:UTP 内の別々の線で送受信するので同時にできる</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="csma">
+  <h2><span class="no">5</span><b class="bl">CSMA/CD</b></h2>
+  <p>媒体共有型で、データ送受信時の衝突(<b class="bl">コリジョン</b>)を回避・解決するしくみ。</p>
+  <div class="tbl"><table>
+    <tr><td><b>CS</b>:<b class="bl">キャリア</b>(搬送波)検知</td><td>送信前に回線を確認。搬送波があれば他の機器が通信中なので待つ。なければ送信開始</td></tr>
+    <tr><td><b>MA</b>:多重アクセス</td><td>1つの回線を多数の端末がタイミングをずらして共有</td></tr>
+    <tr><td><b>CD</b>:衝突検知</td><td>同時に送るとコリジョンが起き、正しい <b class="bl">信号</b> ではなくなる。すぐ送信をやめてジャム信号を送る。ジャム信号を受けた機器は通信を止め、<b class="bl">ランダム</b> な時間待ってから CS に戻る</td></tr>
+  </table></div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>A と B が同時に送ろうとすると</div>
+    <div class="medium" id="cmed"></div>
+    <div class="msg" id="cmsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.92rem;min-height:3.2em" aria-live="polite"></div>
+    <div class="row"><button class="btn" id="cnext" type="button">次へ</button><button class="btn sub" id="creset" type="button">最初から</button><span class="legend" id="cstep"></span></div>
+  </div>
+</section>
+
+<section class="task" id="eth">
+  <h2><span class="no">6</span>Ethernet</h2>
+  <ul>
+    <li>現在最も普及しているデータリンク規格。Xerox と旧 DEC が考案し、その後 <b class="bl">IEEE802.3</b> 委員会で規格化(両者でフレーム形式に違いがある)。</li>
+    <li>規格名の読み方:<span class="mono">1000BASE-T</span> = 1000Mbps・ベースバンド転送・ツイストペアケーブル(F = 光ファイバー、X = FDDI 由来)。</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th>規格</th><th>最大長</th><th>ケーブル</th></tr>
+    <tr><td>10BASE2 / 10BASE5</td><td>185m / 500m</td><td>同軸</td></tr>
+    <tr><td>100BASE-TX</td><td>100m</td><td>UTP/STP(CAT5)</td></tr>
+    <tr><td>100BASE-FX</td><td>1000m</td><td>光(マルチモード)</td></tr>
+    <tr><td>1000BASE-T / 10GBASE-T</td><td>100m</td><td>UTP/STP(CAT6 / CAT6A)</td></tr>
+    <tr><td>100GBASE-LR4</td><td>10km</td><td>光(シングルモード)</td></tr>
+  </table></div>
+  <h3>フレームフォーマット</h3>
+  <ul>
+    <li>先頭に 1 と 0 が交互に並ぶ <b class="bl">プリアンブル</b>(8 オクテット)。NIC にフレームの始まりを知らせ、<b class="bl">同期</b> を取るタイミングを与える。末尾が 11 の SFD で終わる。(オクテット = 8 ビット)</li>
+    <li>ヘッダ(14 オクテット):宛先 MAC・送信元 MAC・タイプ(上位層プロトコル)。タイプ例:0x0800 = IPv4、0x0806 = ARP、0x86DD = IPv6。</li>
+    <li>データ(46〜1500 オクテット)、トレーラ(4 オクテット)= FCS。<b>CRC</b>(誤り検出方式の一種)で、送信側の計算値と受信側の計算値が同じなら誤りなし。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>送るデータの大きさとフレーム</div>
+    <div class="row"><label for="pl">上位層のデータ <b id="plv"></b> オクテット</label><input id="pl" type="range" min="1" max="1500" value="20"></div>
+    <div class="frame" id="frm"></div>
+    <div class="stats" id="frst"></div>
+  </div>
+</section>
+
+<section class="task" id="wl">
+  <h2><span class="no">7</span>無線通信</h2>
+  <p>通信距離で PAN・LAN・MAN・RAN・WAN に分類される。</p>
+  <h3>無線LAN</h3>
+  <ul>
+    <li><b class="bl">IEEE802.11</b> ワーキンググループが規格を標準化。</li>
+    <li><b class="bl">2.4</b> GHz 帯:障害物に強く届きやすいが、干渉が多く遅い。<b class="bl">5</b> GHz 帯:障害物に弱いが、干渉が少なく速い。</li>
+    <li>新しい規格ほど高速。Wi-Fi 5 以上を活かすには、10Gbps 対応のルータ/スイッチと CAT6A 以上のケーブルが必要。</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th>呼称</th><th>規格</th><th>策定</th><th>周波数帯</th><th>最大速度</th></tr>
+    <tr><td>—</td><td>802.11b / a / g</td><td>1999〜2003</td><td>2.4 / 5 / 2.4GHz</td><td>11 / 54 / 54Mbps</td></tr>
+    <tr><td>Wi-Fi 4</td><td>802.11n</td><td>2009</td><td>2.4, 5GHz</td><td>600Mbps</td></tr>
+    <tr><td>Wi-Fi 5</td><td>802.11ac</td><td>2014</td><td>5GHz</td><td>6.9Gbps</td></tr>
+    <tr><td>Wi-Fi 6 / 6E</td><td>802.11ax</td><td>2019 / 2022</td><td>2.4, 5(, 6)GHz</td><td>9.6Gbps</td></tr>
+    <tr><td>Wi-Fi 7</td><td>802.11be</td><td>2024</td><td>2.4, 5, 6GHz</td><td>36Gbps(6GHz)</td></tr>
+  </table></div>
+  <ul>
+    <li><b class="bl">インフラストラクチャ</b> モード:基地局(<b class="bl">アクセスポイント</b>)を介して通信。SSID を指定して接続。</li>
+    <li><b class="bl">アドホック</b> モード:アクセスポイントなしで端末同士が直接通信(携帯ゲーム機のローカル通信、車車間通信など)。</li>
+    <li><b>Bluetooth</b>:無線PAN。<b class="bl">IEEE802.15.1</b> として標準化され、無線LANと同じ <b class="bl">2.4G</b> Hz 帯を使う。4.0 で低消費電力の BLE が策定され IoT で活用(3.0 以前とは互換性なし)。</li>
+    <li><b>WiMAX</b>:無線MAN。<b class="bl">IEEE802.16</b> で標準化。最長 50km、最大 70Mbps。携帯向けの Mobile WiMAX(802.16e)もある。</li>
+  </ul>
+</section>
+
+<section class="task" id="ma">
+  <h2><span class="no">8</span>無線のアクセス制御と多元接続</h2>
+  <p>無線は電波を全員で共有し、送信しながら衝突を検知できない。そのため衝突を<b>回避</b>する方式(<b>CSMA/CA</b>:送信前に空きを確認し、ランダムバックオフでタイミングをずらす。無線LAN)と、通信領域を最初から分けて割り当てる<b>多元接続</b>がある。</p>
+  <div class="panel grid8">
+    <div class="ptitle"><span class="badge">見る</span>4人(色)が1つの通信路を分け合う方法</div>
+    <div class="sw" id="mam"><button data-k="tdma">TDMA</button><button data-k="fdma">FDMA</button><button data-k="cdma">CDMA</button><button data-k="ofdma">OFDMA</button></div>
+    <svg id="masvg" viewBox="0 0 440 250" role="img" aria-label="時間と周波数の割り当て図"></svg>
+    <div class="msg" id="mamsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.9rem" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="pub">
+  <h2><span class="no">9</span>公衆アクセス網</h2>
+  <ul>
+    <li>LAN と外部をつなぐネットワーク:アナログ電話回線、移動体通信、ADSL、FTTH、CATV、専用回線、公衆無線LAN など。</li>
+    <li><b>アナログ電話回線</b>:音声の帯域でダイアルアップ接続。モデムが必要。56kbps と非常に低速(多くの ISP がサービス終了)。</li>
+    <li><b>FTTH</b>(Fiber To The Home):光ファイバーを建物内に引き込み、光回線終端装置(ONU)で光信号を電気信号に変換。常時安定した高速通信。通常は送受信で2本使うが、FTTH では <b>WDM</b>(波長分割多重)で1本で送受信する。</li>
+  </ul>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox" data-ans="48"><div class="qno">問1</div><p>MAC アドレスは何ビット?</p>
+    <div class="check"><input class="ans" placeholder="例 32" aria-label="問1の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox"><div class="qno">問2</div><p>スイッチが、宛先 MAC アドレスがテーブルにないフレームを受け取ったときの動作は?</p>
+    <div class="opts"><button>フレームを捨てる</button><button data-ok>受信ポート以外の全ポートへ送る</button><button>送信元に送り返す</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3</div><p>現在のスター型 Ethernet(スイッチ接続)の通信方式は?</p>
+    <div class="opts"><button>半二重通信</button><button data-ok>全二重通信</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問4</div><p>CSMA/CD で、コリジョンを検知した機器がまず行うことは?</p>
+    <div class="opts"><button>そのまま送り続ける</button><button data-ok>送信を中止してジャム信号を送る</button><button>決まった時間だけ待つ</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問5</div><p>Ethernet のタイプフィールドが 0x0806 のとき、上位層のプロトコルは?</p>
+    <div class="opts"><button>IPv4</button><button data-ok>ARP</button><button>IPv6</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="64"><div class="qno">問6</div><p>上位層のデータが 20 オクテットのとき、Ethernet フレーム(ヘッダ+データ+FCS、プリアンブルを除く)は何オクテット?</p>
+    <div class="check"><input class="ans" placeholder="例 38" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:64</b></p><p>データ部は最低 46 オクテットなので、20 オクテットに 26 オクテットの詰め物(パディング)を足す。14 + 46 + 4 = 64。これが Ethernet の最小フレーム長です。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問7</div><p>無線LANで衝突を避けるために使われるアクセス制御方式は?</p>
+    <div class="opts"><button>CSMA/CD</button><button data-ok>CSMA/CA</button><button>TDMA</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問8</div><p>2.4GHz 帯と 5GHz 帯の比較で正しいのは?</p>
+    <div class="opts"><button>5GHz 帯の方が障害物に強い</button><button data-ok>2.4GHz 帯は届きやすいが干渉が多い</button><button>2.4GHz 帯の方が速い</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問9</div><p>アクセスポイントを使わずに端末同士が直接通信するモードは?</p>
+    <div class="opts"><button>インフラストラクチャモード</button><button data-ok>アドホックモード</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問10</div><p>周波数帯域を細かいサブキャリアに分けて複数の端末に割り当てる、4G/5G や Wi-Fi 6 の方式は?</p>
+    <div class="opts"><button>FDMA</button><button>CDMA</button><button data-ok>OFDMA</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>名城大学 情報工学部「情報通信ネットワーク」#4 のスライドをもとに作成しました。穴埋めの答えは教科書(マスタリングTCP/IP 入門編)の用語に合わせて補っています。授業での解答と違う場合は授業を優先してください。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  /* ===== スイッチ ===== */
+  var PCS=[['A','00:1A:2B:00:00:0A',1,60,40],['B','00:1A:2B:00:00:0B',2,300,40],['C','00:1A:2B:00:00:0C',3,60,220],['D','00:1A:2B:00:00:0D',4,300,220]];
+  var tab={}, last=null, ss=document.getElementById('ssrc'), sd=document.getElementById('sdst');
+  PCS.forEach(function(p,i){ss.add(new Option('PC '+p[0],i));sd.add(new Option('PC '+p[0],i));}); sd.value=3;
+  function drawS(st){
+    var h='';
+    PCS.forEach(function(p,i){var cls='ln'; if(st){ if(i===st.s) cls+=' src'; else if(st.flood) cls+=' fl'; else if(i===st.d) cls+=' fw';} h+='<line class="'+cls+'" x1="180" y1="130" x2="'+p[3]+'" y2="'+p[4]+'"/>';});
+    h+='<rect class="sw2" x="135" y="108" width="90" height="44" rx="8"/><text class="w" x="180" y="135" text-anchor="middle">スイッチ</text>';
+    PCS.forEach(function(p,i){var c='pc'+(st&&i===st.s?' s':st&&i===st.d?' d':'');
+      h+='<rect class="'+c+'" x="'+(p[3]-44)+'" y="'+(p[4]-22)+'" width="88" height="44" rx="8"/><text x="'+p[3]+'" y="'+(p[4]-4)+'" text-anchor="middle" style="font-weight:700;font-family:inherit">PC '+p[0]+'(ポート'+p[2]+')</text><text x="'+p[3]+'" y="'+(p[4]+13)+'" text-anchor="middle" style="font-size:9.5px">'+p[1].slice(-8)+'</text>';});
+    document.getElementById('ssvg').innerHTML=h;
+    var rows=Object.keys(tab);
+    document.getElementById('stab').innerHTML='<tr><th>MAC アドレス</th><th>ポート</th></tr>'+(rows.length?rows.map(function(m){return '<tr class="'+(m===last?'new':'')+'"><td>'+m+'</td><td>'+tab[m]+'</td></tr>';}).join(''):'<tr><td colspan="2" style="color:var(--sub)">(空)</td></tr>');
+  }
+  document.getElementById('ssend').addEventListener('click',function(){
+    var s=+ss.value, d=+sd.value, msg;
+    if(s===d){document.getElementById('smsg').textContent='送信元と宛先が同じです。別の PC を選んでください。';return;}
+    var sm=PCS[s][1], dm=PCS[d][1], known=tab.hasOwnProperty(dm), learned=!tab.hasOwnProperty(sm);
+    tab[sm]=PCS[s][2]; last=learned?sm:null;
+    msg=(learned?'① <b>アドレス学習</b>:送信元 '+sm+' はポート'+PCS[s][2]+' にいる、とテーブルに記録。<br>':'① 送信元 '+sm+' はすでにテーブルにある。<br>')+
+      (known?'② <b>フィルタリング</b>:宛先 '+dm+' はテーブルにある(ポート'+tab[dm]+')ので、<b>そのポートにだけ</b>転送(青)。他の PC には流れない。':'② 宛先 '+dm+' はテーブルに<b>ない</b>ので、受信ポート以外の<b>全ポートへ送信</b>(黄の点線)。PC '+PCS[d][0]+' 以外は自分宛てでないので捨てる。');
+    drawS({s:s,d:d,flood:!known}); document.getElementById('smsg').innerHTML=msg;
+  });
+  document.getElementById('sreset').addEventListener('click',function(){tab={};last=null;drawS();document.getElementById('smsg').textContent='テーブルは空です。まず A → D に送ってみましょう。そのあと D → A に送ると違いが分かります。';});
+  drawS(); document.getElementById('smsg').textContent='テーブルは空です。まず A → D に送ってみましょう。そのあと D → A に送ると違いが分かります。';
+
+  /* ===== CSMA/CD ===== */
+  var C=[[['空き','var(--sub)']],'回線は空いている。A と B が同時に送信したくなった。',
+    [['A も B も「搬送波なし」と判断','var(--sub)']],'<b>CS(キャリア検知)</b>:A も B も回線を確認。誰も送っていないので、ほぼ同時に送信を開始。',
+    [['A','var(--u1)'],['衝突!','var(--warn)'],['B','var(--u2)']],'<b>コリジョン</b>:信号がぶつかって、正しい信号ではなくなった。',
+    [['ジャム信号','var(--warn)']],'<b>CD(衝突検知)</b>:A と B は衝突に気づき、すぐ送信をやめてジャム信号を送る。受け取った機器は通信を止める。',
+    [['A:ランダムに 2 待つ','var(--u1)'],['B:ランダムに 5 待つ','var(--u2)']],'それぞれ<b>ランダムな時間</b>待つ。待ち時間がバラバラなので、次は同時になりにくい。',
+    [['A 送信中','var(--u1)']],'先に待ち終わった A が CS → 空いているので送信。B は搬送波を検知して待機。',
+    [['B 送信中','var(--u2)']],'A が終わったあと、B が CS → 空いているので送信。2台とも無事に送れた。'];
+  var ci=0;
+  function drawC(){var segs=C[ci*2], m=C[ci*2+1];
+    document.getElementById('cmed').innerHTML=segs.map(function(s){return '<span style="background:'+s[1]+'">'+s[0]+'</span>';}).join('');
+    document.getElementById('cmsg').innerHTML=m; document.getElementById('cstep').textContent=(ci+1)+' / '+(C.length/2);
+    document.getElementById('cnext').disabled=ci>=C.length/2-1;}
+  document.getElementById('cnext').addEventListener('click',function(){ci++;drawC();});
+  document.getElementById('creset').addEventListener('click',function(){ci=0;drawC();});
+  drawC();
+
+  /* ===== フレーム ===== */
+  var pl=document.getElementById('pl');
+  function drawF(){var d=+pl.value, pad=Math.max(0,46-d), tot=14+d+pad+4;
+    document.getElementById('plv').textContent=d;
+    var parts=[['プリアンブル',8,'var(--sub)'],['宛先MAC',6,'var(--u1)'],['送信元MAC',6,'var(--u1)'],['タイプ',2,'var(--u1)'],['データ',d,'var(--ink)'],['パディング',pad,'var(--u4)'],['FCS',4,'var(--u3)']];
+    document.getElementById('frm').innerHTML=parts.filter(function(p){return p[1]>0;}).map(function(p){var w=Math.max(46,Math.min(360,p[1]*0.6));return '<span style="background:'+p[2]+';min-width:'+w+'px'+(p[0]==='データ'?';color:var(--paper)':'')+'">'+p[0]+'<small>'+p[1]+'</small></span>';}).join('');
+    document.getElementById('frst').innerHTML='<div class="stat hl"><div class="k">フレーム長(ヘッダ+データ+FCS)</div><div class="v">'+tot+' オクテット</div></div>'+
+      '<div class="stat"><div class="k">詰め物(パディング)</div><div class="v">'+pad+'</div></div>'+
+      '<div class="stat"><div class="k">データの割合(プリアンブル込み)</div><div class="v">'+(d/(tot+8)*100).toFixed(1)+'%</div></div>';}
+  pl.addEventListener('input',drawF); drawF();
+
+  /* ===== MAC ===== */
+  var mi=document.getElementById('macin');
+  function drawMac(){
+    var hx=mi.value.replace(/[^0-9a-fA-F]/g,'').toUpperCase();
+    if(hx.length!==12){document.getElementById('octs').innerHTML='<div style="color:var(--warn)">16進数12桁(例 00:00:5E:00:53:FF)で入力してください</div>';document.getElementById('macst').innerHTML='';return;}
+    var o=[];for(var i=0;i<6;i++)o.push(hx.substr(i*2,2));
+    document.getElementById('octs').innerHTML=o.map(function(x,i){return '<div class="'+(i<3?'v':'s')+'"><b>'+x+'</b>'+parseInt(x,16).toString(2).padStart(8,'0')+'</div>';}).join('');
+    var b0=parseInt(o[0],16), ig=b0&1, ul=(b0>>1)&1, bc=hx==='FFFFFFFFFFFF';
+    document.getElementById('macst').innerHTML=
+      '<div class="stat"><div class="k">前半 24 ビット(ベンダ識別子)</div><div class="v">'+o.slice(0,3).join(':')+'</div></div>'+
+      '<div class="stat"><div class="k">後半 24 ビット(ベンダ内の識別子)</div><div class="v">'+o.slice(3).join(':')+'</div></div>'+
+      '<div class="stat hl"><div class="k">種類(1オクテット目の下位2ビットで判別)</div><div class="v" style="font-family:inherit;font-size:.9rem">'+(bc?'ブロードキャスト(全員宛て)':ig?'マルチキャスト(グループ宛て)':ul?'ローカル管理(ランダム MAC など。ベンダ識別子ではない)':'メーカーが割り当てた世界で一意のアドレス')+'</div></div>';
+  }
+  mi.addEventListener('input',drawMac);
+  document.querySelectorAll('#macex button').forEach(function(b){b.type='button';b.addEventListener('click',function(){mi.value=b.getAttribute('data-v');drawMac();});});
+  drawMac();
+
+  /* ===== 多元接続 ===== */
+  var MA={tdma:['TDMA(時分割)','時間を区切って順番に送信権を割り当てる。全員が同じ周波数を、時間をずらして使う。(1G携帯、ラジオ)'],
+    fdma:['FDMA(周波数分割)','周波数を区切って、それぞれに専用の帯域を割り当てる。全員が同時に、別々の周波数で送る。(2G携帯、PHS)'],
+    cdma:['CDMA(符号分割)','全員が同じ時間・同じ周波数で同時に送り、ユーザごとに違う符号を掛けて区別する。(3G携帯、GPS)'],
+    ofdma:['OFDMA','帯域を細かいサブキャリアに分け、時間ごとに必要な分だけ複数の端末に割り当てる。効率がよい。(4G/LTE・5G、Wi-Fi 6)']};
+  var mk='tdma', sv=document.getElementById('masvg');
+  function drawMA(){
+    document.querySelectorAll('#mam button').forEach(function(b){b.type='button';b.setAttribute('aria-pressed',b.getAttribute('data-k')===mk?'true':'false');});
+    var L=40,T=8,cw=48,ch=26,N=8,h='', cols=['var(--u1)','var(--u2)','var(--u3)','var(--u4)'];
+    var OF=[[0,0,1,1,2,2,3,3],[0,0,1,1,2,2,3,3],[0,0,0,1,1,2,3,3],[1,1,0,0,3,3,2,2],[1,1,0,0,3,3,2,2],[2,2,3,3,0,0,1,1],[2,3,3,3,0,0,1,1],[3,3,2,2,1,1,0,0]];
+    for(var y=0;y<N;y++)for(var x=0;x<N;x++){
+      var X=L+x*cw, Y=T+y*ch;
+      if(mk==='cdma'){for(var k=0;k<4;k++) h+='<rect x="'+(X+1)+'" y="'+(Y+1+k*(ch-2)/4)+'" width="'+(cw-2)+'" height="'+((ch-2)/4)+'" style="fill:'+cols[k]+'"/>';}
+      else{var u=mk==='tdma'?x%4:mk==='fdma'?Math.floor(y/2):OF[y][x]; h+='<rect x="'+(X+1)+'" y="'+(Y+1)+'" width="'+(cw-2)+'" height="'+(ch-2)+'" rx="3" style="fill:'+cols[u]+'"/>';}
+    }
+    h+='<text x="'+(L+N*cw/2)+'" y="'+(T+N*ch+20)+'" text-anchor="middle">時間 →</text><text x="12" y="'+(T+N*ch/2)+'" transform="rotate(-90 12 '+(T+N*ch/2)+')" text-anchor="middle">周波数 →</text>';
+    sv.innerHTML=h; document.getElementById('mamsg').innerHTML='<b>'+MA[mk][0]+'</b>:'+MA[mk][1];
+  }
+  document.querySelectorAll('#mam button').forEach(function(b){b.addEventListener('click',function(){mk=b.getAttribute('data-k');drawMA();});});
+  drawMA();
+})();
+</script>
+</body>
+</html>
