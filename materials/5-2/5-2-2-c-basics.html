@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>C言語の基本構造</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.anno{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:8px 0;font-family:"JetBrains Mono",monospace;font-size:.88rem;overflow-x:auto}
+.anno .l{display:flex;gap:12px;padding:1px 12px;cursor:pointer;white-space:pre;border-left:3px solid transparent}
+.anno .l .no{color:var(--c-com);min-width:1.4em;text-align:right;user-select:none}
+.anno .l:hover{background:#ffffff10}
+.anno .l.on{background:#ffffff1c;border-left-color:var(--mark)}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:10px 0}
+.flow .b{flex:1;min-width:110px;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.85rem}
+.flow .b b{display:block;font-size:.9rem}
+.flow .b .f{font-family:"JetBrains Mono",monospace;font-size:.75rem;color:var(--accent)}
+.flow .a{display:flex;align-items:center;color:var(--sub);font-size:.8rem;text-align:center}
+.idin,.fmtin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:1rem;padding:7px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.out{font-family:"JetBrains Mono",monospace;background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:8px 12px;white-space:pre;overflow-x:auto;margin-top:6px}
+.out .sp{background:#ffffff22;border-radius:2px}
+.trace{width:100%;font-size:.85rem}
+.trace td{font-family:"JetBrains Mono",monospace}
+.trace tr.cur td{background:var(--mark-soft);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>C言語の基本構造</h1>
+  <p>C言語のプログラムが「どんな部品で、どんな順番に」できているかをまとめたページです。課題を解く前の確認や、用語(宣言・定義・式・文…)の意味を調べたいときに使ってください。</p>
+  <div class="demo">
+    <label>まずは全体像:行をタップすると、その行の意味が出ます</label>
+    <div class="anno" id="anno"></div>
+    <div class="msg" id="amsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;margin-top:10px;font-size:.92rem;min-height:3.2em" aria-live="polite"></div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#build">できるまで</a><a href="#stmt">文とブロック</a><a href="#ident">識別子</a><a href="#var">変数と型</a><a href="#const">定数</a><a href="#io">入出力</a><a href="#ctrl">制御構造</a><a href="#func">関数</a><a href="#arr">配列と文字列</a><a href="#terms">用語集</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="build">
+  <h2><span class="no">1</span>プログラムができるまで</h2>
+  <p>人が書いた<b>ソースファイル</b>(.c)は、そのままでは実行できません。次の順に変換されて<b>実行ファイル</b>になります。Visual Studio の「ビルド」ボタンは、これを全部まとめて行っています。</p>
+  <div class="flow">
+    <div class="b"><b>ソースファイル</b><span class="f">main.c</span><br>人が書くテキスト</div><div class="a">→</div>
+    <div class="b"><b>プリプロセッサ</b><span class="f">#include, #define</span><br># で始まる行を処理(ファイルの取り込み・置き換え)</div><div class="a">→</div>
+    <div class="b"><b>コンパイラ</b><span class="f">main.obj</span><br>文法をチェックし、機械語に翻訳</div><div class="a">→</div>
+    <div class="b"><b>リンカ</b><span class="f">main.exe</span><br>printf などのライブラリとつなげる</div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>エラーの種類</th><th>いつ見つかる</th><th>例</th></tr>
+    <tr><td><b>コンパイルエラー</b></td><td>コンパイル時(実行前)</td><td>セミコロン忘れ、変数の宣言忘れ、スペルミス</td></tr>
+    <tr><td><b>リンクエラー</b></td><td>リンク時</td><td><span class="mono">main</span> を <span class="mono">mian</span> と書いた、関数の本体がない</td></tr>
+    <tr><td><b>実行時エラー・バグ</b></td><td>実行してから</td><td>0 で割る、scanf の &amp; 忘れ、答えが違う</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="stmt">
+  <h2><span class="no">2</span>文・ブロック・コメント</h2>
+  <ul>
+    <li><b>文</b>(statement):処理の1単位。最後に <b>セミコロン <span class="mono">;</span></b> を付ける。<span class="mono">x = 3;</span> や <span class="mono">printf("hi");</span></li>
+    <li><b>式</b>(expression):値を持つもの。<span class="mono">3 + 4</span>、<span class="mono">x &gt; 0</span>、<span class="mono">x = 3</span>(代入も式)。式の後ろに ; を付けると文になる。</li>
+    <li><b>ブロック</b>:<span class="mono">{ }</span> で囲んだ文のまとまり。if や for の中身、関数の本体になる。ブロックの後ろには ; を付けない。</li>
+    <li><b>コメント</b>:<span class="mono">/* 〜 */</span>(複数行可)と <span class="mono">// 〜</span>(行末まで)。コンパイラは無視する。</li>
+    <li><b>インデント</b>(字下げ):コンパイラは無視するが、ブロックの入れ子を人が読みやすくするために必ず付ける。</li>
+  </ul>
+  <div class="warn"><b>よくあるミス</b>:<span class="mono">if (x &gt; 0);</span> のように if の直後に ; を書くと、「何もしない文」が if の中身になり、次の { } は条件に関係なく必ず実行されます。</div>
+</section>
+
+<section class="task" id="ident">
+  <h2><span class="no">3</span>識別子と予約語</h2>
+  <p><b>識別子</b>:変数や関数につける名前。次のルールがあります。</p>
+  <ul>
+    <li>使える文字は 英字(A〜Z, a〜z)、数字(0〜9)、アンダースコア(_)</li>
+    <li>先頭に数字は使えない</li>
+    <li>大文字と小文字は区別される(<span class="mono">sum</span> と <span class="mono">Sum</span> は別物)</li>
+    <li><b>予約語</b>(int, if, for, return など、C言語が使う単語)は使えない</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>その名前、変数名に使える?</div>
+    <input id="idin" class="idin" value="2nd_score" aria-label="変数名" autocomplete="off" spellcheck="false">
+    <div class="msg" id="idmsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;margin-top:8px" aria-live="polite"></div>
+    <div class="legend">試してみよう:<span class="mono">score</span> / <span class="mono">_tmp</span> / <span class="mono">my-name</span> / <span class="mono">int</span> / <span class="mono">total2</span> / <span class="mono">平均</span></div>
+  </div>
+</section>
+
+<section class="task" id="var">
+  <h2><span class="no">4</span>変数とデータ型</h2>
+  <p><b>変数</b>:値を入れておく、名前の付いたメモリ上の場所。使う前に<b>型</b>と名前を書いて用意する(宣言)。</p>
+<pre class="code"><code>int count;            /* 宣言(中身は不定) */
+int sum = 0;          /* 宣言と同時に初期化 */
+double ave = 0.0, rate = 1.5;   /* まとめて宣言できる */
+char c = 'A';         /* 文字は ' ' で囲む */</code></pre>
+  <div class="tbl"><table>
+    <tr><th>型</th><th>入れるもの</th><th>大きさ(VS)</th><th>printf</th><th>scanf</th></tr>
+    <tr><td class="mono">char</td><td>1文字(実体は小さな整数)</td><td>1バイト</td><td class="mono">%c</td><td class="mono">%c</td></tr>
+    <tr><td class="mono">int</td><td>整数</td><td>4バイト</td><td class="mono">%d</td><td class="mono">%d</td></tr>
+    <tr><td class="mono">long long</td><td>大きな整数</td><td>8バイト</td><td class="mono">%lld</td><td class="mono">%lld</td></tr>
+    <tr><td class="mono">float</td><td>実数(精度低)</td><td>4バイト</td><td class="mono">%f</td><td class="mono">%f</td></tr>
+    <tr><td class="mono">double</td><td>実数(精度高)</td><td>8バイト</td><td class="mono">%f</td><td class="mono"><b>%lf</b></td></tr>
+  </table></div>
+  <div class="warn"><b>注意</b>:初期化していない変数の中身は「たまたまそこにあった値」(不定)です。合計を入れる変数などは必ず 0 で初期化しましょう。double を scanf で読むときだけは <span class="mono">%lf</span> です。</div>
+  <div class="point"><b>整数どうしの割り算</b>:<span class="mono">7 / 2</span> は 3(小数点以下切り捨て)。3.5 にしたいときは <span class="mono">7.0 / 2</span> か <span class="mono">(double)7 / 2</span>。修飾子や型の範囲は「演算子と型修飾子」の教材も見てください。</div>
+</section>
+
+<section class="task" id="const">
+  <h2><span class="no">5</span>定数</h2>
+  <div class="tbl"><table>
+    <tr><th>種類</th><th>書き方</th><th>特徴</th></tr>
+    <tr><td><b>リテラル</b></td><td class="mono">10, 3.14, 'A', "Hello"</td><td>プログラムに直接書いた値。'A' は文字、"A" は文字列(別物)</td></tr>
+    <tr><td><b>#define</b>(マクロ)</td><td class="mono">#define MAX 100</td><td>プリプロセッサが文字として置き換える。; は付けない。型がない</td></tr>
+    <tr><td><b>const</b> 変数</td><td class="mono">const int MAX = 100;</td><td>変更できない変数。型チェックが効く</td></tr>
+  </table></div>
+  <p>同じ数字を何度も書く代わりに名前を付けると、値を変えたいときに1か所直すだけで済みます(課題2-3の「試行回数 3」など)。</p>
+</section>
+
+<section class="task" id="io">
+  <h2><span class="no">6</span>入力と出力:printf と scanf</h2>
+  <ul>
+    <li><span class="mono">printf("書式", 値, …);</span>:書式の中の <b>変換指定子</b>(%d など)の位置に、後ろの値が順番に入る。<span class="mono">\n</span> は改行。</li>
+    <li><span class="mono">scanf("書式", &amp;変数, …);</span>:キーボードから読み込む。変数の前に <b>&amp;</b>(アドレス)を付ける。ただし配列(文字列)には付けない。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>printf の変換指定子と出力</div>
+    <div class="row"><label for="fmt">書式</label><select id="fmt" class="fmtin">
+      <option>%d</option><option>%5d</option><option>%-5d</option><option>%05d</option><option>%x</option><option>%X</option><option>%o</option><option>%c</option>
+      <option>%f</option><option>%.2f</option><option>%8.3f</option><option>%e</option><option>%s</option><option>%%</option></select>
+      <label for="fval">値</label><input id="fval" class="fmtin" value="42" style="width:9em"></div>
+    <div class="out" id="fout"></div>
+    <div class="msg" id="fmsg" style="background:var(--bg);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:.9rem" aria-live="polite"></div>
+  </div>
+  <div class="warn"><b>scanf の注意</b>:<span class="mono">scanf("%c", &amp;c)</span> は、前の入力で残った改行も1文字として読んでしまいます。%c の前に空白を入れた <span class="mono">scanf(" %c", &amp;c)</span> にすると、空白や改行を読み飛ばします(課題2-2で使います)。</div>
+</section>
+
+<section class="task" id="ctrl">
+  <h2><span class="no">7</span>制御構造</h2>
+  <p>プログラムは基本的に上から順に実行されます(<b>順次</b>)。それを変えるのが<b>分岐</b>と<b>繰り返し</b>です。</p>
+  <div class="tbl"><table>
+    <tr><th>構文</th><th>使いどころ</th><th>形</th></tr>
+    <tr><td><b>if / else if / else</b></td><td>条件で処理を分ける</td><td class="mono" style="text-align:left">if (条件) { … } else { … }</td></tr>
+    <tr><td><b>switch</b></td><td>1つの整数値で多方向に分ける</td><td class="mono" style="text-align:left">switch (x) { case 1: … break; default: … }</td></tr>
+    <tr><td><b>for</b></td><td>回数が決まった繰り返し</td><td class="mono" style="text-align:left">for (初期化; 条件; 更新) { … }</td></tr>
+    <tr><td><b>while</b></td><td>条件が成り立つ間くり返す</td><td class="mono" style="text-align:left">while (条件) { … }</td></tr>
+    <tr><td><b>do-while</b></td><td>最低1回は実行してから判定</td><td class="mono" style="text-align:left">do { … } while (条件);</td></tr>
+  </table></div>
+  <ul>
+    <li><b>break</b>:switch や繰り返しをその場で抜ける。<b>continue</b>:繰り返しの残りを飛ばして次の回へ。</li>
+    <li>switch の case の最後に break を忘れると、下の case まで続けて実行される(フォールスルー)。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>for 文を1ステップずつ追う</div>
+<pre class="code"><code>for (i = 1; i &lt;= 3; i++) {
+    printf("%d回目\n", i);
+}</code></pre>
+    <div class="row"><button class="btn" id="tnext" type="button">1ステップ進む</button><button class="btn sub" id="treset" type="button">最初から</button></div>
+    <div class="tbl"><table class="trace" id="ttab"></table></div>
+    <div class="out" id="tout"></div>
+  </div>
+</section>
+
+<section class="task" id="func">
+  <h2><span class="no">8</span>関数:宣言と定義</h2>
+  <p><b>関数</b>:処理をまとめて名前を付けたもの。main も関数の1つで、プログラムは必ず main から始まります。</p>
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int square(int x);          /* 関数の宣言(プロトタイプ) */
+
+int main(void)
+{
+    int a = square(5);      /* 関数の呼び出し → 25 が返る */
+    printf("%d\n", a);
+    return 0;
+}
+
+int square(int x)           /* 関数の定義 */
+{
+    return x * x;           /* 呼び出し元に値を返す */
+}</code></pre>
+  <div class="tbl"><table>
+    <tr><th>用語</th><th>意味</th></tr>
+    <tr><td><b>宣言</b></td><td>「こういう名前・型のものがある」とコンパイラに<b>知らせる</b>こと。関数ならプロトタイプ <span class="mono">int square(int x);</span></td></tr>
+    <tr><td><b>定義</b></td><td>実体を<b>作る</b>こと。関数なら本体 { } まで書く。変数なら実際にメモリを確保する(<span class="mono">int a;</span> は宣言であり定義でもある)</td></tr>
+    <tr><td><b>引数</b>(ひきすう)</td><td>関数に渡す値。上の <span class="mono">x</span></td></tr>
+    <tr><td><b>戻り値</b></td><td>return で返す値。返さない関数の型は <span class="mono">void</span></td></tr>
+  </table></div>
+  <p>定義が main より後ろにある関数を main で使うときは、先に宣言(プロトタイプ)を書きます。printf の宣言は <span class="mono">stdio.h</span> の中に書いてあるので、<span class="mono">#include &lt;stdio.h&gt;</span> が必要です。</p>
+</section>
+
+<section class="task" id="arr">
+  <h2><span class="no">9</span>配列と文字列</h2>
+<pre class="code"><code>int score[5] = {80, 65, 90, 70, 55};   /* score[0] 〜 score[4] */
+char name[10] = "Taro";                 /* 'T' 'a' 'r' 'o' '\0' */</code></pre>
+  <ul>
+    <li><b>配列</b>:同じ型の変数を並べたもの。添字は <b>0 から</b>始まり、要素数 − 1 まで。範囲外を使ってもエラーにならず、おかしな動作をするので注意。</li>
+    <li><b>文字列</b>:char の配列で、最後に終わりの印 <span class="mono">'\0'</span> が入る。"Taro" は4文字だが5バイト必要。</li>
+    <li>文字列の比較は <span class="mono">==</span> ではできない。<span class="mono">string.h</span> の <span class="mono">strcmp(a, b)</span> を使い、同じなら 0 が返る(課題2-3 第3段階で使います)。</li>
+  </ul>
+</section>
+
+<section class="task" id="terms">
+  <h2><span class="no">10</span>用語集</h2>
+  <div class="tbl"><table>
+    <tr><th>用語</th><th>意味</th></tr>
+    <tr><td>ソースコード</td><td>人が書いたプログラムの文章</td></tr>
+    <tr><td>ヘッダファイル</td><td>関数の宣言などが書かれたファイル(stdio.h, string.h, ctype.h …)</td></tr>
+    <tr><td>プリプロセッサ指令</td><td># で始まる行。コンパイル前に処理される</td></tr>
+    <tr><td>main 関数</td><td>プログラムの入口。return 0 で「正常終了」を OS に伝える</td></tr>
+    <tr><td>式 / 文</td><td>値を持つもの / ; で終わる処理の単位</td></tr>
+    <tr><td>宣言 / 定義</td><td>存在を知らせる / 実体を作る</td></tr>
+    <tr><td>初期化</td><td>宣言と同時に最初の値を入れること</td></tr>
+    <tr><td>代入</td><td>= で変数に値を入れること(「等しい」は ==)</td></tr>
+    <tr><td>変換指定子</td><td>printf / scanf の %d, %c, %f, %s など</td></tr>
+    <tr><td>エスケープシーケンス</td><td>\n(改行)、\t(タブ)、\\(\ 自身)、\0(文字列の終わり)</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox"><div class="qno">問1</div><p>C言語のプログラムが実行を始める関数は?</p>
+    <div class="opts"><button>start</button><button data-ok>main</button><button>printf</button><button>stdio</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問2</div><p>変数名として<b>使えない</b>ものは?</p>
+    <div class="opts"><button>_count</button><button>total2</button><button data-ok>2total</button><button>Total</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3</div><p>double 型の変数 x に scanf で読み込むときの書式は?</p>
+    <div class="opts"><button>%d</button><button>%f</button><button data-ok>%lf</button><button>%c</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問4</div><p><span class="mono">int square(int x);</span> のように、関数の名前・引数・戻り値の型だけを先に知らせる書き方を何という?</p>
+    <div class="opts"><button>定義</button><button data-ok>宣言(プロトタイプ)</button><button>呼び出し</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="3"><div class="qno">問5</div><p><span class="mono">int a = 7 / 2;</span> のとき a の値は?</p>
+    <div class="check"><input class="ans" placeholder="例 4" aria-label="問5の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox" data-ans="6"><div class="qno">問6</div><p>文字列 "Hello" を入れるには、char 配列が最低何要素必要?(終わりの印も入れる)</p>
+    <div class="check"><input class="ans" placeholder="例 4" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:6</b></p><p>「Hello」は5文字ですが、最後に終わりの印 '\0' が入るので 5 + 1 = 6 要素必要です。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問7</div><p>switch の case の最後に break を書き忘れるとどうなる?</p>
+    <div class="opts"><button>コンパイルエラーになる</button><button data-ok>次の case の処理まで続けて実行される</button><button>その case は無視される</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問8</div><p>2つの文字列 a と b が同じか調べる正しい方法は?</p>
+    <div class="opts"><button>a == b</button><button data-ok>strcmp(a, b) == 0</button><button>a = b</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>コード例はすべて gcc でコンパイルして確認しています。型の大きさは Visual Studio(Windows)での値です。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  /* ===== 注釈付きプログラム ===== */
+  var L=[
+    ['/* 2つの数の合計を表示する */','<b>コメント</b>。/* と */ の間はコンパイラに無視される。何をするプログラムか書いておく。'],
+    ['#include &lt;stdio.h&gt;','<b>プリプロセッサ指令</b>。printf や scanf の宣言が書かれた<b>ヘッダファイル</b> stdio.h を取り込む。# で始まる行には ; を付けない。'],
+    ['#define TIMES 2','<b>マクロ定義</b>。プログラム中の TIMES がコンパイル前に 2 に置き換わる。'],
+    ['',''],
+    ['int main(void)','<b>main 関数の定義</b>の始まり。プログラムは必ずここから実行される。int は戻り値の型、void は「引数なし」。'],
+    ['{','main 関数の本体(<b>ブロック</b>)の始まり。'],
+    ['    int a, b, sum;','<b>変数の宣言</b>。int 型(整数)の変数 a, b, sum を用意する。この時点では中身は不定。'],
+    ['',''],
+    ['    printf("2つの数を入力: ");','<b>出力</b>。画面に文字列を表示する。最後の ; で1つの<b>文</b>が終わる。'],
+    ['    scanf("%d %d", &amp;a, &amp;b);','<b>入力</b>。整数を2つ読み込んで a と b に入れる。&amp; は「変数の場所(アドレス)」を渡す印。'],
+    ['    sum = a + b;','<b>代入文</b>。右辺の式 a + b を計算し、左辺の sum に入れる。'],
+    ['',''],
+    ['    if (sum &gt; 10) {','<b>分岐</b>。( ) の条件が真(0 以外)のときだけ { } の中を実行する。'],
+    ['        printf("合計 %d は 10 より大きい\\n", sum);','%d の位置に sum の値が入る。\\n は<b>改行</b>(エスケープシーケンス)。インデントで入れ子を見やすくする。'],
+    ['    }',''],
+    ['    printf("%d 倍すると %d\\n", TIMES, sum * TIMES);','TIMES は 2 に置き換わる。変換指定子は左から順に値と対応する。'],
+    ['    return 0;','main 関数を終わり、0(正常終了)を OS に返す。'],
+    ['}','main 関数の本体の終わり。']
+  ];
+  var an=document.getElementById('anno');
+  an.innerHTML=L.map(function(l,i){return '<div class="l" data-i="'+i+'" tabindex="0" role="button"><span class="no">'+(i+1)+'</span><span>'+(l[0]||' ')+'</span></div>';}).join('');
+  function pick(i){an.querySelectorAll('.l').forEach(function(e){e.classList.toggle('on',+e.getAttribute('data-i')===i);});
+    document.getElementById('amsg').innerHTML=L[i][1]?('<b>'+(i+1)+'行目</b>:'+L[i][1]):'空行。読みやすくするための区切りで、意味はない。';}
+  an.querySelectorAll('.l').forEach(function(e){var i=+e.getAttribute('data-i');e.addEventListener('click',function(){pick(i);});e.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();pick(i);}});});
+  pick(4);
+
+  /* ===== 識別子 ===== */
+  var KW='auto break case char const continue default do double else enum extern float for goto if inline int long register restrict return short signed sizeof static struct switch typedef union unsigned void volatile while'.split(' ');
+  var idin=document.getElementById('idin');
+  function chk(){var s=idin.value, m;
+    if(!s) m='名前を入力してください。';
+    else if(KW.indexOf(s)>=0) m='<span class="fb ng">✕ 使えない</span>:「'+s+'」は<b>予約語</b>です。';
+    else if(/^[0-9]/.test(s)) m='<span class="fb ng">✕ 使えない</span>:先頭が<b>数字</b>です。例えば「score2」「_2nd」のようにしましょう。';
+    else if(/[^A-Za-z0-9_]/.test(s)) m='<span class="fb ng">✕ 使えない</span>:「'+s.match(/[^A-Za-z0-9_]/)[0]+'」は使えない文字です(英字・数字・_ だけ)。ハイフン - は引き算と区別できません。';
+    else m='<span class="fb ok">◯ 使える</span>'+(/^_/.test(s)?'(ただし _ で始まる名前はライブラリ用によく使われるので、自分の変数では避けるのが無難)':'');
+    document.getElementById('idmsg').innerHTML=m;}
+  idin.addEventListener('input',chk); chk();
+
+  /* ===== printf ===== */
+  var fmt=document.getElementById('fmt'), fval=document.getElementById('fval');
+  var DESC={'%d':'10進の整数','%5d':'幅5文字、右寄せ(足りない分は空白)','%-5d':'幅5文字、左寄せ','%05d':'幅5文字、足りない分を0で埋める','%x':'16進(小文字)','%X':'16進(大文字)','%o':'8進','%c':'文字(値を文字コードとして表示)','%f':'実数(小数点以下6桁)','%.2f':'小数点以下2桁(四捨五入)','%8.3f':'全体の幅8文字、小数点以下3桁','%e':'指数表記','%s':'文字列','%%':'% そのものを表示'};
+  function pad(s,w,left,zero){while(s.length<w){s=left?s+' ':(zero?(s[0]==='-'?'-0'+s.slice(1):'0'+s):' '+s);}return s;}
+  function fm(){var f=fmt.value, v=fval.value, o, note='';
+    var n=parseFloat(v), isInt=/^-?\d+$/.test(v.trim());
+    if(f==='%%'){o='%';}
+    else if(f==='%s'){o=v;}
+    else if(/d|x|X|o|c/.test(f.slice(-1))){
+      if(!isInt){o='(整数を入力してください)';}
+      else{var k=parseInt(v,10);
+        if(f==='%c'){o=k>=32&&k<127?String.fromCharCode(k):'?';note='文字コード '+k+(k>=32&&k<127?' は「'+String.fromCharCode(k)+'」':' は表示できる文字ではありません')+'。例:65 → A';}
+        else if(f==='%x'||f==='%X'||f==='%o'){o=(k<0?(k>>>0):k).toString(f==='%o'?8:16);if(f==='%X')o=o.toUpperCase();}
+        else{var w=+(f.match(/\d+/)||[0])[0]; o=pad(String(k),f==='%05d'?5:w,f==='%-5d',f==='%05d');}}}
+    else{ if(isNaN(n)){o='(数値を入力してください)';}
+      else if(f==='%e'){o=n.toExponential(6).replace(/e([+-])(\d)$/,'e$10$2');}
+      else{var p=f==='%.2f'?2:f==='%8.3f'?3:6; o=n.toFixed(p); if(f==='%8.3f')o=pad(o,8);} if(isInt&&f!=='%e') note='int の値を %f に渡すとおかしな表示になります。実数は double の変数や 42.0 のように書きます(ここでは実数として表示)。';}
+    document.getElementById('fout').innerHTML='printf("['+f.replace('%%','%%')+']", '+v.replace(/[<>&]/g,'')+');\n→ ['+o.replace(/[<>&]/g,'').replace(/ /g,'<span class="sp"> </span>')+']';
+    document.getElementById('fmsg').innerHTML='<b>'+f+'</b>:'+DESC[f]+(note?'<br>'+note:'')+'<br><span class="legend">[ ] は表示の範囲を示すために付けたもので、実際には表示されません。</span>';}
+  fmt.addEventListener('change',fm); fval.addEventListener('input',fm); fm();
+
+  /* ===== for トレース ===== */
+  var steps=[],si=0;
+  (function build(){var i; steps.push(['初期化','i = 1','i = 1',null]); i=1;
+    while(true){var c=i<=3; steps.push(['条件','i &lt;= 3','i='+i+' → '+(c?'真':'偽'),null]); if(!c){steps.push(['終了','','ループを抜ける',null]);break;}
+      steps.push(['本体','printf','i='+i,i+'回目']); steps.push(['更新','i++','i = '+(i+1),null]); i++;}})();
+  function drawT(){var h='<tr><th>#</th><th>段階</th><th>処理</th><th>結果</th></tr>',out=[];
+    for(var k=0;k<=si;k++){var s=steps[k];h+='<tr class="'+(k===si?'cur':'')+'"><td>'+(k+1)+'</td><td>'+s[0]+'</td><td>'+s[1]+'</td><td>'+s[2]+'</td></tr>';if(s[3])out.push(s[3]);}
+    document.getElementById('ttab').innerHTML=h; document.getElementById('tout').textContent=out.join('\n')||'(まだ出力なし)';
+    document.getElementById('tnext').disabled=si>=steps.length-1;}
+  document.getElementById('tnext').addEventListener('click',function(){si++;drawT();});
+  document.getElementById('treset').addEventListener('click',function(){si=0;drawT();});
+  drawT();
+
+  /* ===== コードの色付け ===== */
+  var kw=/^(int|char|void|return|for|if|else|while|do|switch|case|break|continue|default|include|define|double|float|long|const|unsigned|sizeof)$/;
+  document.querySelectorAll('pre.code code').forEach(function(el){
+    var src=el.textContent,out='',re=/(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(#?\b[A-Za-z_]\w*\b)|(\b\d+(?:\.\d+)?\b)|([\s\S])/g,m;
+    function e(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    while((m=re.exec(src))){if(m[1])out+='<span class="tk-com">'+e(m[1])+'</span>';else if(m[2])out+='<span class="tk-str">'+e(m[2])+'</span>';else if(m[3])out+=kw.test(m[3].replace('#',''))?'<span class="tk-kw">'+e(m[3])+'</span>':e(m[3]);else if(m[4])out+='<span class="tk-num">'+m[4]+'</span>';else out+=e(m[5]);}
+    el.innerHTML=out;});
+})();
+</script>
+</body>
+</html>

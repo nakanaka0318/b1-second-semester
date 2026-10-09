@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>課題2 解説</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.tin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.2rem;padding:8px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:9em}
+.tin:focus{outline:none;border-color:var(--accent)}
+.big{font-family:"JetBrains Mono",monospace;font-size:1.8rem;font-weight:700;margin:8px 0}
+.big sup{font-size:1rem;color:var(--accent)}
+.rules{list-style:none;padding:0;margin:8px 0}
+.rules li{padding:5px 10px;border-radius:8px;margin:3px 0;background:var(--bg);font-size:.9rem;display:flex;gap:8px;align-items:center}
+.rules li .mk{flex:none;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;background:var(--line);color:var(--sub)}
+.rules li.hit{background:var(--mark-soft);font-weight:700}
+.rules li.hit .mk{background:var(--ok);color:#fff}
+.rules li.skip{opacity:.5}
+.grid100{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-top:8px}
+.grid100 span{font-family:"JetBrains Mono",monospace;font-size:.62rem;text-align:center;padding:3px 0;border-radius:3px;color:#fff}
+.s-st{background:#1F6FB2}.s-nd{background:#C8423B}.s-rd{background:#1C8A5A}.s-th{background:#8592A6}
+.ascii{display:flex;gap:2px;margin-top:8px;flex-wrap:wrap}
+.ascii .rg{flex:1;min-width:80px;border-radius:8px;padding:6px 8px;font-size:.78rem;text-align:center;border:2px solid transparent;background:var(--bg)}
+.ascii .rg.on{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+.ascii .rg b{display:block;font-family:"JetBrains Mono",monospace;font-size:.85rem}
+.pinbox{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:600px){.pinbox{grid-template-columns:1fr}}
+.term{font-family:"JetBrains Mono",monospace;font-size:.85rem;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 12px;min-height:9em;white-space:pre-wrap;overflow-y:auto;max-height:16em}
+.term .in{color:var(--c-str)}
+.term .ok{color:var(--c-num)}
+.term .ng{color:#F0817A}
+.dots{display:flex;gap:6px;margin:6px 0}
+.dots i{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.dots i.used{background:var(--warn)}
+.tag2{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:99px;background:var(--mark-soft);color:var(--ink);margin-left:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>課題2 解説<br>条件分岐と繰り返し</h1>
+  <p>課題2-1〜2-3のヒント・解答例・解説・別解です。ヒントは段階的に開けるようになっています。まずはヒント1だけ見て考え、詰まったら次のヒントへ進みましょう。各課題には、ブラウザ上で動かして確かめられる「試す」コーナーもあります。</p>
+  <div class="demo">
+    <label for="d21">課題2-1 を先に体験:数字を入れると序数になります</label>
+    <input id="d21" class="tin" type="number" value="112" inputmode="numeric">
+    <div class="big" id="d21o"></div>
+    <ul class="rules" id="d21r"></ul>
+  </div>
+</header>
+
+<nav class="toc"><a href="#k1">課題2-1 序数</a><a href="#k2">課題2-2 文字の種類</a><a href="#k3">課題2-3 暗証番号</a><a href="#tips">共通のコツ</a></nav>
+
+<!-- ================= 2-1 ================= -->
+<section class="task" id="k1">
+  <h2><span class="no">2-1</span>英語の序数の接尾辞をつける</h2>
+  <div class="problem"><p>キーボードから数字を入力し、その数字に英語で序数を表す接尾辞(st, nd, rd, th)をつけて表示する。</p>
+    <p class="mono">1 -&gt; 1st ／ 3 -&gt; 3rd ／ 4 -&gt; 4th ／ 22 -&gt; 22nd</p></div>
+
+  <h3>まずはルールを調べる</h3>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">見る</span>1〜120 の接尾辞(色で分類)</div>
+    <div class="grid100" id="g100"></div>
+    <div class="legend2"><span><i class="s-st"></i>st</span><span><i class="s-nd"></i>nd</span><span><i class="s-rd"></i>rd</span><span><i class="s-th"></i>th</span></div>
+    <p class="legend">色の並び方に注目。ほとんどは「一の位」で決まるのに、11〜13 と 111〜113 だけ灰色(th)になっています。</p>
+  </div>
+
+  <details><summary><span class="tag">ヒント1</span>何で決まっている?<span class="tap"></span></summary><div class="body">
+    <p>表を見ると、接尾辞はほとんど<b>一の位の数字</b>で決まっています。一の位が 1 なら st、2 なら nd、3 なら rd、それ以外(0, 4〜9)なら th。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント2</span>一の位の取り出し方<span class="tap"></span></summary><div class="body">
+    <p>整数を 10 で割った<b>余り</b>が一の位です。C では <span class="mono">%</span> 演算子を使います。</p>
+<pre class="code"><code>n % 10      /* 123 % 10 → 3 */</code></pre>
+  </div></details>
+  <details><summary><span class="tag">ヒント3</span>例外がある!<span class="tap"></span></summary><div class="body">
+    <p>一の位だけで決めると、11 は「11st」、12 は「12nd」、13 は「13rd」になってしまいます。正しくは 11th, 12th, 13th。111〜113 も同じです。</p>
+    <p>つまり<b>下2桁</b>が 11, 12, 13 のときは例外で th。下2桁は <span class="mono">n % 100</span> で取り出せます。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント4</span>判定の順番<span class="tap"></span></summary><div class="body">
+    <p>if 〜 else if は<b>上から順に</b>判定され、最初に当てはまったところだけ実行されます。だから<b>例外を先に</b>書くのがポイント。</p>
+    <ol><li>下2桁が 11〜13 → th</li><li>一の位が 1 → st</li><li>一の位が 2 → nd</li><li>一の位が 3 → rd</li><li>それ以外 → th</li></ol>
+    <p>「11〜13」は <span class="mono">n % 100 &gt;= 11 &amp;&amp; n % 100 &lt;= 13</span> と書きます(<span class="mono">11 &lt;= n % 100 &lt;= 13</span> は C では意図通りに動きません)。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント5</span>表示の仕方<span class="tap"></span></summary><div class="body">
+    <p>数字と接尾辞はくっつけて表示します。<span class="mono">printf("%d -&gt; %dst\n", n, n);</span> のように、%d の直後に文字を書けば OK。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>if 〜 else if で書く<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int n;
+
+    printf("数字を入力: ");
+    scanf("%d", &amp;n);
+
+    if (n % 100 &gt;= 11 &amp;&amp; n % 100 &lt;= 13) {   /* 11, 12, 13 で終わる数は例外 */
+        printf("%d -&gt; %dth\n", n, n);
+    } else if (n % 10 == 1) {
+        printf("%d -&gt; %dst\n", n, n);
+    } else if (n % 10 == 2) {
+        printf("%d -&gt; %dnd\n", n, n);
+    } else if (n % 10 == 3) {
+        printf("%d -&gt; %drd\n", n, n);
+    } else {
+        printf("%d -&gt; %dth\n", n, n);
+    }
+    return 0;
+}</code></pre>
+    <p><b>実行例</b></p>
+<div class="sample">数字を入力: <span class="in">112</span>
+112 -&gt; 112th</div>
+    <ol class="steps">
+      <li><span class="mono">n % 100</span> が 11〜13 なら、一の位に関係なく th。これを<b>最初に</b>判定するのが一番大事なところ。</li>
+      <li>それ以外は一の位 <span class="mono">n % 10</span> で st / nd / rd を選び、残りは全部 th。</li>
+      <li>0 や 1000 も一の位が 0 なので th になります(0th, 1000th)。</li>
+    </ol>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">別解1</span>switch で一の位を分ける<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int n;
+    char *suffix;
+
+    printf("数字を入力: ");
+    scanf("%d", &amp;n);
+
+    switch (n % 10) {
+    case 1:  suffix = "st"; break;
+    case 2:  suffix = "nd"; break;
+    case 3:  suffix = "rd"; break;
+    default: suffix = "th"; break;
+    }
+    if (n % 100 &gt;= 11 &amp;&amp; n % 100 &lt;= 13) {
+        suffix = "th";                       /* 例外を後から上書き */
+    }
+    printf("%d -&gt; %d%s\n", n, n, suffix);
+    return 0;
+}</code></pre>
+    <p>一の位による分岐を <b>switch</b> で書き、接尾辞を変数 <span class="mono">suffix</span>(文字列)に入れておきます。例外(11〜13)は<b>後から上書き</b>しているので、順番を気にしなくてよくなります。printf が1回で済むのも利点です。</p>
+    <p><span class="mono">char *suffix</span> は「文字列を指す変数」です。ポインタはまだ習っていなければ、「文字列を入れておける変数」と思っておけば大丈夫です。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">別解2</span>配列で表を引く<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    const char *suf[4] = {"th", "st", "nd", "rd"};
+    int n, k;
+
+    printf("数字を入力: ");
+    scanf("%d", &amp;n);
+
+    k = n % 10;
+    if (k &gt; 3 || (n % 100 &gt;= 11 &amp;&amp; n % 100 &lt;= 13)) {
+        k = 0;                               /* 0 番目 = "th" */
+    }
+    printf("%d -&gt; %d%s\n", n, n, suf[k]);
+    return 0;
+}</code></pre>
+    <p>接尾辞を配列に並べておき、<b>添字で選ぶ</b>方法です。一の位 1〜3 はそのまま添字に使い、4 以上と 11〜13 は 0 番目("th")にします。if の数が減り、「データ」と「処理」を分けて書けます。</p>
+  </div></details>
+
+  <details><summary><span class="tag">注意</span>よくある間違い<span class="tap"></span></summary><div class="body">
+    <ul>
+      <li><b>例外を後に書く</b>:<span class="mono">if (n % 10 == 1) … else if (n % 100 == 11)</span> だと、11 は先に st の条件に当てはまってしまい、例外の判定まで来ません。</li>
+      <li><b><span class="mono">n == 11 || n == 12 || n == 13</span> だけで判定</b>:111, 112, 113 が 111st などになってしまいます。下2桁(<span class="mono">% 100</span>)で判定しましょう。</li>
+      <li><b>負の数</b>:C では <span class="mono">-1 % 10</span> は <span class="mono">-1</span> になるので、-1 は -1th と表示されます。気になる人は、負の数のときにエラーを表示するなどの工夫をしてみましょう(発展)。</li>
+    </ul>
+  </div></details>
+</section>
+
+<!-- ================= 2-2 ================= -->
+<section class="task" id="k2">
+  <h2><span class="no">2-2</span>入力された文字の種類を判定する</h2>
+  <div class="problem"><p>キーボードから1文字を入力し、英大文字・英小文字・数字・それ以外のどれかを適切に表示する。</p>
+  <div class="sample">半角英数字が入力されました。入力された文字は英大文字です。
+半角英数字が入力されました。入力された文字は英小文字です。
+半角英数字が入力されました。入力された文字は数字です。
+半角英数字以外が入力されました。</div></div>
+
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>1文字入れると、文字コードと判定が出ます</div>
+    <input id="d22" class="tin" value="g" maxlength="2" aria-label="1文字" autocomplete="off" spellcheck="false">
+    <div class="ascii" id="d22r"></div>
+    <div class="msg" id="d22m" style="background:var(--bg);border-radius:10px;padding:10px 14px;margin-top:8px" aria-live="polite"></div>
+  </div>
+
+  <details><summary><span class="tag">ヒント1</span>文字は「数」<span class="tap"></span></summary><div class="body">
+    <p>課題1で学んだように、char の中身は文字コード(整数)です。ASCII では次のように<b>連続して</b>並んでいます。</p>
+    <div class="tbl"><table><tr><th>種類</th><th>範囲</th><th>文字コード(10進)</th></tr>
+      <tr><td>数字</td><td class="mono">'0' 〜 '9'</td><td>48 〜 57</td></tr>
+      <tr><td>英大文字</td><td class="mono">'A' 〜 'Z'</td><td>65 〜 90</td></tr>
+      <tr><td>英小文字</td><td class="mono">'a' 〜 'z'</td><td>97 〜 122</td></tr></table></div>
+  </div></details>
+  <details><summary><span class="tag">ヒント2</span>1文字の読み込み方<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>char c;
+scanf(" %c", &amp;c);     /* %c の前の空白で、改行や空白を読み飛ばす */</code></pre>
+    <p><span class="mono">c = getchar();</span> でも1文字読めます(この場合 c は int 型にします)。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント3</span>範囲の判定<span class="tap"></span></summary><div class="body">
+    <p>「c が 'A' 以上かつ 'Z' 以下」を C で書くと <span class="mono">c &gt;= 'A' &amp;&amp; c &lt;= 'Z'</span>。65 や 90 と数字で書くより、意味が分かりやすくなります。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント4</span>4つに分ける<span class="tap"></span></summary><div class="body">
+    <p>if → else if → else if → else の形で、大文字・小文字・数字・<b>それ以外</b>の4つに分けます。最後の else が「どれにも当てはまらなかった場合」です。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>文字コードの範囲で判定<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char c;
+
+    printf("1文字入力: ");
+    scanf(" %c", &amp;c);
+
+    if (c &gt;= 'A' &amp;&amp; c &lt;= 'Z') {
+        printf("半角英数字が入力されました。入力された文字は英大文字です。\n");
+    } else if (c &gt;= 'a' &amp;&amp; c &lt;= 'z') {
+        printf("半角英数字が入力されました。入力された文字は英小文字です。\n");
+    } else if (c &gt;= '0' &amp;&amp; c &lt;= '9') {
+        printf("半角英数字が入力されました。入力された文字は数字です。\n");
+    } else {
+        printf("半角英数字以外が入力されました。\n");
+    }
+    return 0;
+}</code></pre>
+    <p><b>実行例</b></p>
+<div class="sample">1文字入力: <span class="in">Q</span>
+半角英数字が入力されました。入力された文字は英大文字です。</div>
+    <ol class="steps">
+      <li><span class="mono">scanf(" %c", &amp;c)</span> で1文字読み込む。</li>
+      <li>大文字・小文字・数字の範囲を順に調べ、どれにも当てはまらなければ「以外」。</li>
+      <li>全角の「あ」などは1文字が複数バイトなので、最初の1バイトだけが読まれ、どの範囲にも入らず「以外」になります。</li>
+    </ol>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">別解1</span>ctype.h の関数を使う<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+#include &lt;ctype.h&gt;
+
+int main(void)
+{
+    int c;
+
+    printf("1文字入力: ");
+    c = getchar();
+
+    if (isupper(c)) {
+        printf("半角英数字が入力されました。入力された文字は英大文字です。\n");
+    } else if (islower(c)) {
+        printf("半角英数字が入力されました。入力された文字は英小文字です。\n");
+    } else if (isdigit(c)) {
+        printf("半角英数字が入力されました。入力された文字は数字です。\n");
+    } else {
+        printf("半角英数字以外が入力されました。\n");
+    }
+    return 0;
+}</code></pre>
+    <p><span class="mono">ctype.h</span> には文字の種類を調べる関数がそろっています。<span class="mono">isupper</span>(大文字?)、<span class="mono">islower</span>(小文字?)、<span class="mono">isdigit</span>(数字?)は、当てはまると 0 以外を返します。他に <span class="mono">isalpha</span>(英字?)、<span class="mono">isalnum</span>(英数字?)もあります。</p>
+    <p>課題の狙いが「文字コードの範囲を自分で書けるか」なら解答例の方、実際のプログラムなら別解の方がよく使われます。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">別解2</span>判定と表示を分ける<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char c;
+    char *kind = NULL;
+
+    printf("1文字入力: ");
+    scanf(" %c", &amp;c);
+
+    if (c &gt;= 'A' &amp;&amp; c &lt;= 'Z')      kind = "英大文字";
+    else if (c &gt;= 'a' &amp;&amp; c &lt;= 'z') kind = "英小文字";
+    else if (c &gt;= '0' &amp;&amp; c &lt;= '9') kind = "数字";
+
+    if (kind != NULL) {
+        printf("半角英数字が入力されました。入力された文字は%sです。\n", kind);
+    } else {
+        printf("半角英数字以外が入力されました。\n");
+    }
+    return 0;
+}</code></pre>
+    <p>判定の結果(種類の名前)を変数 <span class="mono">kind</span> に入れ、表示は最後にまとめて行います。メッセージの共通部分「半角英数字が入力されました。」を1か所に書けるので、文言を直すときに楽です。<span class="mono">NULL</span> は「まだ何も入っていない」印です。</p>
+  </div></details>
+
+  <details><summary><span class="tag">注意</span>よくある間違い<span class="tap"></span></summary><div class="body">
+    <ul>
+      <li><span class="mono">'A' &lt;= c &lt;= 'Z'</span>:数学の書き方は C では使えません(常に真になる)。</li>
+      <li><span class="mono">c &gt;= A</span>:クォート ' ' を忘れると、A という変数だと思われてエラーになります。</li>
+      <li><span class="mono">c &gt;= "A"</span>:" " は文字列なので別物です。1文字は ' ' で囲みます。</li>
+      <li><span class="mono">scanf("%c", c)</span>:&amp; を忘れると実行時におかしくなります。</li>
+    </ul>
+  </div></details>
+</section>
+
+<!-- ================= 2-3 ================= -->
+<section class="task" id="k3">
+  <h2><span class="no">2-3</span>暗証番号を3回まで入力させる</h2>
+  <div class="problem"><p>数字を入力し、暗証番号と一致すれば「正しい暗証番号が入力されました。」と表示して終了。間違えると「暗証番号が正しく入力されませんでした。」と表示して、<b>3回まで</b>入力をくり返す。</p>
+    <p>第1段階:決めた暗証番号を表示して入力を受け付ける/第2段階:暗証番号もキーボードから設定する/第3段階:最初の数字が「0」でも対応する</p></div>
+
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>暗証番号シミュレータ(第2・第3段階の違い)</div>
+    <div class="row"><label for="pmode">比べ方</label><select id="pmode"><option value="int">int で比べる(第2段階)</option><option value="str">文字列で比べる(第3段階)</option></select>
+      <label for="pset">暗証番号</label><input id="pset" class="tin" value="0123" style="width:6em" autocomplete="off"></div>
+    <div class="pinbox">
+      <div><div class="row"><input id="ptry" class="tin" placeholder="入力" style="width:7em" autocomplete="off" aria-label="暗証番号の入力"><button class="btn" id="pgo" type="button">入力</button><button class="btn sub" id="preset" type="button">最初から</button></div>
+        <div class="dots" id="pdots"><i></i><i></i><i></i></div>
+        <div class="legend">「0123」を設定して「123」を入れてみよう。int の比べ方では…?</div></div>
+      <div class="term" id="pterm" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <details><summary><span class="tag">ヒント1</span>「3回まで」の繰り返し<span class="tap"></span></summary><div class="body">
+    <p>回数が決まった繰り返しなので <b>for 文</b>が使えます。</p>
+<pre class="code"><code>for (i = 1; i &lt;= 3; i++) {
+    /* 入力して、正しいか調べる */
+}</code></pre>
+  </div></details>
+  <details><summary><span class="tag">ヒント2</span>正しかったら途中で終わる<span class="tap"></span></summary><div class="body">
+    <p>正しい番号が入ったら、残りの回数は不要です。方法は3つ:</p>
+    <ul><li><span class="mono">return 0;</span> でプログラム(main)を終了する</li><li><span class="mono">break;</span> でループだけ抜ける</li><li>「正解したか」を表す変数(フラグ)を作り、ループの条件に入れる</li></ul>
+  </div></details>
+  <details><summary><span class="tag">ヒント3</span>第1段階:暗証番号を決めておく<span class="tap"></span></summary><div class="body">
+    <p><span class="mono">int pin = 1234;</span> のように変数に入れておき、テスト用に最初に表示します。入力を <span class="mono">input</span> に読み込み、<span class="mono">input == pin</span> で比べます(= 1つは代入なので注意)。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント4</span>第2段階:暗証番号も入力する<span class="tap"></span></summary><div class="body">
+    <p>ループの<b>前</b>に、<span class="mono">scanf("%d", &amp;pin);</span> で暗証番号を設定させれば OK。ループの中に書くと毎回設定し直すことになってしまいます。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント5</span>第3段階:「0」で始まると何が困る?<span class="tap"></span></summary><div class="body">
+    <p>int で読み込むと、「0123」は数として <b>123</b> になります。先頭の 0 の情報が消えるので、<b>「123」と入力しても正解</b>になってしまいます(上のシミュレータで試せます)。</p>
+    <p>対策:暗証番号を<b>数ではなく文字列</b>として扱い、<span class="mono">char pin[16];</span> に <span class="mono">scanf("%15s", pin);</span> で読み込みます。文字列の比較は <span class="mono">==</span> ではなく <span class="mono">strcmp</span>(<span class="mono">string.h</span>)を使い、同じなら 0 が返ります。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>第1段階<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int pin = 1234;      /* あらかじめ決めた暗証番号 */
+    int input, i;
+
+    printf("(テスト用)暗証番号は %d です。\n", pin);
+
+    for (i = 1; i &lt;= 3; i++) {
+        printf("暗証番号を入力(%d回目): ", i);
+        scanf("%d", &amp;input);
+        if (input == pin) {
+            printf("正しい暗証番号が入力されました。\n");
+            return 0;                /* 終了 */
+        }
+        printf("暗証番号が正しく入力されませんでした。\n");
+    }
+    return 0;
+}</code></pre>
+    <p><b>実行例</b></p>
+<div class="sample">(テスト用)暗証番号は 1234 です。
+暗証番号を入力(1回目): <span class="in">1111</span>
+暗証番号が正しく入力されませんでした。
+暗証番号を入力(2回目): <span class="in">1234</span>
+正しい暗証番号が入力されました。</div>
+    <p>正解したら <span class="mono">return 0;</span> でその場で終了。3回とも間違えると、for が終わって最後の return 0 に進みます。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>第2段階(フラグを使う)<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int pin, input, i;
+    int ok = 0;
+
+    printf("暗証番号を設定してください: ");
+    scanf("%d", &amp;pin);
+
+    for (i = 1; i &lt;= 3 &amp;&amp; !ok; i++) {
+        printf("暗証番号を入力(%d回目): ", i);
+        scanf("%d", &amp;input);
+        if (input == pin) {
+            ok = 1;
+        } else {
+            printf("暗証番号が正しく入力されませんでした。\n");
+        }
+    }
+    if (ok) {
+        printf("正しい暗証番号が入力されました。\n");
+    }
+    return 0;
+}</code></pre>
+    <p>正解したかどうかを変数 <span class="mono">ok</span>(0 か 1)で覚えておき、ループの条件 <span class="mono">i &lt;= 3 &amp;&amp; !ok</span> に入れています。<span class="mono">!ok</span> は「ok が 0 なら真」。こうすると return を途中に書かずに済み、ループの後で「最終的に正解したか」を使った処理(例:3回失敗したらロック)を追加しやすくなります。</p>
+    <div class="warn">このままだと、暗証番号「0123」に「123」を入力しても正解になります。これを直すのが第3段階です。</div>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>第3段階(文字列で比べる)<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(void)
+{
+    char pin[16], input[16];
+    int i;
+
+    printf("暗証番号を設定してください: ");
+    scanf("%15s", pin);
+
+    for (i = 1; i &lt;= 3; i++) {
+        printf("暗証番号を入力(%d回目): ", i);
+        scanf("%15s", input);
+        if (strcmp(input, pin) == 0) {      /* 文字列として比べる */
+            printf("正しい暗証番号が入力されました。\n");
+            return 0;
+        }
+        printf("暗証番号が正しく入力されませんでした。\n");
+    }
+    return 0;
+}</code></pre>
+    <p><b>実行例</b></p>
+<div class="sample">暗証番号を設定してください: <span class="in">0123</span>
+暗証番号を入力(1回目): <span class="in">123</span>
+暗証番号が正しく入力されませんでした。
+暗証番号を入力(2回目): <span class="in">0123</span>
+正しい暗証番号が入力されました。</div>
+    <ol class="steps">
+      <li>暗証番号も入力も <b>char の配列(文字列)</b>として読む。"0123" は '0' '1' '2' '3' の4文字のまま保存される。</li>
+      <li><span class="mono">%15s</span> の 15 は「最大15文字まで」。配列の大きさ 16 から終わりの印 '\0' の分を引いた数で、長すぎる入力で配列があふれるのを防ぐ。</li>
+      <li><span class="mono">strcmp(input, pin) == 0</span> で2つの文字列が同じか判定する。</li>
+    </ol>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">別解</span>第3段階を int のまま解く(桁数も比べる)<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int pin, input, i;
+    int pinlen, inlen;       /* 入力された桁数 */
+    int a, b;
+
+    printf("暗証番号を設定してください: ");
+    scanf("%n%d%n", &amp;a, &amp;pin, &amp;b);
+    pinlen = b - a;
+
+    for (i = 1; i &lt;= 3; i++) {
+        printf("暗証番号を入力(%d回目): ", i);
+        scanf(" %n%d%n", &amp;a, &amp;input, &amp;b);
+        inlen = b - a;
+        if (input == pin &amp;&amp; inlen == pinlen) {   /* 値も桁数も同じ */
+            printf("正しい暗証番号が入力されました。\n");
+            return 0;
+        }
+        printf("暗証番号が正しく入力されませんでした。\n");
+    }
+    return 0;
+}</code></pre>
+    <p>scanf の <span class="mono">%n</span> は「ここまでに読んだ文字数」を記録する指定子です。数字を読む前後の文字数の差から、<b>何桁で入力されたか</b>が分かります。値と桁数の両方が同じときだけ正解にすれば、「0123」と「123」を区別できます。</p>
+    <p>少し高度な方法なので、まずは文字列版を理解しましょう。「暗証番号は数ではなく文字の並び」と考える方が自然です(電話番号や郵便番号も同じ)。</p>
+  </div></details>
+
+  <details><summary><span class="tag">発展</span>さらに良くするなら<span class="tap"></span></summary><div class="body">
+    <ul>
+      <li>試行回数を <span class="mono">#define MAX_TRY 3</span> にして、回数を変えやすくする。</li>
+      <li>「あと◯回入力できます」と残り回数を表示する(<span class="mono">MAX_TRY - i</span>)。</li>
+      <li>暗証番号に数字以外が含まれていたら設定し直させる(課題2-2の判定が使える)。</li>
+      <li>3回失敗したら「ロックされました」と表示する(第2段階の ok フラグがあると簡単)。</li>
+    </ul>
+  </div></details>
+</section>
+
+<section class="task" id="tips">
+  <h2><span class="no">★</span>3つの課題に共通するコツ</h2>
+  <div class="tbl"><table>
+    <tr><th>コツ</th><th>どの課題で</th></tr>
+    <tr><td>if 〜 else if は<b>上から順</b>。例外・特別なケースを先に書く</td><td>2-1</td></tr>
+    <tr><td>範囲は <span class="mono">a &lt;= x &amp;&amp; x &lt;= b</span> と <b>&amp;&amp;</b> でつなぐ</td><td>2-1, 2-2</td></tr>
+    <tr><td><span class="mono">%</span>(余り)で桁を取り出す:<span class="mono">% 10</span> は一の位、<span class="mono">% 100</span> は下2桁</td><td>2-1</td></tr>
+    <tr><td>文字は ' '、文字列は " "、文字列の比較は strcmp</td><td>2-2, 2-3</td></tr>
+    <tr><td>「何回か」の繰り返しは for、途中で抜けるなら return / break / フラグ</td><td>2-3</td></tr>
+    <tr><td>同じ文を何度も書くなら、変数(suffix, kind)にしてまとめる</td><td>2-1, 2-2 の別解</td></tr>
+  </table></div>
+</section>
+
+<footer>解答例と別解(全8本)はすべて gcc でコンパイルし、警告なしで動くこと、実行例どおりの出力になることを確認済みです。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  function suffix(n){var m100=((n%100)+100)%100, m10=n%10; if(n<0) return ['th',-1];
+    if(m100>=11&&m100<=13) return ['th',0]; if(m10===1) return ['st',1]; if(m10===2) return ['nd',2]; if(m10===3) return ['rd',3]; return ['th',4];}
+  /* 2-1 体験 */
+  var d=document.getElementById('d21');
+  var R=['下2桁(n % 100)が 11〜13 → th','一の位(n % 10)が 1 → st','一の位が 2 → nd','一の位が 3 → rd','それ以外 → th'];
+  function d21(){var n=parseInt(d.value,10); if(isNaN(n)){document.getElementById('d21o').textContent='';return;}
+    var r=suffix(n); document.getElementById('d21o').innerHTML=n+' -&gt; '+n+'<sup>'+r[0]+'</sup>';
+    document.getElementById('d21r').innerHTML=r[1]<0?'<li class="hit"><span class="mk">!</span>負の数(C では -1 % 10 は -1 なので th になります)</li>':R.map(function(t,i){return '<li class="'+(i===r[1]?'hit':i<r[1]?'skip':'')+'"><span class="mk">'+(i===r[1]?'✓':i<r[1]?'×':'')+'</span>'+t+(i===0?'(n % 100 = '+(n%100)+')':i===1?'(n % 10 = '+(n%10)+')':'')+'</li>';}).join('');}
+  d.addEventListener('input',d21); d21();
+  var g='';for(var i=1;i<=120;i++){var s=suffix(i)[0];g+='<span class="s-'+s+'">'+i+s+'</span>';} document.getElementById('g100').innerHTML=g;
+
+  /* 2-2 */
+  var c2=document.getElementById('d22');
+  var RG=[['数字','\'0\'〜\'9\'','48〜57',48,57],['英大文字','\'A\'〜\'Z\'','65〜90',65,90],['英小文字','\'a\'〜\'z\'','97〜122',97,122]];
+  function d22(){var ch=Array.from(c2.value)[0]; var r=document.getElementById('d22r'), m=document.getElementById('d22m');
+    if(!ch){r.innerHTML='';m.textContent='1文字入力してください。';return;}
+    var code=ch.codePointAt(0), hit=-1; RG.forEach(function(g,i){if(code>=g[3]&&code<=g[4])hit=i;});
+    r.innerHTML=RG.map(function(g,i){return '<div class="rg'+(i===hit?' on':'')+'"><b>'+g[1]+'</b>'+g[0]+'<br>'+g[2]+'</div>';}).join('');
+    var bytes=new TextEncoder().encode(ch);
+    m.innerHTML='「'+ch.replace(/[<>&]/g,'')+'」の文字コード:'+(code<128?code+'(16進 '+code.toString(16).toUpperCase()+')':'半角ではありません(UTF-8 で '+bytes.length+' バイト。C で1文字読むと最初の 1 バイト '+bytes[0]+' だけが読まれる)')+'<br>→ '+(hit===1?'半角英数字が入力されました。入力された文字は英大文字です。':hit===2?'半角英数字が入力されました。入力された文字は英小文字です。':hit===0?'半角英数字が入力されました。入力された文字は数字です。':'半角英数字以外が入力されました。');}
+  c2.addEventListener('input',d22); d22();
+
+  /* 2-3 */
+  var pm=document.getElementById('pmode'), ps=document.getElementById('pset'), pt=document.getElementById('ptry'), term=document.getElementById('pterm'), tries=0, done=false;
+  function esc(s){return s.replace(/[<>&]/g,'');}
+  function preset(){tries=0;done=false;term.innerHTML='暗証番号を設定してください: <span class="in">'+esc(ps.value)+'</span>\n'+(pm.value==='int'?'(int として保存 → '+(isNaN(parseInt(ps.value,10))?'?':parseInt(ps.value,10))+')\n':'(文字列 "'+esc(ps.value)+'" として保存)\n')+'暗証番号を入力(1回目): ';
+    document.querySelectorAll('#pdots i').forEach(function(e){e.className='';}); pt.disabled=false; document.getElementById('pgo').disabled=false; pt.value='';}
+  function ptry(){if(done)return; var v=pt.value.trim(); if(!v)return; tries++;
+    var ok=pm.value==='int'?(parseInt(v,10)===parseInt(ps.value,10)):(v===ps.value);
+    document.querySelectorAll('#pdots i')[tries-1].className='used';
+    term.innerHTML+='<span class="in">'+esc(v)+'</span>'+(pm.value==='int'?'  (int → '+parseInt(v,10)+')':'')+'\n';
+    if(ok){term.innerHTML+='<span class="ok">正しい暗証番号が入力されました。</span>'+(pm.value==='int'&&v!==ps.value?'\n<span class="ng">※ 文字としては違うのに正解になった!(先頭の 0 が消えたため)</span>':'')+'\n';done=true;}
+    else{term.innerHTML+='<span class="ng">暗証番号が正しく入力されませんでした。</span>\n'; if(tries<3) term.innerHTML+='暗証番号を入力('+(tries+1)+'回目): '; else {term.innerHTML+='(3回間違えたので終了)\n';done=true;}}
+    if(done){pt.disabled=true;document.getElementById('pgo').disabled=true;}
+    pt.value=''; term.scrollTop=term.scrollHeight;}
+  document.getElementById('pgo').addEventListener('click',ptry);
+  pt.addEventListener('keydown',function(e){if(e.key==='Enter')ptry();});
+  document.getElementById('preset').addEventListener('click',preset); pm.addEventListener('change',preset); ps.addEventListener('input',preset);
+  preset();
+
+  /* コードの色付け */
+  var kw=/^(int|char|void|return|for|if|else|while|do|switch|case|break|continue|default|include|define|double|float|long|const|unsigned|sizeof|NULL)$/;
+  document.querySelectorAll('pre.code code').forEach(function(el){
+    var src=el.textContent,out='',re=/(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(#?\b[A-Za-z_]\w*\b)|(\b\d+(?:\.\d+)?\b)|([\s\S])/g,m;
+    function e(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    while((m=re.exec(src))){if(m[1])out+='<span class="tk-com">'+e(m[1])+'</span>';else if(m[2])out+='<span class="tk-str">'+e(m[2])+'</span>';else if(m[3])out+=kw.test(m[3].replace('#',''))?'<span class="tk-kw">'+e(m[3])+'</span>':e(m[3]);else if(m[4])out+='<span class="tk-num">'+m[4]+'</span>';else out+=e(m[5]);}
+    el.innerHTML=out;});
+})();
+</script>
+</body>
+</html>

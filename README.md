@@ -23,7 +23,7 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 | 4-2 | 線形代数2 | [courses/4-2.html](courses/4-2.html) | – |
 | 4-3 | 物理学演習 | [courses/4-3.html](courses/4-3.html) | – |
 | 5-1 | 創造的思考法 | [courses/5-1.html](courses/5-1.html) | – |
-| 5-2 | プログラミング演習 | [courses/5-2.html](courses/5-2.html) | 2件 |
+| 5-2 | プログラミング演習 | [courses/5-2.html](courses/5-2.html) | 4件 |
 | 5-3 | プラティカルICT | [courses/5-3.html](courses/5-3.html) | – |
 
 ## 登録済みの教材
@@ -73,6 +73,8 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 |------|------|----------|------------|
 | 5-2-1 | 演算子と型修飾子 | [materials/5-2/5-2-1-operators.html](materials/5-2/5-2-1-operators.html) | [claude.ai](https://claude.ai/artifact/WPM49GQkEvCe24SHigcLRs) |
 | 5-2-1 | 課題1 解説 ― 文字と文字コード | [materials/5-2/5-2-1-kadai1.html](materials/5-2/5-2-1-kadai1.html) | [claude.ai](https://claude.ai/artifact/RLJRE4NrTHtg6a7vnc27yN) |
+| 5-2-2 | C言語の基本構造 | [materials/5-2/5-2-2-c-basics.html](materials/5-2/5-2-2-c-basics.html) | – |
+| 5-2-2 | 課題2 解説 ― 条件分岐と繰り返し | [materials/5-2/5-2-2-kadai2.html](materials/5-2/5-2-2-kadai2.html) | – |
 <!-- AUTO-GENERATED:END -->
 
 ## 教材の追加方法

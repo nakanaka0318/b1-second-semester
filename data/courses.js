@@ -93,7 +93,14 @@ window.COURSES = [
     { id: "5-2-1-kadai1", lesson: 1, title: "課題1 解説 ― 文字と文字コード",
       file: "materials/5-2/5-2-1-kadai1.html",
       url: "https://claude.ai/artifact/RLJRE4NrTHtg6a7vnc27yN",
-      note: "文字列と ASCII コード、大文字変換、^ で大文字の位置を示す課題の解説" }
+      note: "文字列と ASCII コード、大文字変換、^ で大文字の位置を示す課題の解説" },
+    { id: "5-2-2-c-basics", lesson: 2, title: "C言語の基本構造",
+      file: "materials/5-2/5-2-2-c-basics.html",
+      note: "プログラムができるまで、文・識別子・変数と型・定数・printf/scanf・制御構造・関数の宣言と定義・配列と文字列、用語集" },
+    { id: "5-2-2-kadai2", refs: [{ label: "課題のスライド", files: ["refs/5-2-2-kadai2.jpg"] }],
+      lesson: 2, title: "課題2 解説 ― 条件分岐と繰り返し",
+      file: "materials/5-2/5-2-2-kadai2.html",
+      note: "序数の接尾辞・文字の種類・暗証番号3回の段階的ヒント、解答例、別解、よくある間違い。ブラウザで試せる体験コーナー付き" }
   ] },
   { id: "5-3", name: "プラティカルICT",        materials: [] }
 ];
