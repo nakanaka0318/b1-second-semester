@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>中国語 第11課</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.zh{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",sans-serif}
+.say{font:inherit;font-size:.78rem;border:1.5px solid var(--line);background:var(--paper);color:var(--accent);border-radius:99px;padding:1px 9px;cursor:pointer;vertical-align:middle;margin-left:6px;white-space:nowrap}
+.say:hover{border-color:var(--accent)}
+.say.playing{background:var(--accent);color:#fff}
+.dlg{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:start;margin:8px 0}
+.dlg .who{font-weight:700;color:var(--sub);padding-top:4px;white-space:nowrap}
+.dlg .ln .hz{font-size:1.25rem}
+.dlg .ln .py{font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--accent)}
+.dlg .ln .ja{font-size:.85rem;color:var(--sub)}
+.hide-py .py,.hide-ja .ja{visibility:hidden}
+.ex{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:6px 0}
+.ex .hz{font-size:1.15rem}
+.ex .py{font-family:"JetBrains Mono",monospace;font-size:.82rem;color:var(--accent)}
+.ex .ja{font-size:.85rem;color:var(--sub)}
+.tg{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.tg button{font:inherit;font-size:.82rem;font-weight:700;padding:4px 12px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.tg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.card3{perspective:800px;margin:10px auto;max-width:360px;height:170px;cursor:pointer}
+.card3 .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.card3.flip .in{transform:rotateY(180deg)}
+.card3 .f,.card3 .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;border:2px solid var(--line);background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px;text-align:center}
+.card3 .b{transform:rotateY(180deg);border-color:var(--accent)}
+.card3 .big{font-size:2.2rem;font-weight:700}
+.card3 .py{font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.05rem}
+@media (prefers-reduced-motion: reduce){.card3 .in{transition:none}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:44px;padding:6px;border-radius:10px;background:var(--bg);margin:6px 0}
+.chips.ans{background:var(--paper);border:2px dashed var(--line)}
+.chips button{font:inherit;font-size:1.1rem;padding:5px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.chips.ans button{border-color:var(--accent);background:var(--accent-soft)}
+.chips button:disabled{opacity:.25;cursor:default}
+.subs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.subs button{font:inherit;padding:4px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.subs button[aria-pressed="true"]{border-color:var(--mark);background:var(--mark-soft);font-weight:700}
+.voice-note{font-size:.8rem;color:var(--sub)}
+
+.clockbox{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center}
+.clockbox svg{width:150px;height:150px}
+.clockbox .face{fill:var(--paper);stroke:var(--ink);stroke-width:3}
+.clockbox .tick{stroke:var(--sub);stroke-width:2}
+.clockbox .hh{stroke:var(--ink);stroke-width:5;stroke-linecap:round}
+.clockbox .mh{stroke:var(--accent);stroke-width:3;stroke-linecap:round}
+.clockbox .dg{font-family:"JetBrains Mono",monospace;font-size:1.6rem;font-weight:700}
+.reads{list-style:none;padding:0;margin:6px 0}
+.reads li{background:var(--bg);border-radius:8px;padding:6px 10px;margin:4px 0}
+.reads li .hz{font-size:1.25rem}
+.reads li .py{font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--accent);margin-left:6px}
+.reads li .k{font-size:.72rem;color:var(--sub);margin-left:6px}
+.tin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.05rem;padding:6px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:6.5em}
+@media (max-width:520px){.clockbox{grid-template-columns:1fr;justify-items:center}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>第11課<br><span class="zh">我饿了。</span></h1>
+  <p>中国語 第11課のまとめです(文末の"了"・時刻の言い方・前置詞"在")。中国語の文は ▶ で読み上げられます(ブラウザの音声機能を使います)。<span class="voice-note" id="vnote"></span></p>
+  <div class="demo">
+    <label>時刻を中国語で言ってみよう</label>
+    <div class="clockbox">
+      <svg id="clk" viewBox="0 0 150 150" role="img" aria-label="時計"></svg>
+      <div>
+        <div class="row"><input id="tm" class="tin" type="time" value="02:05" aria-label="時刻"><button class="btn sub" id="trnd" type="button">ランダム</button></div>
+        <ul class="reads" id="reads"></ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><a href="#text">本文</a><a href="#g1">文末の了</a><a href="#g2">時刻</a><a href="#g3">在</a><a href="#ch">チャレンジ</a><a href="#vocab">単語カード</a><a href="#drill">ドリル</a><a href="#q">練習問題</a></nav>
+
+<section class="task" id="text">
+  <h2><span class="no">本文</span>陈红と张平は繁華街に来ています</h2>
+  <div class="tg"><button data-toggle="hide-py" data-target="dlg">ピンイン</button><button data-toggle="hide-ja" data-target="dlg">日本語訳</button><button type="button" id="playall">▶ 全部読む</button></div>
+  <div class="dlg" id="dlg">
+    <span class="who zh">陈红</span><div class="ln" data-say="我饿了。"><span class="hz zh">我饿了。</span><div class="py">Wǒ è le.</div><div class="ja">お腹がすいた。</div></div>
+    <span class="who zh">张平</span><div class="ln" data-say="我也饿了。"><span class="hz zh">我也饿了。</span><div class="py">Wǒ yě è le.</div><div class="ja">私もお腹がすいた。</div></div>
+    <span class="who zh">陈红</span><div class="ln" data-say="现在几点了?"><span class="hz zh">现在几点了?</span><div class="py">Xiànzài jǐ diǎn le?</div><div class="ja">今何時になった?</div></div>
+    <span class="who zh">张平</span><div class="ln" data-say="已经十二点了。"><span class="hz zh">已经十二点了。</span><div class="py">Yǐjīng shí'èr diǎn le.</div><div class="ja">もう12時だよ。</div></div>
+    <span class="who zh">陈红</span><div class="ln" data-say="我们在哪儿吃饭?"><span class="hz zh">我们在哪儿吃饭?</span><div class="py">Wǒmen zài nǎr chī fàn?</div><div class="ja">私たち、どこでご飯を食べる?</div></div>
+    <span class="who zh">张平</span><div class="ln" data-say="在那家快餐店吃,怎么样?"><span class="hz zh">在那家快餐店吃,怎么样?</span><div class="py">Zài nèi jiā kuàicāndiàn chī, zěnmeyàng?</div><div class="ja">あのファーストフード店で食べるのはどう?</div></div>
+  </div>
+  <div class="point"><b>本文のポイント</b>:「饿了」「几点了」「十二点了」の"了"はすべて<b>変化</b>(お腹がすいた状態になった/〜時になった)。"那家"の"那"は会話では nèi と読むことが多い。</div>
+</section>
+
+<section class="task" id="g1">
+  <h2><span class="no">1</span>文末の"了"</h2>
+  <div class="ex" data-say="我最近胖了。"><span class="hz zh">我最近胖了。</span><div class="py">Wǒ zuìjìn pàng le.</div><div class="ja">私は最近太った。</div></div>
+  <div class="ex" data-say="她买票了。"><span class="hz zh">她买票了。</span><div class="py">Tā mǎi piào le.</div><div class="ja">彼女はチケットを買った。</div></div>
+  <div class="ex" data-say="你已经吃早饭了吗?我还没吃早饭。"><span class="hz zh">你已经吃早饭了吗?──我还没吃早饭。</span><div class="py">Nǐ yǐjīng chī zǎofàn le ma? ── Wǒ hái méi chī zǎofàn.</div><div class="ja">もう朝ご飯を食べた?──まだ食べていない。</div></div>
+  <ul>
+    <li>文末の"了"は、<b>状況の変化</b>や<b>新しい事態の発生</b>を表す。「〜になった。〜した」</li>
+    <li>否定形は、"<b>没(有)</b>"を動詞・形容詞の前に置き、<b>"了"は取る</b>。「まだ〜していない」は"还没〜"。</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th>否定</th><th>意味</th><th>例</th></tr>
+    <tr><td class="zh"><b>不</b></td><td>しない(意志・習慣・未来)</td><td class="zh">我不吃早饭。(朝ご飯は食べない主義)</td></tr>
+    <tr><td class="zh"><b>没(有)</b></td><td>しなかった/していない(事実)</td><td class="zh">我没吃早饭。(今日は食べていない)</td></tr>
+  </table></div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">練習</span>否定文にしてみよう(タップで答え)</div>
+    <details><summary><span class="tag">1</span><span class="zh">她买票了。</span><span class="tap"></span></summary><div class="body"><p class="zh" style="font-size:1.15rem">她没(有)买票。</p><p>"了"を取り、動詞の前に"没(有)"。</p></div></details>
+    <details><summary><span class="tag">2</span><span class="zh">我饿了。</span><span class="tap"></span></summary><div class="body"><p class="zh" style="font-size:1.15rem">我不饿。</p><p>「今はお腹がすいていない」という状態の否定は"不"が自然です。</p></div></details>
+    <details><summary><span class="tag">3</span><span class="zh">你已经吃早饭了吗?(「まだ」と答える)</span><span class="tap"></span></summary><div class="body"><p class="zh" style="font-size:1.15rem">我还没吃早饭。</p><p>"还没(有)〜"で「まだ〜していない」。</p></div></details>
+  </div>
+</section>
+
+<section class="task" id="g2">
+  <h2><span class="no">2</span>時点(2)時刻</h2>
+  <div class="ex" data-say="现在几点?"><span class="hz zh">现在几点?</span><div class="py">Xiànzài jǐ diǎn?</div><div class="ja">今何時?</div></div>
+  <div class="tbl"><table>
+    <tr><th>時刻</th><th>中国語</th><th>ピンイン</th></tr>
+    <tr><td>2:05</td><td class="zh">两点(零)五分</td><td class="mono">liǎng diǎn (líng) wǔ fēn</td></tr>
+    <tr><td>2:15</td><td class="zh">两点一刻</td><td class="mono">liǎng diǎn yí kè</td></tr>
+    <tr><td>2:30</td><td class="zh">两点半</td><td class="mono">liǎng diǎn bàn</td></tr>
+    <tr><td>2:55</td><td class="zh">差五分三点</td><td class="mono">chà wǔ fēn sān diǎn</td></tr>
+  </table></div>
+  <ul>
+    <li>「2時」は <b>两点</b>(二点とは言わない)。ただし「2分」は 二分 / 零二分。</li>
+    <li>1分〜9分は、前に<b>零</b>を入れることがある。</li>
+    <li><b>刻</b> = 15分。一刻(15分)、三刻(45分)。<b>差</b> = 足りない →「差五分三点」= 3時まで5分足りない = 2:55。</li>
+    <li>時刻・年月日・曜日・年齢・金額の文では、よく<b>"是"が省略</b>される(现在两点)。ただし<b>否定では省略できない</b>:<span class="zh">现在不是两点。</span></li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">聞き取り</span>ドリル1と同じ:読み上げた時刻を数字で書こう</div>
+    <div class="row"><button class="btn" id="lplay" type="button">▶ 時刻を聞く</button><input id="lans" class="tin" placeholder="例 5:46" aria-label="聞き取った時刻"><button class="btn sub" id="lchk" type="button">判定</button><button class="btn sub" id="lshow" type="button">答えを見る</button></div>
+    <div class="fb" id="lfb" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="g3">
+  <h2><span class="no">3</span>前置詞"在"</h2>
+  <div class="ex" data-say="他在哪儿工作?他在饭店工作。"><span class="hz zh">他在哪儿工作?──他在饭店工作。</span><div class="py">Tā zài nǎr gōngzuò? ── Tā zài fàndiàn gōngzuò.</div><div class="ja">彼はどこで働いていますか。──ホテルで働いています。</div></div>
+  <div class="formula"><span class="zh">"在"</span> + 場所 + 動詞 <small>「〜で…する」("在"は動作の行われる場所を導く)</small></div>
+  <ul>
+    <li>語順は日本語と同じく「場所 → 動作」。<span class="zh">我在快餐店打工</span>(× 我打工在快餐店)。</li>
+    <li>否定は、ふつう"<b>不</b>"を「在+場所」の<b>前</b>に置く:<span class="zh">他不在饭店工作。</span></li>
+    <li>"饭店"は「ホテル」の意味もあるので注意(レストランは"饭馆儿"など)。</li>
+  </ul>
+</section>
+
+<section class="task" id="ch">
+  <h2><span class="no">★</span>チャレンジ:言い換え練習</h2>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">①</span>毎朝何時に〜する?</div>
+    <div class="subs" id="ch1"></div>
+    <div class="ex" id="ch1s"></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">②</span>私は〜でアルバイトをしています</div>
+    <div class="subs" id="ch2"></div>
+    <div class="ex" id="ch2s"></div>
+  </div>
+</section>
+
+<section class="task" id="vocab">
+  <h2><span class="no">語</span>新出語句・単語カード</h2>
+  <div class="panel" id="cards"></div>
+  <details><summary><span class="tag">一覧</span>新出語句の一覧を見る<span class="tap"></span></summary><div class="body"><div class="tbl"><table id="vlist"></table></div></div></details>
+</section>
+
+<section class="task" id="drill">
+  <h2><span class="no">ドリル</span></h2>
+  <h3>2 日本語に合うように並べ替え</h3>
+  <div class="panel" id="ro"></div>
+  <h3>3 日本語の意味に合うように、誤りを直す</h3>
+  <div class="qbox"><div class="qno">① あなたはパンを食べますか。</div><p class="zh" style="font-size:1.1rem">你吃不吃面包吗?</p>
+    <details class="ans"><summary><span class="tag">答え</span>直し方<span class="tap"></span></summary><div class="body"><p class="zh ansline"><b>你吃不吃面包?</b> または <b>你吃面包吗?</b></p><p>反復疑問文(吃不吃)と"吗"は一緒に使えません。どちらか一方にします。</p></div></details></div>
+  <div class="qbox"><div class="qno">② 私はこの二つのテーブルを買いたい。</div><p class="zh" style="font-size:1.1rem">我想买这二张桌子。</p>
+    <details class="ans"><summary><span class="tag">答え</span>直し方<span class="tap"></span></summary><div class="body"><p class="zh ansline"><b>我想买这两张桌子。</b></p><p>量詞の前の「2」は"两"。(两点 と同じ理屈)</p></div></details></div>
+  <div class="qbox"><div class="qno">③ 私は最近、非常に忙しい。</div><p class="zh" style="font-size:1.1rem">我最近是非常忙。</p>
+    <details class="ans"><summary><span class="tag">答え</span>直し方<span class="tap"></span></summary><div class="body"><p class="zh ansline"><b>我最近非常忙。</b></p><p>形容詞が述語になる文には"是"は不要です。</p></div></details></div>
+  <div class="qbox"><div class="qno">④ 彼女は昨日、アルバイトをしませんでした。</div><p class="zh" style="font-size:1.1rem">她昨天没打工了。</p>
+    <details class="ans"><summary><span class="tag">答え</span>直し方<span class="tap"></span></summary><div class="body"><p class="zh ansline"><b>她昨天没打工。</b></p><p>"没"で否定したら"了"は取ります(文法1)。</p></div></details></div>
+  <div class="qbox"><div class="qno">⑤ あなたは何の本を読みたいですか。</div><p class="zh" style="font-size:1.1rem">你想看什么的书?</p>
+    <details class="ans"><summary><span class="tag">答え</span>直し方<span class="tap"></span></summary><div class="body"><p class="zh ansline"><b>你想看什么书?</b></p><p>「何の〜」は"什么+名詞"で、"的"は入れません。</p></div></details></div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+  <div class="qbox"><div class="qno">問1</div><p>「2時」を中国語で言うと?</p>
+    <div class="opts"><button class="zh">二点</button><button class="zh" data-ok>两点</button><button class="zh">二时</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問2</div><p><span class="zh">差一刻十点</span> は何時何分?</p>
+    <div class="opts"><button>10:15</button><button data-ok>9:45</button><button>10:45</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問3</div><p>「私はまだ朝ご飯を食べていない」として正しいのは?</p>
+    <div class="opts"><button class="zh">我还不吃早饭了。</button><button class="zh">我还没吃早饭了。</button><button class="zh" data-ok>我还没吃早饭。</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問4</div><p>「彼はホテルで働いていない」として正しいのは?</p>
+    <div class="opts"><button class="zh" data-ok>他不在饭店工作。</button><button class="zh">他在饭店不工作。</button><button class="zh">他在饭店没工作了。</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問5</div><p>「今は2時ではない」として正しいのは?</p>
+    <div class="opts"><button class="zh">现在不两点。</button><button class="zh" data-ok>现在不是两点。</button><button class="zh">现在没两点。</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問6</div><p><span class="zh">两点半</span> は何時何分?</p>
+    <div class="opts"><button>2:15</button><button data-ok>2:30</button><button>12:30</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="score" id="score"></div>
+</section>
+
+<footer>教科書 第11課(本文・文法・チャレンジ・新出語句・ドリル)をもとに作成しました。日本語訳と練習問題の一部は説明のために作成したものです。読み上げの音声はブラウザによって異なります。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+/* ===== 中国語ページ共通 ===== */
+var ZH=(function(){
+  var synth=window.speechSynthesis, voice=null;
+  function pickVoice(){ if(!synth) return; var vs=synth.getVoices(); voice=vs.filter(function(v){return /^zh(-|_)?(CN|Hans)?/i.test(v.lang)&&/CN|Hans/i.test(v.lang);})[0]||vs.filter(function(v){return /^zh/i.test(v.lang);})[0]||null; }
+  if(synth){ pickVoice(); if(synth.onvoiceschanged!==undefined) synth.onvoiceschanged=pickVoice; }
+  function say(text,btn){
+    if(!synth){ note(); return; }
+    try{ synth.cancel(); var u=new SpeechSynthesisUtterance(text); u.lang='zh-CN'; if(voice) u.voice=voice; u.rate=.8;
+      if(btn){ btn.classList.add('playing'); u.onend=u.onerror=function(){btn.classList.remove('playing');}; }
+      synth.speak(u); }catch(e){ note(); }
+  }
+  function note(){ var n=document.getElementById('vnote'); if(n) n.textContent='このブラウザでは読み上げが使えません。ピンインを見ながら声に出して練習しましょう。'; }
+  /* data-say を持つ要素に読み上げボタンを付ける */
+  function bindSay(root){ (root||document).querySelectorAll('[data-say]').forEach(function(el){ if(el.querySelector(':scope > .say')) return;
+    var b=document.createElement('button'); b.type='button'; b.className='say'; b.textContent='▶ 読む'; b.setAttribute('aria-label','中国語を読み上げる');
+    b.addEventListener('click',function(e){e.stopPropagation(); say(el.getAttribute('data-say'),b);}); el.appendChild(b); }); }
+  /* ピンイン・訳の表示切り替え */
+  function bindToggles(){ document.querySelectorAll('[data-toggle]').forEach(function(b){ b.type='button';
+    var tgt=document.getElementById(b.getAttribute('data-target')), cls=b.getAttribute('data-toggle');
+    b.setAttribute('aria-pressed','true');
+    b.addEventListener('click',function(){ var on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on?'true':'false'); tgt.classList.toggle(cls,!on); }); }); }
+  /* 単語カード */
+  function cards(id,V){
+    var box=document.getElementById(id), order=[], i=0, mode='zh', known=0, seen=0;
+    box.innerHTML='<div class="tg" data-r="mode"><button data-m="zh" aria-pressed="true">中国語 → 意味</button><button data-m="ja" aria-pressed="false">意味 → 中国語</button><button data-m="shuffle">シャッフル</button></div>'+
+      '<div class="card3" tabindex="0" role="button" aria-label="カードをめくる"><div class="in"><div class="f"></div><div class="b"></div></div></div>'+
+      '<div class="row" style="justify-content:center"><button class="btn sub" data-a="ng" type="button">✕ まだ</button><button class="btn" data-a="ok" type="button">◯ 覚えた</button></div>'+
+      '<div class="legend" style="text-align:center" data-r="st"></div>';
+    var card=box.querySelector('.card3');
+    function reset(sh){order=V.map(function(_,k){return k;}); if(sh) order.sort(function(){return Math.random()-.5;}); i=0; known=0; seen=0; draw();}
+    function draw(){ card.classList.remove('flip');
+      if(i>=order.length){ card.querySelector('.f').innerHTML='<div>全部終わりました!</div><div class="legend">'+known+' / '+V.length+' 語を覚えた</div>'; card.querySelector('.b').innerHTML=''; box.querySelector('[data-r=st]').textContent='シャッフルでもう一周'; return; }
+      var w=V[order[i]], zh='<div class="big zh">'+w[0]+'</div><div class="py">'+w[1]+'</div>', ja='<div style="font-size:1.2rem;font-weight:700">'+w[2]+'</div>';
+      card.querySelector('.f').innerHTML=mode==='zh'?zh:ja; card.querySelector('.b').innerHTML=mode==='zh'?ja:zh;
+      box.querySelector('[data-r=st]').textContent=(i+1)+' / '+V.length+'(覚えた '+known+')・カードをタップでめくる'; }
+    function flip(){ if(i<order.length){ card.classList.toggle('flip'); if(card.classList.contains('flip')) say(V[order[i]][0]); } }
+    card.addEventListener('click',flip); card.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}});
+    box.querySelectorAll('[data-a]').forEach(function(b){b.addEventListener('click',function(){ if(i>=order.length) return; if(b.getAttribute('data-a')==='ok') known++; else order.push(order[i]); i++; draw(); });});
+    box.querySelectorAll('[data-m]').forEach(function(b){b.type='button';b.addEventListener('click',function(){ var m=b.getAttribute('data-m'); if(m==='shuffle'){reset(true);return;} mode=m; box.querySelectorAll('[data-m=zh],[data-m=ja]').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-m')===m?'true':'false');}); draw(); });});
+    reset(false);
+  }
+  /* 並べ替え:Q = [日本語, [語…], [正解…]] */
+  function reorder(id,Q){
+    var box=document.getElementById(id), qi=0, pick=[];
+    function norm(s){return s.replace(/[\s,。?!,.?!]/g,'');}
+    function draw(){ var q=Q[qi];
+      box.innerHTML='<div class="ptitle"><span class="badge">'+(qi+1)+' / '+Q.length+'</span>'+q[0]+'</div>'+
+        '<div class="chips ans" data-r="ans"></div><div class="chips" data-r="pool"></div>'+
+        '<div class="row"><button class="btn" data-a="chk" type="button">判定</button><button class="btn sub" data-a="clr" type="button">やり直す</button><button class="btn sub" data-a="next" type="button">次の問題</button><span class="fb" data-r="fb" aria-live="polite"></span></div>';
+      var pool=box.querySelector('[data-r=pool]'), ans=box.querySelector('[data-r=ans]');
+      function paint(){ ans.innerHTML=''; pick.forEach(function(k,j){var b=document.createElement('button');b.type='button';b.className='zh';b.textContent=q[1][k];b.addEventListener('click',function(){pick.splice(j,1);paint();});ans.appendChild(b);});
+        pool.querySelectorAll('button').forEach(function(b){b.disabled=pick.indexOf(+b.getAttribute('data-k'))>=0;}); }
+      q[1].forEach(function(w,k){var b=document.createElement('button');b.type='button';b.className='zh';b.textContent=w;b.setAttribute('data-k',k);b.addEventListener('click',function(){if(pick.indexOf(k)<0){pick.push(k);paint();}});pool.appendChild(b);});
+      paint();
+      box.querySelector('[data-a=clr]').addEventListener('click',function(){pick=[];paint();box.querySelector('[data-r=fb]').textContent='';});
+      box.querySelector('[data-a=next]').addEventListener('click',function(){qi=(qi+1)%Q.length;pick=[];draw();});
+      box.querySelector('[data-a=chk]').addEventListener('click',function(){ var s=pick.map(function(k){return q[1][k];}).join(''), fb=box.querySelector('[data-r=fb]');
+        if(pick.length<q[1].length){fb.className='fb ng';fb.textContent='まだ使っていない語があります';return;}
+        var ok=q[2].some(function(a){return norm(a)===norm(s);});
+        fb.className='fb '+(ok?'ok':'ng'); fb.innerHTML=ok?'◯ 正解!':'✕ 正解は「<span class="zh">'+q[2][0]+'</span>」'+(q[3]?'。'+q[3]:'');
+        if(ok) say(q[2][0]); });
+    }
+    draw();
+  }
+  /* 数字 → 中国語 */
+  var D=['零','一','二','三','四','五','六','七','八','九'], P=['líng','yī','èr','sān','sì','wǔ','liù','qī','bā','jiǔ'];
+  function ap(s){ return /^[aeoāáǎàēéěèōóǒò]/.test(s)?"'"+s:s; }  /* 母音で始まる音節の前にアポストロフィ(shí'èr) */
+  function num(n){ if(n<10) return [D[n],P[n]]; if(n<20) return ['十'+(n%10?D[n%10]:''),'shí'+(n%10?ap(P[n%10]):'')];
+    var t=Math.floor(n/10), o=n%10; return [D[t]+'十'+(o?D[o]:''), P[t]+(o?'shi':'shí')+(o?ap(P[o]):'')]; }
+  return {say:say,bindSay:bindSay,bindToggles:bindToggles,cards:cards,reorder:reorder,num:num,D:D,P:P};
+})();
+
+(function(){
+  var V=[['最近','zuìjìn','最近。近ごろ'],['胖','pàng','太っている'],['了','le','(文末)変化・新しい事態'],['票','piào','チケット'],['已经','yǐjīng','すでに'],['早饭','zǎofàn','朝食'],['还','hái','まだ'],['没(有)','méi(yǒu)','〜していない。〜しなかった'],['点','diǎn','〜時'],['零','líng','ゼロ'],['分','fēn','〜分'],['刻','kè','15分'],['半','bàn','半。半分'],['差','chà','足りない'],['在','zài','〜で'],['哪儿','nǎr','どこ'],['工作','gōngzuò','仕事をする'],['饭店','fàndiàn','ホテル'],['饿','è','お腹がすいている'],['饭','fàn','食事'],['家','jiā','〜軒(店・会社を数える)'],['快餐店','kuàicāndiàn','ファーストフード店'],['怎么样','zěnmeyàng','どうですか'],['起床','qǐchuáng','起きる。起床する'],['出门','chūmén','家を出る。外出する'],['打工','dǎgōng','アルバイトをする'],['便利店','biànlìdiàn','コンビニエンスストア'],['车站','chēzhàn','駅。バス停']];
+  ZH.cards('cards',V);
+  document.getElementById('vlist').innerHTML='<tr><th>語</th><th>ピンイン</th><th>意味</th></tr>'+V.map(function(w){return '<tr><td class="zh" data-say="'+w[0].replace(/\(.*\)/,'')+'" style="font-size:1.1rem">'+w[0]+'</td><td class="mono">'+w[1]+'</td><td>'+w[2]+'</td></tr>';}).join('');
+
+  /* ===== 時刻 ===== */
+  function hourZh(h){ if(h===2) return ['两','liǎng']; return ZH.num(h); }
+  function minZh(m){ var n=ZH.num(m); return n; }
+  function readings(h,m){
+    var H=h%12||12, r=[], hz=hourZh(H);
+    if(m===0){ r.push([hz[0]+'点',hz[1]+' diǎn','ちょうど(〜点整 とも)']); }
+    else if(m<10){ var n=minZh(m); r.push([hz[0]+'点零'+n[0]+'分',hz[1]+' diǎn líng '+n[1]+' fēn','1〜9分は"零"を入れることが多い']); r.push([hz[0]+'点'+n[0]+'分',hz[1]+' diǎn '+n[1]+' fēn','"零"なし']); }
+    else { var n2=minZh(m); r.push([hz[0]+'点'+n2[0]+'分',hz[1]+' diǎn '+n2[1]+' fēn','基本の言い方']); }
+    if(m===15) r.unshift([hz[0]+'点一刻',hz[1]+' diǎn yí kè','刻 = 15分']);
+    if(m===30) r.unshift([hz[0]+'点半',hz[1]+' diǎn bàn','半 = 30分']);
+    if(m===45){ var nh=hourZh(H%12+1); r.unshift([hz[0]+'点三刻',hz[1]+' diǎn sān kè','三刻 = 45分']); r.push(['差一刻'+nh[0]+'点','chà yí kè '+nh[1]+' diǎn','次の時刻まで15分足りない']); }
+    if(m>=50){ var d=60-m, nh2=hourZh(H%12+1), dz=d===2?['两','liǎng']:ZH.num(d); r.push(['差'+dz[0]+'分'+nh2[0]+'点','chà '+dz[1]+' fēn '+nh2[1]+' diǎn','次の時刻まで'+d+'分足りない']); }
+    return r;
+  }
+  var tm=document.getElementById('tm');
+  function drawClock(h,m){
+    var s='<circle class="face" cx="75" cy="75" r="68"/>';
+    for(var i=0;i<12;i++){var a=i*Math.PI/6;s+='<line class="tick" x1="'+(75+58*Math.sin(a))+'" y1="'+(75-58*Math.cos(a))+'" x2="'+(75+66*Math.sin(a))+'" y2="'+(75-66*Math.cos(a))+'"/>';}
+    var ha=((h%12)+m/60)*Math.PI/6, ma=m*Math.PI/30;
+    s+='<line class="hh" x1="75" y1="75" x2="'+(75+36*Math.sin(ha))+'" y2="'+(75-36*Math.cos(ha))+'"/><line class="mh" x1="75" y1="75" x2="'+(75+54*Math.sin(ma))+'" y2="'+(75-54*Math.cos(ma))+'"/><circle cx="75" cy="75" r="4" style="fill:var(--ink)"/>';
+    document.getElementById('clk').innerHTML=s;
+  }
+  function drawT(){var p=(tm.value||'02:05').split(':'),h=+p[0],m=+p[1]; drawClock(h,m);
+    document.getElementById('reads').innerHTML='<li><span class="dg">'+(h%12||12)+':'+String(m).padStart(2,'0')+'</span>'+(h>=12?' <span class="k">午後(下午 xiàwǔ)</span>':' <span class="k">午前(上午 shàngwǔ)</span>')+'</li>'+readings(h,m).map(function(r){return '<li data-say="'+r[0]+'"><span class="hz zh">'+r[0]+'</span><span class="py">'+r[1]+'</span><span class="k">'+r[2]+'</span></li>';}).join('');
+    ZH.bindSay(document.getElementById('reads'));}
+  tm.addEventListener('input',drawT);
+  document.getElementById('trnd').addEventListener('click',function(){var ms=[0,5,15,30,45,55,20,8,50,2][Math.floor(Math.random()*10)],h=1+Math.floor(Math.random()*12);tm.value=String(h).padStart(2,'0')+':'+String(ms).padStart(2,'0');drawT();});
+  drawT();
+
+  /* 聞き取り */
+  var cur=null;
+  function newQ(){var h=1+Math.floor(Math.random()*12), m=[0,5,10,15,20,25,30,35,40,45,46,50,55,8,3][Math.floor(Math.random()*15)]; cur=[h,m,readings(h,m)[0]];}
+  newQ();
+  document.getElementById('lplay').addEventListener('click',function(){ZH.say(cur[2][0],this);});
+  document.getElementById('lchk').addEventListener('click',function(){var v=document.getElementById('lans').value.replace(/[::]/,':').trim().split(':'),fb=document.getElementById('lfb');
+    if(v.length===2&&+v[0]%12===cur[0]%12&&+v[1]===cur[1]){fb.className='fb ok';fb.innerHTML='◯ 正解! <span class="zh">'+cur[2][0]+'</span> = '+cur[0]+':'+String(cur[1]).padStart(2,'0')+'(次の問題に進みます)';newQ();document.getElementById('lans').value='';}
+    else{fb.className='fb ng';fb.textContent='✕ もう一度聞いてみよう(「5:46」の形で入力)';}});
+  document.getElementById('lshow').addEventListener('click',function(){var fb=document.getElementById('lfb');fb.className='fb';fb.innerHTML='答え:'+cur[0]+':'+String(cur[1]).padStart(2,'0')+' = <span class="zh">'+cur[2][0]+'</span>('+cur[2][1]+')';newQ();});
+
+  /* チャレンジ */
+  function subs(id,items,make){var box=document.getElementById(id),out=document.getElementById(id+'s');
+    items.forEach(function(it,i){var b=document.createElement('button');b.type='button';b.innerHTML='<span class="zh">'+it[0]+'</span> '+it[2];b.addEventListener('click',function(){box.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed','false');});b.setAttribute('aria-pressed','true');var s=make(it);out.setAttribute('data-say',s[0]);out.innerHTML='<span class="hz zh">'+s[0]+'</span><div class="py">'+s[1]+'</div><div class="ja">'+s[2]+'</div>';ZH.bindSay(out.parentNode);});box.appendChild(b);});
+    box.querySelector('button').click();}
+  subs('ch1',[['吃早饭','chī zǎofàn','朝ご飯を食べる'],['起床','qǐchuáng','起きる'],['出门','chūmén','家を出る']],function(it){return ['你每天早上几点'+it[0]+'?','Nǐ měitiān zǎoshang jǐ diǎn '+it[1]+'?','あなたは毎朝何時に'+it[2].replace(/る$/,'ますか')+'。'];});
+  subs('ch2',[['快餐店','kuàicāndiàn','ファーストフード店'],['便利店','biànlìdiàn','コンビニ'],['车站','chēzhàn','駅']],function(it){return ['我在'+it[0]+'打工。','Wǒ zài '+it[1]+' dǎgōng.','私は'+it[2]+'でアルバイトをしています。'];});
+
+  /* 並べ替え */
+  ZH.reorder('ro',[
+    ['① 彼はどこで中国語を学んでいますか。',['学','他','汉语','哪儿','在'],['他在哪儿学汉语?'],'「在+場所」は動詞の前'],
+    ['② 彼女はもう家を買いましたか。',['房子','她','了','已经','买','吗'],['她已经买房子了吗?'],'"已经"は動詞の前、"了"と"吗"は文末'],
+    ['③ 私は十時十五分前に家を出たい。',['出门','十点','差','我','想','一刻'],['我想差一刻十点出门。'],'時刻は動詞の前。差一刻十点 = 9:45'],
+    ['④ 私たちはどこでご飯を食べますか。',['吃','我们','哪儿','饭','在'],['我们在哪儿吃饭?'],'本文の文']
+  ]);
+
+  ZH.bindSay(); ZH.bindToggles();
+  document.getElementById('playall').addEventListener('click',function(){ZH.say(Array.prototype.map.call(document.querySelectorAll('#dlg .ln'),function(e){return e.getAttribute('data-say');}).join(' '),this);});
+})();
+</script>
+</body>
+</html>

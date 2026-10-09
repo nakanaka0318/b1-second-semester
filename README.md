@@ -18,7 +18,7 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 | 1-4 | 情報通信ネットワーク | [courses/1-4.html](courses/1-4.html) | 4件 |
 | 2-1 | 社会科学基礎 | [courses/2-1.html](courses/2-1.html) | 1件 |
 | 2-2 | 微分積分2 | [courses/2-2.html](courses/2-2.html) | – |
-| 3-2 | 中国語 | [courses/3-2.html](courses/3-2.html) | – |
+| 3-2 | 中国語 | [courses/3-2.html](courses/3-2.html) | 2件 |
 | 3-3 | 物理学2 | [courses/3-3.html](courses/3-3.html) | – |
 | 4-2 | 線形代数2 | [courses/4-2.html](courses/4-2.html) | – |
 | 4-3 | 物理学演習 | [courses/4-3.html](courses/4-3.html) | – |
@@ -66,6 +66,13 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 | 番号 | 教材 | ファイル | 元のページ |
 |------|------|----------|------------|
 | 2-1-1 | 冷戦の時代 | [materials/2-1/2-1-1-cold-war.html](materials/2-1/2-1-1-cold-war.html) | – |
+
+### 3-2 中国語
+
+| 番号 | 教材 | ファイル | 元のページ |
+|------|------|----------|------------|
+| 3-2-2 | 第11課 我饿了。(文末の了・時刻・在) | [materials/3-2/3-2-2-lesson11.html](materials/3-2/3-2-2-lesson11.html) | – |
+| 3-2-3 | 第12課 你星期六干什么?(連動文・年月日・怎么) | [materials/3-2/3-2-3-lesson12.html](materials/3-2/3-2-3-lesson12.html) | – |
 
 ### 5-2 プログラミング演習
 
