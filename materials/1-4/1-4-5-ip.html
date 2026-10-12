@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IPとIPアドレス</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+:root{--net:#1F6FB2;--host:#C77700;--net-soft:#E3EEF8;--host-soft:#FFF4D6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--net:#6DB3F2;--host:#F2BE3A;--net-soft:#1B2D46;--host-soft:#3A3016}}
+:root[data-theme="dark"]{--net:#6DB3F2;--host:#F2BE3A;--net-soft:#1B2D46;--host-soft:#3A3016}
+.sw{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.sw button{font:inherit;font-size:.85rem;font-weight:700;padding:5px 11px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ipin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.1rem;padding:7px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;max-width:240px}
+.ipin:focus{outline:none;border-color:var(--accent)}
+.ipin.err{border-color:var(--warn)}
+.demo .ipin{font-size:1.1rem;padding:7px 10px;width:100%;max-width:240px}
+.bitrow{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:flex-start;margin:2px 0 6px}
+.bitrow .rl{width:100%;font-size:.78rem;color:var(--sub);line-height:1.4}
+.og{display:flex;flex-direction:column;align-items:center}
+.oct{display:flex;gap:1px}
+.oct span,.oct button{width:17px;height:24px;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:.82rem;border-radius:3px;border:none;padding:0;color:var(--ink)}
+.oct .n{background:var(--net-soft)}.oct .h{background:var(--host-soft)}
+.oct .n.one{background:var(--net);color:#fff}.oct .h.one{background:var(--host);color:#fff}
+.oct button{cursor:pointer;font:inherit;font-family:"JetBrains Mono",monospace;font-size:.82rem}
+.oct button:focus-visible{outline:2px solid var(--ink)}
+.dec{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--sub);line-height:1.3}
+.bitlegend{display:flex;gap:14px;font-size:.78rem;color:var(--sub);margin:6px 0}
+.bitlegend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.bits8{display:flex;gap:4px;flex-wrap:wrap;margin:10px 0}
+.bits8 button{width:52px;font:inherit;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer;padding:4px 0;text-align:center}
+.bits8 button small{display:block;font-size:.68rem;color:var(--sub)}
+.bits8 button b{display:block;font-family:"JetBrains Mono",monospace;font-size:1.3rem}
+.bits8 button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.bits8 button[aria-pressed="true"] small{color:#fff;opacity:.85}
+.big{font-family:"JetBrains Mono",monospace;font-size:1.6rem;font-weight:700}
+.msg{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.92rem;margin-top:8px}
+.trip{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:8px 0;font-size:.8rem;text-align:center}
+.trip div{border-radius:8px;padding:6px 4px}
+.trip .dl{background:var(--net-soft)}
+.trip .ip{grid-column:1/-1;background:var(--host-soft)}
+.term{background:var(--code-bg);color:var(--code-ink);font-family:"JetBrains Mono",monospace;font-size:.78rem;border-radius:10px;padding:10px 12px;overflow-x:auto;white-space:pre;line-height:1.6}
+.term b{color:var(--c-str);font-weight:700}
+.v6{font-family:"JetBrains Mono",monospace;font-size:1rem;word-break:break-all;background:var(--bg);border-radius:8px;padding:8px 10px}
+.v6 span:nth-child(odd){color:var(--net)}.v6 span:nth-child(even){color:var(--host)}
+@media (max-width:600px){.trip{font-size:.72rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>IP(Internet Protocol)と IP アドレス</h1>
+  <p>情報通信ネットワーク 第5回(#5 IP)のまとめです。パケットを世界中の目的のコンピュータまで届ける IP と、その住所にあたる IP アドレス(ネットワーク部・ホスト部、サブネットマスク)を学びます。</p>
+  <div class="demo">
+    <label for="ipin">IP アドレス計算機:IP アドレスとサブネットマスクから、ネットワークアドレス・ブロードキャストアドレスを求める</label>
+    <div class="row" style="margin-top:0"><input id="ipin" class="ipin" value="172.20.100.52" aria-label="IPアドレス" autocomplete="off" spellcheck="false" inputmode="decimal"><span class="mono" style="font-weight:700">/<span id="pfv"></span></span></div>
+    <div class="row"><label for="pfx">ネットワーク部の長さ</label><input id="pfx" type="range" min="0" max="32" value="26"><span class="mono" id="mkv" style="font-size:.9rem"></span></div>
+    <div class="sw" id="ipex"><button data-ip="172.20.100.52" data-p="26">スライドの例</button><button data-ip="192.168.100.150" data-p="25">演習(p.23)</button><button data-ip="192.168.144.10" data-p="24">192.168.144.10/24</button><button data-ip="10.1.2.3" data-p="8">10.1.2.3/8</button></div>
+    <div id="bitv" aria-live="polite"></div>
+    <div class="bitlegend"><span><i style="background:var(--net)"></i>ネットワーク部</span><span><i style="background:var(--host)"></i>ホスト部</span><span>IP アドレスのビットはタップで 0/1 を切り替えられます</span></div>
+    <div class="stats" id="ipst"></div>
+  </div>
+</header>
+
+<div class="blbar"><span class="t">穴埋め:<span id="blcount"></span></span><button class="btn sub" id="blhide" type="button">すべて隠す</button><button class="btn sub" id="blshow" type="button">すべて表示</button></div>
+
+<nav class="toc">
+  <a href="#layer">インターネット層</a><a href="#role">役割</a><a href="#router">ルータ</a><a href="#dl">L2とL3</a><a href="#addr">IPアドレス</a><a href="#nethost">ネットワーク部</a><a href="#class">クラス</a><a href="#nb">特別なアドレス</a><a href="#short">枯渇問題</a><a href="#subnet">サブネット</a><a href="#ex">演習</a><a href="#cmd">コマンド</a><a href="#priv">プライベート</a><a href="#v6">IPv6</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="layer">
+  <h2><span class="no">1</span>インターネット層と IP</h2>
+  <ul>
+    <li>TCP/IP のインターネット層は、OSI 参照モデルの <b>ネットワーク層(L3)</b> にあたる。この層の機能は OS に実装されている。</li>
+    <li>上の層から受け取る単位はセグメント/データグラム、この層の単位は <b class="bl">パケット</b>、下の層(データリンク層)の単位はフレーム。</li>
+    <li><b>IP</b> は TCP/IP の心臓部とも言えるインターネット層のプロトコル。<b>IPv4</b> はインターネットの誕生から現在まで最も多く使われてきた IP(本科目はこちら)、<b>IPv6</b> は IPv4 アドレスの枯渇問題から標準化された新しい IP。</li>
+  </ul>
+  <h3>用語の定義</h3>
+  <div class="tbl"><table>
+    <tr><th>用語</th><th>意味</th></tr>
+    <tr><td><b class="bl">ホスト</b></td><td>IP アドレスが付けられた機器の総称。ただし経路制御(ルーティング)は<b>行わない</b>。</td></tr>
+    <tr><td><b class="bl">ルータ</b></td><td>IP アドレスが付けられ、<b>ルーティングを行う</b>ネットワーク機器。異なるネットワークを接続する。<b>ゲートウェイ</b>とも呼ぶことがある。</td></tr>
+    <tr><td><b class="bl">ノード</b></td><td>ホストとルータをあわせた機器の総称。</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="role">
+  <h2><span class="no">2</span>インターネット層の役割</h2>
+  <h3>(1) パケットの構築と再構築</h3>
+  <ul>
+    <li>上位層から受け取ったセグメント/データグラムを「パケット」と呼ぶ小さな単位に分割する(<b class="bl">フラグメンテーション</b>)。</li>
+    <li>分割したデータにヘッダを付ける:宛先・送信元 IP アドレス、<b>フラグメントオフセット</b>(元データの中での位置)など。</li>
+    <li>受信側は、下位層から受け取ったパケットをフラグメントオフセットの値に基づいて順序を整理し、すべてそろったら<b>再構築</b>(復元)する。</li>
+  </ul>
+  <h3>(2) 異なるネットワーク間でのデータのやり取り</h3>
+  <ul>
+    <li><b class="bl">IPアドレス</b> による通信相手の特定:インターネット層におけるノードの識別子。TCP/IP で通信するすべてのノードは IP アドレスを設定しなければならない。データリンクの種類(有線・無線など)にかかわらず同じ形式。</li>
+    <li>途中の中継器(<b>ルータ</b>)は、パケットに書かれた宛先アドレスを見て、どのネットワークに送るかを決めて転送する。</li>
+    <li>→ ネットワークにつながっていれば、世界中のコンピュータにデータを届けることができる。</li>
+  </ul>
+</section>
+
+<section class="task" id="router">
+  <h2><span class="no">3</span>ルータ/レイヤ3スイッチ</h2>
+  <ul>
+    <li>ネットワーク層でネットワークを接続する装置。複数の NIC を持ち、異なるネットワークに接続する。宛先 IP アドレスにしたがってパケットを中継する。</li>
+    <li>異なるデータリンク同士でも相互接続できる。
+      <ul><li>ブロードバンドルータ:Ethernet(有線LAN)と IEEE802.11(無線LAN)</li>
+      <li>モバイルルータ:IEEE802.11(無線LAN)と 4G/5G(無線WAN)</li></ul></li>
+    <li>(前回のブリッジ/レイヤ2スイッチは MAC アドレスで、ルータは IP アドレスで転送先を決める。)</li>
+  </ul>
+</section>
+
+<section class="task" id="dl">
+  <h2><span class="no">4</span>ネットワーク層とデータリンク層の関係</h2>
+  <div class="tbl"><table>
+    <tr><th></th><th>データリンク層</th><th>ネットワーク層</th></tr>
+    <tr><td>役割</td><td>通信媒体で<b>直接接続された</b>ノード同士の通信</td><td>直接接続されて<b>いない</b>ノード間の通信(複数のネットワークを中継)</td></tr>
+    <tr><td>使うアドレス</td><td>Ethernet では <b class="bl">MACアドレス</b> で「次に送る」ノードを指定</td><td>IP では <b class="bl">IPアドレス</b> で「最終目的地」のエンドノードを指定</td></tr>
+  </table></div>
+  <p>旅行にたとえると、データリンク層は区間ごとの<b>切符や航空券</b>、IP は出発地から最終目的地までの<b>旅行の行程表</b>。</p>
+  <div class="trip" aria-label="旅行のたとえ">
+    <div class="dl">イーサネット<br>(地下鉄)</div><div class="dl">IP-VPN<br>(電車)</div><div class="dl">ギガビットイーサネット<br>(飛行機)</div><div class="dl">無線<br>(バス)</div>
+    <div class="ip">IP:ホスト A から ホスト B まで(エンドツーエンド)</div>
+  </div>
+  <p>データリンクは1区間(1ホップ)ごとに乗り換え、IP は最後まで同じ。コンピュータネットワークでは<b>両方が必要</b>で、直接つながっている相手との通信でも IP は必須。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>相手は同じネットワーク? ルータが必要?</div>
+    <div class="row"><label for="sa">自分</label><input id="sa" class="ipin" value="192.168.1.19" style="max-width:170px" autocomplete="off" spellcheck="false" inputmode="decimal"><label for="sb">相手</label><input id="sb" class="ipin" value="192.168.1.26" style="max-width:170px" autocomplete="off" spellcheck="false" inputmode="decimal"></div>
+    <div class="row"><label for="sp">ネットワーク部</label><input id="sp" type="range" min="1" max="30" value="24"><span class="mono" id="spv"></span></div>
+    <div class="sw" id="sex"><button data-a="192.168.1.19" data-b="192.168.1.26" data-p="24">同じ家の中</button><button data-a="192.168.1.19" data-b="203.0.113.5" data-p="24">外のサーバー</button><button data-a="172.20.100.52" data-b="172.20.100.70" data-p="26">/26 の境目</button></div>
+    <div class="msg" id="smsg" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="addr">
+  <h2><span class="no">5</span>IP アドレス</h2>
+  <ul>
+    <li><b class="bl">32ビット</b> の正の整数値(IPv4 の場合)。2<sup>32</sup> = 4,294,967,296 = 約 <b class="bl">43億</b> 個の IP アドレスを定義できる。</li>
+    <li><b class="bl">8</b> ビットずつの <b class="bl">4</b> 組に分けて、2進数を10進数で書き、ピリオドでつなぐ(<b>ドット付き10進記法</b>)。各組は 0〜255 の値。</li>
+  </ul>
+  <div class="formula"><span class="mono" style="font-size:.95rem">11000000 10101000 00000001 01100100</span><small>↓ 各組を10進数に変換してピリオドで連結</small><b class="bl mono">192.168.1.100</b></div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">ゲーム</span>8ビットで数を作ろう</div>
+    <p style="margin:0">ビットをタップして、目標の10進数と同じ値にしてください。各ビットの重みは 2<sup>7</sup>=128 から 2<sup>0</sup>=1 まで。</p>
+    <div class="row"><span>目標:</span><span class="big" id="gt"></span><span>いまの値:</span><span class="big" id="gv" style="color:var(--accent)"></span></div>
+    <div class="bits8" id="g8"></div>
+    <div class="row"><button class="btn" id="gnext" type="button">次の問題</button><button class="btn sub" id="gclr" type="button">全部 0 に</button><span class="legend" id="gst" style="margin:0"></span></div>
+    <div class="msg" id="gmsg" aria-live="polite"></div>
+  </div>
+  <h3>IP アドレスは NIC ごと</h3>
+  <ul>
+    <li>IP アドレスはノードごとではなく、<b class="bl">NIC</b> ごとに割り当てる。
+      <ul><li>ルータは 2 つ以上の NIC を持ち、それぞれに IP アドレスを設定する。</li>
+      <li>ホストも複数の NIC を持つことがある(有線LAN、無線LAN、4G/5G)。1つの NIC に複数の IP アドレスを付けることもできる。</li></ul></li>
+    <li>TCP/IP ネットワーク上で重複した IP アドレスは設定 <b class="bl">できない</b>(ユニークでなければならない)。どのノードにルーティングすればよいか一意に決まらなくなるため。</li>
+  </ul>
+</section>
+
+<section class="task" id="nethost">
+  <h2><span class="no">6</span>IP アドレスの構成</h2>
+  <div class="tbl"><table>
+    <tr><th>ネットワークアドレス部(ネットワーク部)</th><th>ホストアドレス部(ホスト部)</th></tr>
+    <tr><td>ネットワークを識別する値。IP アドレスの<b>前半</b>。データリンクのセグメントごとに重複しない値を割り当てる。同じセグメントにつながるノードの NIC には<b>同じ値</b>を設定する。</td>
+      <td>ノードを識別する値。IP アドレスの<b>後半</b>。同じセグメント内で重複しない値を割り当てる(他のセグメントのノードと同じ値でもかまわない)。</td></tr>
+  </table></div>
+  <p>住所にたとえると、ネットワーク部が「町名」、ホスト部が「番地」。同じ町の中では番地が重ならなければよく、別の町なら同じ番地があってもよい。</p>
+</section>
+
+<section class="task" id="class">
+  <h2><span class="no">7</span>アドレスクラス(クラスフルアドレッシング)</h2>
+  <p>インターネット普及初期の区別のしかた。クラス A〜D の 4 つが定義され(未使用のクラス E もある)、クラスごとにネットワーク部の長さが<b>固定</b>されている。先頭のビットでクラスが決まる。</p>
+  <div class="tbl"><table>
+    <tr><th>クラス</th><th>先頭ビット</th><th>範囲</th><th>ネットワーク部</th><th>1ネットワークのアドレス数</th></tr>
+    <tr><td>A</td><td class="mono">0</td><td class="mono">0.0.0.0〜127.255.255.255</td><td><b class="bl">8</b> ビット</td><td>2<sup>24</sup>−2 = 16,777,214</td></tr>
+    <tr><td>B</td><td class="mono">10</td><td class="mono">128.0.0.0〜191.255.255.255</td><td><b class="bl">16</b> ビット</td><td>2<sup>16</sup>−2 = 65,534</td></tr>
+    <tr><td>C</td><td class="mono">110</td><td class="mono">192.0.0.0〜223.255.255.255</td><td><b class="bl">24</b> ビット</td><td>2<sup>8</sup>−2 = 254</td></tr>
+    <tr><td>D</td><td class="mono">1110</td><td class="mono">224.0.0.0〜239.255.255.255</td><td colspan="2">マルチキャスト通信に利用(ネットワーク部・ホスト部の概念なし)</td></tr>
+  </table></div>
+  <p>「−2」は、ホスト部が全部 0(ネットワークアドレス)と全部 1(ブロードキャストアドレス)の 2 つがノードに使えないから。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">ゲーム</span>クラスあて</div>
+    <div class="row"><span>この IP アドレスのクラスは?</span><span class="big" id="cq"></span></div>
+    <div class="sw" id="cbtn"><button data-c="A">A</button><button data-c="B">B</button><button data-c="C">C</button><button data-c="D">D</button><button data-c="E">E</button></div>
+    <div class="msg" id="cmsg" aria-live="polite">第1オクテットだけ見れば分かります。</div>
+    <div class="row"><button class="btn" id="cnext" type="button">次の問題</button><span class="legend" id="cst" style="margin:0"></span></div>
+  </div>
+</section>
+
+<section class="task" id="nb">
+  <h2><span class="no">8</span>ネットワークアドレスとブロードキャストアドレス</h2>
+  <div class="tbl"><table>
+    <tr><th></th><th>ネットワークアドレス</th><th>ブロードキャストアドレス</th></tr>
+    <tr><td>ホスト部のビット</td><td><b class="bl">すべて0</b></td><td><b class="bl">すべて1</b></td></tr>
+    <tr><td>用途</td><td>ネットワークそのもののアドレスを表す。IP アドレスが不明・未確定のときにも使う</td><td>同じリンクにつながったすべてのノードに送る(IP パケットの<b>宛先</b>に指定)</td></tr>
+    <tr><td>例(クラスC)</td><td class="mono">192.168.144.10 → 192.168.144.0<br>(192.168.144.0/24 とも書く)</td><td class="mono">192.168.0.0/24 → 192.168.0.255</td></tr>
+  </table></div>
+  <p>どちらもノードには<b>設定できない</b>。また、<b>ブロードキャストはルータを越えない</b>(ローカルブロードキャスト)。「/24」はネットワーク部が先頭から何ビットかを表す。</p>
+</section>
+
+<section class="task" id="short">
+  <h2><span class="no">9</span>クラスフルの無駄と IPv4 アドレスの枯渇</h2>
+  <ul>
+    <li>クラス A は1つのネットワークに約1600万台、B は 65,534 台、C は 254 台つなげる。家庭はクラス C で十分だが、オフィスでは足りないので A・B を取得 → 実際につなぐ台数は限られるので、<b>使われない IP アドレスが大量に発生</b>。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>アドレス使用率</div>
+    <div class="row"><label for="un">つなぐ台数 <b id="unv"></b> 台</label><input id="un" type="range" min="1" max="5000" value="1200"></div>
+    <div class="stats" id="ust"></div>
+  </div>
+  <ul>
+    <li>インターネットの発展で通信機器が爆発的に増え、IP アドレスを管理して各地域・各国の ISP へ配る組織の在庫がなくなった(<b>2011年</b>)。IPv4 アドレスの総数は約43億個で、2007年の世界人口(約67.5億人)より少ない。</li>
+    <li>IP アドレスが使えない = <b class="bl">インターネットに接続できない</b></li>
+    <li>対策:① IP アドレスの効率的な利用(サブネット) ② プライベート IP アドレスと NAT の利用 ③ IPv6 への移行</li>
+  </ul>
+</section>
+
+<section class="task" id="subnet">
+  <h2><span class="no">10</span>対策① サブネットとサブネットマスク</h2>
+  <ul>
+    <li>ネットワークを複数の <b class="bl">サブネット</b> に分割する → サブネット単位で使える IP アドレスの数を少なくできる。<br>例:クラス B(172.16.0.0)を4つに分割 → 2<sup>16</sup>−2 = 65,534 個 が 1サブネットあたり 2<sup>14</sup>−2 = 16,382 個に。</li>
+    <li><b class="bl">サブネットマスク</b> を導入し、ネットワーク部の長さを <b class="bl">自由</b> に設定できるように拡張した(<b>クラスレスアドレッシング</b>)。
+      <ul><li>サブネットマスクは IP アドレスと同じ書き方(例 255.255.255.0)。</li>
+      <li>ビットが連続して 1 になっている範囲がネットワーク部。</li>
+      <li>IP アドレスとサブネットマスクの<b>論理積(AND)</b>を計算すると、ネットワークアドレスが求まる。</li></ul></li>
+  </ul>
+  <div class="tbl"><table style="max-width:220px">
+    <tr><th>AND</th><th>0</th><th>1</th></tr><tr><th>0</th><td>0</td><td>0</td></tr><tr><th>1</th><td>0</td><td><b>1</b></td></tr>
+  </table></div>
+  <h3>算出例(スライド p.19〜20)</h3>
+  <p>IP アドレス 172.20.100.52、サブネットマスク 255.255.255.192(クラス B に 10 ビットのサブネットマスクを追加した場合)</p>
+  <div class="term">IP アドレス      10101100.00010100.01100100.00110100   172.20.100.52
+サブネットマスク 11111111.11111111.11111111.11000000   255.255.255.192
+                 └──── ネットワーク部 26bit ────┘└ホスト部 6bit
+AND の結果      10101100.00010100.01100100.00000000   <b>172.20.100.0</b>  ← ネットワークアドレス</div>
+  <p>ブロードキャストアドレスはホスト部のビットをすべて 1 にする。第4オクテットで考えると、<span class="mono">11111111 − 11000000 = 00111111</span>、10進数で <span class="mono">255 − 192 = <b class="bl">63</b></span>。ネットワークアドレスの第4オクテット 0 に足して ∴ ブロードキャストアドレス = <b class="bl mono">172.20.100.63</b>。</p>
+  <p>このネットワークに設定できる IP アドレスは <span class="mono">172.20.100.1〜172.20.100.62</span>(<b class="bl">62</b> 個)= 2<sup>6</sup>−2。使えるアドレス数が少なくなる = 未使用の IP アドレスを少なくできる。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>必要な台数にちょうどよいサブネット</div>
+    <div class="row"><label for="nn">つなぎたい台数</label><input id="nn" class="ipin" type="number" min="1" max="16777214" value="50" style="max-width:130px"></div>
+    <div class="stats" id="nst"></div>
+    <div class="msg" id="nmsg" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="ex">
+  <h2><span class="no">11</span>演習(スライド p.23)</h2>
+  <p>ホストがある LAN に接続すると、IP アドレス <span class="mono">192.168.100.150</span>、サブネットマスク <span class="mono">255.255.255.128</span> が設定された。この LAN のネットワークアドレスとブロードキャストアドレスを答えよ。また、この LAN に接続できる通信機器は最大何台か。</p>
+  <details class="ans"><summary><span class="tag">ヒント1</span>まずどこを見る?<span class="tap"></span></summary><div class="body"><p>255 のオクテットはそのまま残るので、<b>第4オクテット</b>(150 と 128)だけ 2 進数にすれば十分です。</p></div></details>
+  <details class="ans"><summary><span class="tag">ヒント2</span>2進数にすると<span class="tap"></span></summary><div class="body"><p class="mono">150 = 10010110<br>128 = 10000000</p><p>マスクの 1 は先頭 1 ビットだけ → ネットワーク部は 24+1 = <b>25 ビット</b>、ホスト部は <b>7 ビット</b>。</p></div></details>
+  <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body">
+    <p class="ansline"><b>ネットワークアドレス 192.168.100.128 / ブロードキャストアドレス 192.168.100.255 / 最大 126 台</b></p>
+    <p>AND:<span class="mono">10010110 AND 10000000 = 10000000 = 128</span> → ネットワークアドレスは 192.168.100.128。</p>
+    <p>ホスト部 7 ビットをすべて 1 に:<span class="mono">10000000 + 01111111 = 11111111 = 255</span>(255 − 128 = 127 を 128 に足す)→ 192.168.100.255。</p>
+    <p>台数:2<sup>7</sup> − 2 = 128 − 2 = <b>126</b>(ネットワークアドレスとブロードキャストアドレスは使えない)。範囲は 192.168.100.129〜192.168.100.254。</p>
+    <p>上の「IP アドレス計算機」の「演習(p.23)」ボタンでも確かめられます。</p>
+  </div></details>
+</section>
+
+<section class="task" id="cmd">
+  <h2><span class="no">12</span>コマンドで自分の IP 設定を確認する</h2>
+  <ul>
+    <li><b>Windows</b>:<span class="mono">ipconfig /all</span>。「物理アドレス」= MAC アドレス、「IPv4 アドレス」、「サブネット マスク」を見る。</li>
+    <li><b>Mac/Linux</b>:<span class="mono">ifconfig</span>(Linux では <span class="mono">ip addr</span> も)。<span class="mono">ether</span> = MAC アドレス、<span class="mono">inet</span> = IPv4 アドレス、<span class="mono">netmask</span> = サブネットマスク。<span class="mono">lo0</span> はループバックインタフェース(第6回で解説)。</li>
+  </ul>
+  <div class="term">en0: flags=8863&lt;UP,BROADCAST,SMART,RUNNING,SIMPLEX,MULTICAST&gt; mtu 1500
+        ether 38:f9:d3:0d:6e:39
+        inet <b>192.168.1.19</b> netmask <b>0xffffff00</b> broadcast <b>192.168.1.255</b></div>
+  <p>ifconfig の netmask は 16 進数で表示される。<span class="mono">0xffffff00</span> = ff.ff.ff.00 = <b>255.255.255.0</b>(/24)。だから broadcast は 192.168.1.255 になっている。</p>
+</section>
+
+<section class="task" id="priv">
+  <h2><span class="no">13</span>対策② プライベート IP アドレス</h2>
+  <ul>
+    <li>インターネットに接続しない、独立した LAN の内部だけで使える IP アドレス。次の範囲が決められている。</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th>クラス</th><th>範囲</th></tr>
+    <tr><td>A</td><td class="mono">10.0.0.0〜10.255.255.255(10.0.0.0/8)</td></tr>
+    <tr><td>B</td><td class="mono">172.16.0.0〜172.31.255.255(172.16.0.0/12)</td></tr>
+    <tr><td>C</td><td class="mono">192.168.0.0〜192.168.255.255(192.168.0.0/16)</td></tr>
+  </table></div>
+  <ul>
+    <li>上の範囲以外の IP アドレスを<b>グローバル IP アドレス</b>(インターネットに接続できる IP アドレス)として再定義した。</li>
+    <li>プライベートネットワークをインターネットにつなぐ場合は、<b>NAT</b> でプライベート IP アドレスをグローバル IP アドレスに変換する必要がある(第10回で解説)。</li>
+    <li>各組織の中で同じプライベートアドレスを使い回せるので、グローバルアドレスを節約できる。</li>
+  </ul>
+  <p class="legend">上の IP アドレス計算機の「種類」欄で、入力したアドレスがプライベートかどうかも確かめられます。</p>
+</section>
+
+<section class="task" id="v6">
+  <h2><span class="no">14</span>対策③ IPv6 への移行</h2>
+  <ul>
+    <li>IP アドレスの空間そのものを広げる新しい IP。IPv6 アドレスは IPv4 アドレスの 4 倍の長さ(<b class="bl">128</b> bit)。</li>
+    <li>アドレス数は 2<sup>128</sup> ≒ 3.4×10<sup>38</sup> ≒ 340澗(かん)個(IPv4 の 2<sup>96</sup> 倍)。天文学的な数。</li>
+    <li>16 ビットごとに 4 桁の 16 進数(小文字)で書き、コロンで区切る(コロン区切り16進表記)。詳しくは 3 年後期「情報通信システム」で。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">見る</span>IPv6 アドレスの形</div>
+    <div class="v6" id="v6a"></div>
+    <div class="row"><button class="btn sub" id="v6b" type="button">別のアドレスを作る</button><span class="legend" style="margin:0">4桁 × 8組 = 16進数32桁 = 128ビット</span></div>
+    <div class="stats">
+      <div class="stat"><div class="k">IPv4 のアドレス数</div><div class="v">約 4.3×10<sup>9</sup></div></div>
+      <div class="stat"><div class="k">IPv6 のアドレス数</div><div class="v">約 3.4×10<sup>38</sup></div></div>
+      <div class="stat hl"><div class="k">世界の人口 約80億人で割ると 1人あたり</div><div class="v">約 4×10<sup>28</sup> 個</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox" data-ans="32"><div class="qno">問1</div><p>IPv4 アドレスは何ビット?</p>
+    <div class="check"><input class="ans" placeholder="例 48" aria-label="問1の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox"><div class="qno">問2</div><p>IP アドレスが付けられ、ルーティングを<b>行わない</b>機器の総称は?</p>
+    <div class="opts"><button data-ok>ホスト</button><button>ルータ</button><button>ノード</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3</div><p>Ethernet で「次に送る相手」を指定するのに使うアドレスは?</p>
+    <div class="opts"><button>IP アドレス</button><button data-ok>MAC アドレス</button><button>ポート番号</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="168"><div class="qno">問4</div><p>2進数 10101000 を10進数にすると?</p>
+    <div class="check"><input class="ans" placeholder="例 192" aria-label="問4の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:168</b></p><p>1 のビットの重みを足す:128 + 32 + 8 = 168。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問5</div><p>150.10.1.1 はどのクラス?</p>
+    <div class="opts"><button>クラス A</button><button data-ok>クラス B</button><button>クラス C</button></div><span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">解説</span>見分け方<span class="tap"></span></summary><div class="body"><p>第1オクテットが 128〜191 ならクラス B(150 = 10010110、先頭が 10)。</p></div></details></div>
+
+  <div class="qbox" data-ans="63"><div class="qno">問6</div><p>172.20.100.52、サブネットマスク 255.255.255.192 のブロードキャストアドレスは 172.20.100.□。□ は?</p>
+    <div class="check"><input class="ans" placeholder="例 255" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:63</b></p><p>ネットワークアドレスの第4オクテットは 52 AND 192 = 0。ホスト部 6 ビットをすべて 1 にすると 0 + 63 = 63。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問7</div><p>演習(192.168.100.150 / 255.255.255.128)のネットワークアドレスは?</p>
+    <div class="opts"><button>192.168.100.0</button><button data-ok>192.168.100.128</button><button>192.168.100.150</button><button>192.168.100.255</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="126"><div class="qno">問8</div><p>演習の LAN に接続できる通信機器は最大何台?</p>
+    <div class="check"><input class="ans" placeholder="例 254" aria-label="問8の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:126</b></p><p>ホスト部 7 ビット → 2<sup>7</sup> − 2 = 126(全部0と全部1の2つは使えない)。</p></div></details></div>
+
+  <div class="qbox" data-ans="30"><div class="qno">問9</div><p>サブネットマスク 255.255.255.224(/27)のネットワークでは、ノードに設定できる IP アドレスはいくつ?</p>
+    <div class="check"><input class="ans" placeholder="例 62" aria-label="問9の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:30</b></p><p>224 = 11100000 なので、ホスト部は 32 − 27 = 5 ビット。2<sup>5</sup> − 2 = 30。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問10</div><p>プライベート IP アドレスはどれ?</p>
+    <div class="opts"><button>172.32.0.1</button><button data-ok>172.20.100.52</button><button>192.169.0.1</button><button>11.0.0.1</button></div><span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">解説</span>範囲の確認<span class="tap"></span></summary><div class="body"><p>クラス B のプライベートは 172.16.0.0〜172.31.255.255。172.32 は範囲外、192.169 も 192.168 ではないので範囲外、11 は 10 ではないので範囲外。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問11</div><p>ブロードキャストアドレス宛てのパケットについて正しいのは?</p>
+    <div class="opts"><button>ルータを越えてインターネット全体に届く</button><button data-ok>同じリンク内の全ノードに届き、ルータは越えない</button><button>ノードの IP アドレスとして設定できる</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="128"><div class="qno">問12</div><p>IPv6 アドレスは何ビット?</p>
+    <div class="check"><input class="ans" placeholder="例 64" aria-label="問12の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox"><div class="qno">問13</div><p>ifconfig に <span class="mono">netmask 0xfffffff0</span> と表示された。サブネットマスクを10進で書くと?</p>
+    <div class="opts"><button>255.255.255.0</button><button data-ok>255.255.255.240</button><button>255.255.255.15</button></div><span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">解説</span>16進数の読み方<span class="tap"></span></summary><div class="body"><p>2桁ずつ区切ると ff.ff.ff.f0。f0 = 1111 0000 = 240。ネットワーク部は 28 ビット(/28)。</p></div></details></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>名城大学 情報工学部「情報通信ネットワーク」#5 のスライドをもとに作成しました。穴埋めの答えは教科書(マスタリングTCP/IP 入門編)の用語とスライドの文脈から補っています。p.16「IPアドレスが使えない=」、p.18「サイズを__に設定できる」は推測を含みます。p.24 の空欄は内容が読み取れなかったため、範囲の表として載せています。授業での解答と違うときは授業を優先してください。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  function $(id){return document.getElementById(id);}
+  function parseIP(s){var m=String(s).trim().match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/); if(!m) return null;
+    var v=0; for(var i=1;i<=4;i++){var o=+m[i]; if(o>255) return null; v=v*256+o;} return v;}
+  function toIP(v){return [v>>>24&255,v>>>16&255,v>>>8&255,v&255].join('.');}
+  function maskOf(p){return p===0?0:(0xFFFFFFFF<<(32-p))>>>0;}
+  function cls(v){var a=v>>>24; return a<128?'A':a<192?'B':a<224?'C':a<240?'D':'E';}
+  function kind(v){var a=v>>>24,b=v>>>16&255;
+    if(a===10||(a===172&&b>=16&&b<=31)||(a===192&&b===168)) return 'プライベート';
+    if(a===127) return 'ループバック(第6回)'; if(a>=224&&a<240) return 'マルチキャスト'; if(a>=240) return '予約(クラス E)';
+    if(a===0) return '特別な用途'; return 'グローバル';}
+  function fmt(n){return n.toLocaleString('ja-JP');}
+
+  /* ===== IP アドレス計算機 ===== */
+  var ipin=$('ipin'), pfx=$('pfx'), cur=parseIP(ipin.value);
+  function bitsHTML(v,p,label,btn){
+    var h='<div class="bitrow"><span class="rl">'+label+'</span>';
+    for(var o=0;o<4;o++){h+='<span class="og"><span class="oct">';
+      for(var k=0;k<8;k++){var i=o*8+k, b=(v>>>(31-i))&1, c=(i<p?'n':'h')+(b?' one':'');
+        h+=btn?'<button type="button" class="'+c+'" data-i="'+i+'" aria-label="第'+(i+1)+'ビット '+b+'">'+b+'</button>':'<span class="'+c+'">'+b+'</span>';}
+      h+='</span><span class="dec">'+((v>>>(24-o*8))&255)+(o<3?' .':'')+'</span></span>';}
+    return h+'</div>';
+  }
+  function drawIP(){
+    var p=+pfx.value, v=parseIP(ipin.value);
+    $('pfv').textContent=p; $('mkv').textContent='マスク '+toIP(maskOf(p));
+    ipin.classList.toggle('err',v===null);
+    if(v===null){$('bitv').innerHTML='<div class="msg" style="color:var(--warn)">0〜255 の数を4つ、ピリオドで区切って入力してください(例 192.168.1.10)</div>';$('ipst').innerHTML='';return;}
+    cur=v; var m=maskOf(p), net=(v&m)>>>0, bc=(net|(~m>>>0))>>>0, h=32-p, cnt=h>=2?Math.pow(2,h)-2:0;
+    $('bitv').innerHTML=bitsHTML(v,p,'IP アドレス',true)+bitsHTML(m,p,'サブネットマスク')+bitsHTML(net,p,'AND = ネットワーク')+bitsHTML(bc,p,'ホスト部を全部1');
+    $('ipst').innerHTML=
+      '<div class="stat hl"><div class="k">ネットワークアドレス</div><div class="v">'+toIP(net)+'/'+p+'</div></div>'+
+      '<div class="stat hl"><div class="k">ブロードキャストアドレス</div><div class="v">'+toIP(bc)+'</div></div>'+
+      '<div class="stat"><div class="k">設定できる範囲</div><div class="v" style="font-size:.88rem">'+(cnt?toIP(net+1)+'〜'+toIP(bc-1):'なし')+'</div></div>'+
+      '<div class="stat"><div class="k">設定できる数 2<sup>'+h+'</sup>−2</div><div class="v">'+(cnt?fmt(cnt):'0(ホスト部が足りない)')+'</div></div>'+
+      '<div class="stat"><div class="k">昔のクラス(先頭ビット)</div><div class="v">クラス '+cls(v)+'</div></div>'+
+      '<div class="stat"><div class="k">種類</div><div class="v" style="font-size:.9rem">'+kind(v)+'</div></div>'+
+      ((v===net||v===bc)&&cnt?'<div class="stat" style="grid-column:1/-1;background:var(--warn-soft)"><div class="k">注意</div><div class="v" style="font-size:.9rem;font-family:inherit">この IP アドレスは'+(v===net?'ネットワーク':'ブロードキャスト')+'アドレスなので、ノードには設定できません</div></div>':'');
+    $('bitv').querySelectorAll('button[data-i]').forEach(function(b){b.addEventListener('click',function(){var i=+b.getAttribute('data-i');
+      ipin.value=toIP((cur^(1<<(31-i)))>>>0); drawIP(); var nb=$('bitv').querySelector('button[data-i="'+i+'"]'); if(nb) nb.focus();});});
+    document.querySelectorAll('#ipex button').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-ip')===ipin.value.trim()&&+b.getAttribute('data-p')===p?'true':'false');});
+  }
+  ipin.addEventListener('input',drawIP); pfx.addEventListener('input',drawIP);
+  document.querySelectorAll('#ipex button').forEach(function(b){b.type='button';b.addEventListener('click',function(){ipin.value=b.getAttribute('data-ip');pfx.value=b.getAttribute('data-p');drawIP();});});
+  drawIP();
+
+  /* ===== 同じネットワーク? ===== */
+  function drawSame(){
+    var a=parseIP($('sa').value), b=parseIP($('sb').value), p=+$('sp').value, m=maskOf(p);
+    $('spv').textContent='/'+p+'('+toIP(m)+')';
+    $('sa').classList.toggle('err',a===null); $('sb').classList.toggle('err',b===null);
+    if(a===null||b===null){$('smsg').textContent='IP アドレスを正しく入力してください';return;}
+    var na=(a&m)>>>0, nb=(b&m)>>>0, same=na===nb;
+    $('smsg').innerHTML='自分のネットワーク:<span class="mono">'+toIP(na)+'/'+p+'</span><br>相手のネットワーク:<span class="mono">'+toIP(nb)+'/'+p+'</span><br>'+
+      (same?'<b style="color:var(--ok)">同じネットワーク</b> → ルータを通さず、データリンク層(相手の <b>MAC アドレス</b>)で直接届けられる。':
+       '<b style="color:var(--warn)">別のネットワーク</b> → まず<b>ルータ</b>(デフォルトゲートウェイ)の MAC アドレス宛てにフレームを送り、ルータが宛先 <b>IP アドレス</b>を見て中継する。');
+    document.querySelectorAll('#sex button').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-a')===$('sa').value.trim()&&x.getAttribute('data-b')===$('sb').value.trim()&&+x.getAttribute('data-p')===p?'true':'false');});
+  }
+  ['sa','sb','sp'].forEach(function(id){$(id).addEventListener('input',drawSame);});
+  document.querySelectorAll('#sex button').forEach(function(x){x.type='button';x.addEventListener('click',function(){$('sa').value=x.getAttribute('data-a');$('sb').value=x.getAttribute('data-b');$('sp').value=x.getAttribute('data-p');drawSame();});});
+  drawSame();
+
+  /* ===== 8ビットゲーム ===== */
+  var gv=0, gt=0, gok=0, gtry=0, gdone=false;
+  var g8=$('g8'); g8.innerHTML=[7,6,5,4,3,2,1,0].map(function(k){return '<button type="button" data-k="'+k+'" aria-pressed="false"><b>0</b><small>2<sup>'+k+'</sup>='+(1<<k)+'</small></button>';}).join('');
+  function drawG(){g8.querySelectorAll('button').forEach(function(b){var on=(gv>>+b.getAttribute('data-k'))&1;b.setAttribute('aria-pressed',on?'true':'false');b.querySelector('b').textContent=on;});
+    $('gv').textContent=gv; $('gt').textContent=gt; $('gst').textContent='正解 '+gok+' / '+gtry+' 問';
+    if(gv===gt&&!gdone){gdone=true;gok++;$('gst').textContent='正解 '+gok+' / '+gtry+' 問';
+      $('gmsg').innerHTML='<b style="color:var(--ok)">◯ 正解!</b> '+gt+' = '+[7,6,5,4,3,2,1,0].filter(function(k){return gt>>k&1;}).map(function(k){return 1<<k;}).join(' + ')+(gt?'':'(全部 0)')+' → 2進数 <span class="mono">'+gt.toString(2).padStart(8,'0')+'</span>';}
+    else if(!gdone) $('gmsg').textContent=gv<gt?'あと '+(gt-gv)+' 足りない。大きい重みから順に考えよう':'大きすぎ。'+(gv-gt)+' 多い';}
+  function newG(){var pool=[192,168,172,10,255,128,224,240,252,100,150,63,127,200,64,20,52];gt=Math.random()<.5?pool[Math.floor(Math.random()*pool.length)]:Math.floor(Math.random()*256);
+    if(gt===0)gt=1; gv=0; gdone=false; gtry++; drawG();}
+  g8.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){if(gdone)return;gv^=1<<+b.getAttribute('data-k');drawG();});});
+  $('gnext').addEventListener('click',newG); $('gclr').addEventListener('click',function(){if(gdone)return;gv=0;drawG();});
+  newG();
+
+  /* ===== クラスあて ===== */
+  var cv=0, cok=0, cn=0, cans=false;
+  function newC(){var r=Math.random(), a=r<.27?1+Math.floor(Math.random()*126):r<.54?128+Math.floor(Math.random()*64):r<.81?192+Math.floor(Math.random()*32):r<.93?224+Math.floor(Math.random()*16):240+Math.floor(Math.random()*15);
+    cv=((a*16777216)+Math.floor(Math.random()*16777216))>>>0; if((cv&255)===0) cv+=1; cans=false; cn++;
+    $('cq').textContent=toIP(cv); $('cmsg').textContent='第1オクテットだけ見れば分かります。';
+    document.querySelectorAll('#cbtn button').forEach(function(b){b.className='';b.disabled=false;b.setAttribute('aria-pressed','false');}); $('cst').textContent='正解 '+cok+' / '+(cn-1)+' 問';}
+  document.querySelectorAll('#cbtn button').forEach(function(b){b.type='button';b.addEventListener('click',function(){
+    if(cans) return; var c=cls(cv), a=cv>>>24, ok=b.getAttribute('data-c')===c; cans=true; if(ok) cok++;
+    document.querySelectorAll('#cbtn button').forEach(function(x){x.disabled=true;x.setAttribute('aria-pressed',x.getAttribute('data-c')===c?'true':'false');});
+    $('cmsg').innerHTML=(ok?'<b style="color:var(--ok)">◯ 正解!</b> ':'<b style="color:var(--warn)">✕ 正解はクラス '+c+'</b> ')+'第1オクテット '+a+' = <span class="mono">'+a.toString(2).padStart(8,'0')+'</span>、先頭が <span class="mono">'+{A:'0',B:'10',C:'110',D:'1110',E:'1111'}[c]+'</span> なのでクラス '+c+'。'+(c==='D'?'(マルチキャスト用)':c==='E'?'(未使用)':'ネットワーク部は '+{A:8,B:16,C:24}[c]+' ビット。');
+    $('cst').textContent='正解 '+cok+' / '+cn+' 問';});});
+  $('cnext').addEventListener('click',newC); newC();
+
+  /* ===== 使用率 ===== */
+  function drawU(){var n=+$('un').value; $('unv').textContent=fmt(n);
+    var best=n<=254?254:n<=65534?65534:16777214, rows=[['クラス C(254)',254],['クラス B(65,534)',65534],['クラス A(16,777,214)',16777214]];
+    $('ust').innerHTML=rows.map(function(r){return '<div class="stat'+(r[1]===best?' hl':'')+'"><div class="k">'+r[0]+'</div><div class="v">'+(n<=r[1]?(n/r[1]*100).toFixed(n/r[1]<.001?4:2)+'%':'足りない')+'</div></div>';}).join('');}
+  $('un').addEventListener('input',drawU); drawU();
+
+  /* ===== 必要台数とサブネット ===== */
+  function drawN(){var n=Math.floor(+$('nn').value);
+    if(!(n>=1&&n<=16777214)){$('nst').innerHTML='';$('nmsg').textContent='1〜16,777,214 の台数を入力してください';return;}
+    var h=2; while(Math.pow(2,h)-2<n) h++; var p=32-h, cap=Math.pow(2,h)-2, cl=n<=254?['C',254]:n<=65534?['B',65534]:['A',16777214];
+    $('nst').innerHTML='<div class="stat"><div class="k">必要なホスト部</div><div class="v">'+h+' ビット</div></div>'+
+      '<div class="stat hl"><div class="k">サブネットマスク</div><div class="v" style="font-size:.95rem">/'+p+' = '+toIP(maskOf(p))+'</div></div>'+
+      '<div class="stat"><div class="k">設定できる数 2<sup>'+h+'</sup>−2</div><div class="v">'+fmt(cap)+'</div></div>'+
+      '<div class="stat"><div class="k">使用率(サブネット)</div><div class="v">'+(n/cap*100).toFixed(1)+'%</div></div>';
+    $('nmsg').innerHTML='クラスフルだとクラス '+cl[0]+'(使用率 '+(n/cl[1]*100).toFixed(2)+'%)。サブネットマスクでホスト部を '+h+' ビットにすれば、使用率 '+(n/cap*100).toFixed(1)+'% まで上げられる。';}
+  $('nn').addEventListener('input',drawN); drawN();
+
+  /* ===== IPv6 ===== */
+  function newV6(first){var g=first?['2001','0db8','11aa','22bb','33cc','44ee','55ff','0006']:['2001','0db8'].concat([0,0,0,0,0,0].map(function(){return Math.floor(Math.random()*65536).toString(16).padStart(4,'0');}));
+    $('v6a').innerHTML=g.map(function(x){return '<span>'+x+'</span>';}).join(':');}
+  $('v6b').addEventListener('click',function(){newV6(false);}); newV6(true);
+})();
+</script>
+</body>
+</html>

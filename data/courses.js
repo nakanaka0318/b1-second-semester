@@ -83,7 +83,11 @@ window.COURSES = [
     { id: "1-4-4-datalink", refs: [{ label: "スライド #4", dir: "refs/slide-04", pages: 25 }],
       lesson: 4, title: "データリンク層",
       file: "materials/1-4/1-4-4-datalink.html",
-      note: "#4 MACアドレス・ブリッジ/スイッチ・CSMA/CD・Ethernetフレーム・無線LAN・多元接続。スイッチのアドレス学習シミュレータと穴埋め付き" }
+      note: "#4 MACアドレス・ブリッジ/スイッチ・CSMA/CD・Ethernetフレーム・無線LAN・多元接続。スイッチのアドレス学習シミュレータと穴埋め付き" },
+    { id: "1-4-5-ip", refs: [{ label: "スライド #5", dir: "refs/slide-05", pages: 25 }],
+      lesson: 5, title: "IPとIPアドレス",
+      file: "materials/1-4/1-4-5-ip.html",
+      note: "#5 IPの役割・ルータ・IPアドレスとクラス・ネットワーク/ブロードキャストアドレス・サブネットマスク・プライベートIP・IPv6。ビットを動かせるIPアドレス計算機と穴埋め付き" }
   ] },
   { id: "2-1", name: "社会科学基礎",           materials: [
     { id: "2-1-1-cold-war", refs: [{ label: "スライド 第1・2回", dir: "refs/2-1-1", pages: 7 }],
