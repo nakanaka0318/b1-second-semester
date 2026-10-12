@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>逆茂木文の書き直し</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.stepper .st{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.stepper .st span{font-size:.75rem;padding:3px 9px;border-radius:99px;background:var(--bg);color:var(--sub);border:1px solid var(--line)}
+.stepper .st span.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+.stepper .view{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;line-height:2;min-height:7em}
+.stepper .view .s{display:block;margin:2px 0}
+.stepper .view .subj{background:var(--mark-soft);border-radius:4px;padding:0 3px;font-weight:700}
+.stepper .view .conn{color:var(--accent);font-weight:700}
+.stepper .view .add{background:var(--accent-soft);border-radius:4px;padding:0 3px}
+.order .chips{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.order .chips button{font:inherit;text-align:left;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.order .chips button:disabled{opacity:.3;cursor:default}
+.order .picked{display:flex;flex-direction:column;gap:4px;min-height:3em;background:var(--bg);border-radius:10px;padding:8px;border:2px dashed var(--line)}
+.order .picked div{padding:4px 8px;border-radius:6px;background:var(--accent-soft)}
+.tree svg{width:100%;max-width:480px;display:block;margin:0 auto}
+.tree .trunk{stroke:var(--ink);stroke-width:4;stroke-linecap:round}
+.tree .br{stroke:var(--sub);stroke-width:2.5;stroke-linecap:round}
+.tree text{font-size:12px;fill:var(--ink)}
+.amb{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0}
+.amb .src{font-size:1.05rem;font-weight:700}
+.amb .tg{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.amb .tg button{font:inherit;font-size:.82rem;padding:3px 10px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.amb .tg button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.amb .out{font-size:.92rem;min-height:2.6em}
+.amb .kind{font-size:.72rem;color:var(--sub);border:1px solid var(--line);border-radius:99px;padding:0 8px;margin-left:6px;font-weight:400}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>逆茂木文の書き直し</h1>
+  <p>テクニカルリテラシー 第4回のノートのまとめです。前回見つけた「逆茂木型の文」を、どういう手順で読みやすい文章に直すのか。文章全体の組み立て(ポイント先行主義)と、複数の解釈ができる文の避け方も扱います。</p>
+  <div class="demo stepper">
+    <label>例文1を3つの要領で書き直す(ボタンで1段階ずつ)</label>
+    <div class="st" id="sst"></div>
+    <div class="view" id="sview"></div>
+    <div class="msg" id="smsg" style="background:var(--bg);border-radius:10px;padding:10px 14px;margin-top:8px;font-size:.92rem" aria-live="polite"></div>
+    <div class="row"><button class="btn sub" id="sprev" type="button">‹ 戻る</button><button class="btn" id="snext" type="button">次の段階 ›</button></div>
+  </div>
+</header>
+
+<nav class="toc"><a href="#why">なる理由</a><a href="#how">書き直す要領</a><a href="#tips">書かない心得</a><a href="#doc">逆茂木型の文章</a><a href="#amb">複数の解釈</a><a href="#q">練習問題</a></nav>
+
+<section class="task" id="why">
+  <h2><span class="no">1</span>逆茂木文になる理由</h2>
+  <ul>
+    <li>長い<b>修飾節</b>・<b>修飾句</b>が多い。</li>
+    <li>日本語の構文規則:修飾節や修飾句は<b>名詞の前</b>に置く(「高校卒業後すぐに…配属された A」)。</li>
+    <li>英語では関係代名詞や分詞形を使って<b>名詞の後</b>に置く(A, who joined …)。そのため英語は主語と述語が早く出てくる。</li>
+  </ul>
+  <div class="panel tree">
+    <div class="ptitle"><span class="badge">図</span>逆茂木型と望ましい構造</div>
+    <svg viewBox="0 0 480 190" role="img" aria-label="逆茂木型は幹の前に枝が刺さる、望ましい構造は幹が先で枝が後ろ">
+      <text x="10" y="18" style="font-weight:700">逆茂木型:幹(主語・述語)の前に、長い枝(修飾)が何本も刺さる</text>
+      <line class="trunk" x1="330" y1="70" x2="470" y2="70"/>
+      <line class="br" x1="40" y1="40" x2="330" y2="70"/><line class="br" x1="80" y1="100" x2="330" y2="70"/><line class="br" x1="150" y1="35" x2="250" y2="62"/><line class="br" x1="190" y1="105" x2="270" y2="78"/>
+      <text x="350" y="60">A は … 結婚した</text>
+      <text x="10" y="135" style="font-weight:700">望ましい構造:幹が先に来て、枝はその後ろへ短く</text>
+      <line class="trunk" x1="20" y1="165" x2="300" y2="165"/>
+      <line class="br" x1="80" y1="165" x2="120" y2="145"/><line class="br" x1="160" y1="165" x2="200" y2="148"/><line class="br" x1="160" y1="165" x2="195" y2="182"/><line class="br" x1="250" y1="165" x2="290" y2="148"/>
+      <text x="320" y="170">短い文の連なり</text>
+    </svg>
+  </div>
+</section>
+
+<section class="task" id="how">
+  <h2><span class="no">2</span>逆茂木文を書き直す要領</h2>
+  <ol>
+    <li><b>(a)</b> その文を、いくつかの<b>短い文からなる一つのパラグラフ</b>に書き直す。</li>
+    <li><b>(b)</b> 原文で前に長い修飾節がついていた名詞が、書き直した文では、それぞれ<b>一つの文の主語</b>として登場するようにする。うまく主語にならない場合は「〜の中には」「〜では」などの形で、その名詞を文の前に持ってくる。</li>
+    <li><b>(c)</b> パラグラフの中の各文は、なるべく<b>前の文とのつながり</b>が浮き立つように書き始める。</li>
+  </ol>
+  <h3>例文1の改良版(ノート)</h3>
+  <div class="good">A と B とは職場結婚である。A は、高校卒業後すぐに K 市の T 自動車に入社し、営業部門に配属された。B はこれも卒業直後に ○ 市の T 自動車に入社し経理を手伝っていたところ、B の一家は 2 年前に K 市に転居したので、B も K 市の T 自動車に転勤した。そこで二人は知り合い、やがて結婚した。</div>
+  <div class="point"><b>第1文の役割</b>:「A と B とは職場結婚である。」は原文にない文です。パラグラフの<b>中心文</b>として、また<b>ポイント先行主義</b>(結論を先に)にも従って追加しています。</div>
+</section>
+
+<section class="task" id="tips">
+  <h2><span class="no">3</span>逆茂木文を書かないための心得</h2>
+  <ol class="steps">
+    <li>書きたい内容を<b>短い文に分割</b>して書く。</li>
+    <li>やむをえず文が長くなるときも、<b>長い前置修飾節は使わない</b>ように気をつける。</li>
+    <li>文または節は、なるべく<b>前とのつながりを浮き立たせる</b>ように書き始める(「そこで」「その結果」「これらを」など)。</li>
+  </ol>
+</section>
+
+<section class="task" id="doc">
+  <h2><span class="no">4</span>逆茂木型の文章</h2>
+  <p>文だけでなく、<b>文章全体</b>も逆茂木型になることがあります。</p>
+  <ul>
+    <li>それぞれの文の書き出しが唐突で、前の文とどうつながっているか分からない。</li>
+    <li>数文を読み進めて振り返らないと、文章の各部分の役割が分からない。</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th></th><th>例A(逆茂木型の文章)</th><th>例B(理系の文書で望ましい)</th></tr>
+    <tr><td>文章</td><td>私の調査によると ○○ という事実がある。X 氏は △△ ということを報告している。Y 氏は □□ という観察をしている。これらを考え合わせ、私は ×× と結論する。</td><td>私は ×× と考える。それには3つ根拠がある。第一に、私の調査によると ○○。第二に、X 氏の報告によれば △△。第三に、Y 氏は □□ という観察をしている。</td></tr>
+    <tr><td>構造</td><td class="mono">○○, △△, □□ → ××</td><td class="mono">×× → ○○, △△, □□</td></tr>
+    <tr><td>読み手</td><td>×× が出てくるまで、各文が何のためにあるのか分からない</td><td>最初に結論が分かるので、後の文を「根拠」として読める(<b>ポイント先行主義</b>)</td></tr>
+  </table></div>
+  <div class="point"><b>書かないためのポイント</b>:文章の筋道が<b>1本の幹</b>になっているか、常に確認する。</div>
+  <div class="panel order">
+    <div class="ptitle"><span class="badge">試す</span>ポイント先行の順に並べ替えよう(上から順にタップ)</div>
+    <div class="picked" id="opick"></div>
+    <div class="chips" id="opool"></div>
+    <div class="row"><button class="btn" id="ochk" type="button">判定</button><button class="btn sub" id="oclr" type="button">やり直す</button><span class="fb" id="ofb" aria-live="polite"></span></div>
+  </div>
+</section>
+
+<section class="task" id="amb">
+  <h2><span class="no">5</span>複数の解釈ができる文を書かないために</h2>
+  <ul><li>何度も<b>読み直して</b>修正する。</li><li><b>読点</b>を適切に入れる(または語順を変える)。</li></ul>
+  <p>特に注意すべきケース:<b>修飾語が離れている</b>/<b>列挙を含む</b>/<b>否定表現</b>/<b>「最初」「全部」</b>などを含む場合。下の例で、解釈ボタンを押してみましょう。</p>
+  <div id="ambs"></div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+  <div class="qbox"><div class="qno">問1</div><p>日本語で逆茂木文が生まれやすい理由は?</p>
+    <div class="opts"><button>主語を省略するから</button><button data-ok>修飾節・修飾句を名詞の前に置く構文規則だから</button><button>敬語があるから</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問2</div><p>書き直す要領 (b) の内容は?</p>
+    <div class="opts"><button>修飾語をすべて削除する</button><button data-ok>長い修飾節がついていた名詞を、それぞれ一つの文の主語にする</button><button>文をできるだけ長くまとめる</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問3</div><p>改良版の第1文「A と B とは職場結婚である。」を加えた理由は?</p>
+    <div class="opts"><button>文字数を増やすため</button><button data-ok>パラグラフの中心文として、ポイント先行主義に従うため</button><button>敬語を使うため</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問4</div><p>理系の文書で望ましい文章構造は?</p>
+    <div class="opts"><button>○○, △△, □□ → ××(根拠を並べてから結論)</button><button data-ok>×× → ○○, △△, □□(結論を先に、根拠を後に)</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問5</div><p>「全員が来なかった」が2通りに読めるのは、どのケース?</p>
+    <div class="opts"><button>修飾語が離れている</button><button>列挙を含む</button><button data-ok>否定表現と「全部」を含む</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問6 書き直し</div><p>次の逆茂木文を、要領 (a)〜(c) に従って書き直しなさい。</p>
+    <div class="bad">昨年完成し、学生が自由に使える 3D プリンタやレーザー加工機を備えた、大学の新しい工作室で、私たちは試作品を作った。</div>
+    <details class="ans"><summary><span class="tag">修正例</span>書き直し例を見る<span class="tap"></span></summary><div class="body">
+      <div class="good">私たちは、大学の新しい工作室で試作品を作った。この工作室は昨年完成したもので、3D プリンタやレーザー加工機を備えている。これらの機器は学生が自由に使える。</div>
+      <p>(a) 3つの短い文に分け、(b)「工作室」「機器」をそれぞれ主語にし、(c)「この工作室は」「これらの機器は」で前の文とのつながりを示しています。ポイント(何をしたか)が最初の文に来ています。</p>
+    </div></details></div>
+  <div class="score" id="score"></div>
+</section>
+
+<footer>ノートの内容をもとにまとめています。複数の解釈ができる文の例と、問6の例文は説明のために作成したものです。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  /* ===== 書き直しステッパー ===== */
+  var ST=[
+    ['原文','<span class="s">高校卒業後すぐに K 市の T 自動車に入社し営業部門に配属された A は、○ 市の T 自動車にこれも高卒直後に入社して経理を手伝い 2 年前、一家の K 市転居にともなって K 市の T 自動車に転勤してきた B と知り合って、やがて結婚した。</span>','長い修飾節が「A」と「B」の前に刺さった逆茂木文。幹は「A は B と知り合って、やがて結婚した」だけ。'],
+    ['(a) 短い文に分ける','<span class="s">高校卒業後すぐに K 市の T 自動車に入社し、営業部門に配属された。</span><span class="s">○ 市の T 自動車に卒業直後に入社して、経理を手伝っていた。</span><span class="s">2 年前、一家の K 市転居にともなって K 市の T 自動車に転勤してきた。</span><span class="s">知り合って、やがて結婚した。</span>','まず内容のまとまりごとに切る。ただしこのままでは「誰が」が分からない文になっている。'],
+    ['(b) 名詞を主語にする','<span class="s"><span class="subj">A は</span>、高校卒業後すぐに K 市の T 自動車に入社し、営業部門に配属された。</span><span class="s"><span class="subj">B は</span>卒業直後に ○ 市の T 自動車に入社し、経理を手伝っていた。</span><span class="s"><span class="subj">B の一家は</span> 2 年前に K 市に転居し、<span class="subj">B も</span> K 市の T 自動車に転勤した。</span><span class="s"><span class="subj">二人は</span>知り合い、やがて結婚した。</span>','前に長い修飾節がついていた「A」「B」を、それぞれ文の主語(黄色)として登場させる。'],
+    ['(c) つながりを示す','<span class="s"><span class="subj">A は</span>、高校卒業後すぐに K 市の T 自動車に入社し、営業部門に配属された。</span><span class="s"><span class="subj">B は</span><span class="conn">これも</span>卒業直後に ○ 市の T 自動車に入社し、経理を手伝っていた<span class="conn">ところ</span>、<span class="subj">B の一家は</span> 2 年前に K 市に転居した<span class="conn">ので</span>、<span class="subj">B も</span> K 市の T 自動車に転勤した。</span><span class="s"><span class="conn">そこで</span><span class="subj">二人は</span>知り合い、やがて結婚した。</span>','「これも」「ところ」「ので」「そこで」(青)で、前の文とのつながりを浮き立たせる。'],
+    ['中心文を加える','<span class="s"><span class="add">A と B とは職場結婚である。</span></span><span class="s"><span class="subj">A は</span>、高校卒業後すぐに K 市の T 自動車に入社し、営業部門に配属された。</span><span class="s"><span class="subj">B は</span><span class="conn">これも</span>卒業直後に ○ 市の T 自動車に入社し、経理を手伝っていた<span class="conn">ところ</span>、<span class="subj">B の一家は</span> 2 年前に K 市に転居した<span class="conn">ので</span>、<span class="subj">B も</span> K 市の T 自動車に転勤した。</span><span class="s"><span class="conn">そこで</span><span class="subj">二人は</span>知り合い、やがて結婚した。</span>','最後に、パラグラフの中心文(水色)を先頭に加える。ポイント先行主義にも合う。これがノートの改良版です。']
+  ];
+  var si=0;
+  function drawS(){document.getElementById('sst').innerHTML=ST.map(function(s,i){return '<span class="'+(i===si?'on':'')+'">'+s[0]+'</span>';}).join('');
+    document.getElementById('sview').innerHTML=ST[si][1]; document.getElementById('smsg').innerHTML=ST[si][2];
+    document.getElementById('sprev').disabled=si===0; document.getElementById('snext').disabled=si===ST.length-1;}
+  document.getElementById('snext').addEventListener('click',function(){si++;drawS();});
+  document.getElementById('sprev').addEventListener('click',function(){si--;drawS();});
+  drawS();
+
+  /* ===== 並べ替え ===== */
+  var OS=[['私は ×× と考える。',0],['それには3つ根拠がある。',1],['第一に、私の調査によると ○○ という事実がある。',2],['第二に、X 氏の報告によれば △△ である。',3],['第三に、Y 氏は □□ という観察をしている。',4]];
+  var order=OS.map(function(_,i){return i;}).sort(function(){return Math.random()-.5;}), pick=[];
+  function drawO(){var pool=document.getElementById('opool'); pool.innerHTML='';
+    order.forEach(function(i){var b=document.createElement('button');b.type='button';b.textContent=OS[i][0];b.disabled=pick.indexOf(i)>=0;b.addEventListener('click',function(){pick.push(i);drawO();});pool.appendChild(b);});
+    document.getElementById('opick').innerHTML=pick.length?pick.map(function(i,k){return '<div>'+(k+1)+'. '+OS[i][0]+'</div>';}).join(''):'<span class="legend">ここに並びます</span>';}
+  document.getElementById('oclr').addEventListener('click',function(){pick=[];drawO();document.getElementById('ofb').textContent='';});
+  document.getElementById('ochk').addEventListener('click',function(){var fb=document.getElementById('ofb');
+    if(pick.length<OS.length){fb.className='fb ng';fb.textContent='全部の文を並べてください';return;}
+    var ok=pick[0]===0&&pick[1]===1; fb.className='fb '+(ok?'ok':'ng');
+    fb.textContent=ok?'◯ 正解! 結論 → 根拠の数 → 根拠、の順(ポイント先行主義)':pick[0]!==0?'✕ 結論(××)を最初に':'✕ 2文目で「根拠が3つある」と予告すると、後の文が読みやすくなります';});
+  drawO();
+
+  /* ===== 複数の解釈 ===== */
+  var AM=[
+    ['黒い目の大きな犬','修飾語が離れている',[['目が黒い','「黒い目」をした大きな犬'],['犬が黒い','目の大きな、黒い犬']],'目の大きな黒い犬 / 黒い目をした大きな犬'],
+    ['A 社と B 社の製品を比較した。','列挙を含む',[['A 社 vs B 社','A 社の製品と、B 社の製品を比較した'],['(A 社)と(B 社の製品)','A 社(という会社)と、B 社の製品を比較した']],'A 社の製品と B 社の製品を比較した。'],
+    ['全員が会議に来なかった。','否定表現・「全部」',[['全部否定','1人も来なかった'],['部分否定','来なかった人もいる(全員がそろったわけではない)']],'1人も会議に来なかった。 / 会議に来なかった人がいた。'],
+    ['最初の実験で使った試料を測定した。','「最初」を含む',[['最初の実験','1回目の実験で使った試料を(今回)測定した'],['最初に使った試料','実験の中で最初に使った試料を測定した']],'1回目の実験で使った試料を測定した。'],
+    ['私は急いで部屋を出た彼を追いかけた。','修飾語が離れている・読点',[['急いだのは私','私は急いで、部屋を出た彼を追いかけた'],['急いだのは彼','私は、急いで部屋を出た彼を追いかけた']],'読点の位置で1通りに決まる']
+  ];
+  document.getElementById('ambs').innerHTML=AM.map(function(a,i){return '<div class="amb" data-i="'+i+'"><div class="src">「'+a[0]+'」<span class="kind">'+a[1]+'</span></div><div class="tg">'+a[2].map(function(x,j){return '<button type="button" data-j="'+j+'">解釈'+(j+1)+':'+x[0]+'</button>';}).join('')+'<button type="button" data-j="fix">直し方</button></div><div class="out" aria-live="polite"><span class="legend">ボタンを押すと意味が出ます</span></div></div>';}).join('');
+  document.querySelectorAll('.amb').forEach(function(el){var a=AM[+el.getAttribute('data-i')];el.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){
+    el.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});var j=b.getAttribute('data-j');
+    el.querySelector('.out').innerHTML=j==='fix'?'<span class="good" style="display:block">'+a[3]+'</span>':'→ '+a[2][+j][1];});});});
+})();
+</script>
+</body>
+</html>

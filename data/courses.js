@@ -25,7 +25,11 @@ window.COURSES = [
     { id: "1-1-3-bayes", refs: [{ label: "ノート", files: ["refs/1-1-3-note.jpg"] }],
       lesson: 3, title: "全確率の定理とベイズの定理",
       file: "materials/1-1/1-1-3-bayes.html",
-      note: "クロス表、くじの順番、全確率の定理、ベイズの定理、事前確率・事後確率。不良品の原因を探る工場シミュレーション付き" }
+      note: "クロス表、くじの順番、全確率の定理、ベイズの定理、事前確率・事後確率。不良品の原因を探る工場シミュレーション付き" },
+    { id: "1-1-4-random-variable", refs: [{ label: "ノート", files: ["refs/1-1-4-note.jpg"] }],
+      lesson: 4, title: "確率変数と分布関数",
+      file: "materials/1-1/1-1-4-random-variable.html",
+      note: "確率変数、離散型・連続型、確率関数と確率密度関数、分布関数F(x)の性質。サイコロの分布とF(x)の階段グラフ、密度の面積を動かせるグラフ付き" }
   ] },
   { id: "1-2", name: "テクニカルリテラシー",   materials: [
     { id: "1-2-1-technical-documents", refs: [{ label: "ノート", files: ["refs/1-2-1-note.jpg"] }],
@@ -39,7 +43,11 @@ window.COURSES = [
     { id: "1-2-3-document-structure", refs: [{ label: "ノート", files: ["refs/1-2-3-note.jpg"] }],
       lesson: 3, title: "文章の構造と逆茂木型の文",
       file: "materials/1-2/1-2-3-document-structure.html",
-      note: "隠れた主語、首尾一貫の心得、文・パラグラフ・節・章、逆茂木型の文。17の句に分けた例文を解体できる図付き" }
+      note: "隠れた主語、首尾一貫の心得、文・パラグラフ・節・章、逆茂木型の文。17の句に分けた例文を解体できる図付き" },
+    { id: "1-2-4-rewriting", refs: [{ label: "ノート", files: ["refs/1-2-4-note.jpg"] }],
+      lesson: 4, title: "逆茂木文の書き直し",
+      file: "materials/1-2/1-2-4-rewriting.html",
+      note: "逆茂木文を文に分ける・名詞を主語にする・接続詞でつなぐ手順、要点を先に書く、あいまいな文。1段ずつ書き直せるステッパーと並べ替えゲーム付き" }
   ] },
   { id: "1-3", name: "コンピュータアーキテクチャ", materials: [
     { id: "1-3-1-organization-isa", refs: [{ label: "ノート①", files: ["refs/1-3-1-note-a.jpg"] }, { label: "ノート②(二重線より上)", files: ["refs/1-3-x-note-b.jpg"] }],
@@ -53,7 +61,11 @@ window.COURSES = [
     { id: "1-3-3-addressing", refs: [{ label: "ノート", files: ["refs/1-3-3-note.jpg"] }],
       lesson: 3, title: "アドレッシングと記憶装置",
       file: "materials/1-3/1-3-3-addressing.html",
-      note: "絶対・実効・相対アドレス、アドレス空間、6つのアドレッシング方式、記憶階層、ノイマン・ボトルネック。方式を切り替えられるシミュレータ付き" }
+      note: "絶対・実効・相対アドレス、アドレス空間、6つのアドレッシング方式、記憶階層、ノイマン・ボトルネック。方式を切り替えられるシミュレータ付き" },
+    { id: "1-3-4-performance", refs: [{ label: "ノート", files: ["refs/1-3-4-note.jpg"] }],
+      lesson: 4, title: "数の接頭語と性能評価",
+      file: "materials/1-3/1-3-4-performance.html",
+      note: "k/M/G と Ki/Mi/Gi、ビットとバイト、MSB/LSB、CPU時間=命令数×CPI÷クロック、MIPS、稼働率(MTBF/MTTR)。CPU時間と稼働率の計算機付き" }
   ] },
   { id: "1-4", name: "情報通信ネットワーク",   materials: [
     { id: "1-4-1-network-osi", refs: [{ label: "スライド #1", dir: "refs/slide-01", pages: 25 }],

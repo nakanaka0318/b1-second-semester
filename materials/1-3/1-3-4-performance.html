@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>数の接頭語と性能評価</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.nin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:1rem;padding:6px 9px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:7em}
+.nin:focus{outline:none;border-color:var(--accent)}
+.bits{display:flex;gap:4px;margin:8px 0;flex-wrap:wrap}
+.bits button{width:40px;height:46px;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.2rem;font-weight:700;border-radius:8px;border:2px solid var(--line);background:var(--paper);color:var(--sub);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.bits button small{font-size:.58rem;font-weight:400;margin-top:3px}
+.bits button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.bitlab{display:flex;justify-content:space-between;max-width:350px;font-size:.75rem;font-weight:700;color:var(--mark)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.grid2 label{font-size:.8rem;color:var(--sub);display:block}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.cmp{grid-template-columns:1fr}}
+.cmp .c{background:var(--bg);border-radius:10px;padding:10px}
+.cmp .c b{display:block;margin-bottom:4px}
+.updown{display:flex;height:28px;border-radius:6px;overflow:hidden;margin:8px 0}
+.updown span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;white-space:nowrap;overflow:hidden}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>数の接頭語と性能評価</h1>
+  <p>コンピュータアーキテクチャ 第4回のノートのまとめです(2.2 数の接頭語、2.3 ビットとバイト、1.7 性能評価)。単位の換算と、CPU の速さを数式で比べる方法を、計算機で確かめながら学びます。</p>
+  <div class="demo">
+    <label>CPU 時間の計算機:実行命令数・CPI・クロック周波数から求める</label>
+    <div class="grid2">
+      <div><label for="ic">実行命令数(億命令)</label><input id="ic" class="nin" type="number" value="20" step="any"></div>
+      <div><label for="cpi">CPI(1命令の平均クロック数)</label><input id="cpi" class="nin" type="number" value="1.5" step="any"></div>
+      <div><label for="hz">クロック周波数(GHz)</label><input id="hz" class="nin" type="number" value="3" step="any"></div>
+    </div>
+    <div class="stats" id="cst"></div>
+    <div class="formula" id="cform" aria-live="polite"></div>
+  </div>
+</header>
+
+<nav class="toc"><a href="#prefix">数の接頭語</a><a href="#bit">ビットとバイト</a><a href="#time">処理時間での評価</a><a href="#cpu">CPU時間</a><a href="#other">その他の指標</a><a href="#rel">信頼性</a><a href="#q">練習問題</a></nav>
+
+<section class="task" id="prefix">
+  <h2><span class="no">2.2</span>数の接頭語</h2>
+  <div class="tbl"><table>
+    <tr><th colspan="3">大きな数</th><th colspan="3">小さな数</th></tr>
+    <tr><td><b>k</b></td><td>キロ</td><td>10<sup>3</sup></td><td><b>m</b></td><td>ミリ</td><td>10<sup>−3</sup></td></tr>
+    <tr><td><b>M</b></td><td>メガ</td><td>10<sup>6</sup></td><td><b>μ</b></td><td>マイクロ</td><td>10<sup>−6</sup></td></tr>
+    <tr><td><b>G</b></td><td>ギガ</td><td>10<sup>9</sup></td><td><b>n</b></td><td>ナノ</td><td>10<sup>−9</sup></td></tr>
+    <tr><td><b>T</b></td><td>テラ</td><td>10<sup>12</sup></td><td><b>p</b></td><td>ピコ</td><td>10<sup>−12</sup></td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="bit">
+  <h2><span class="no">2.3</span>ビットとバイト</h2>
+  <ul>
+    <li>2 進数 1 桁 = <b>1 ビット</b>、8 ビット = <b>1 バイト</b></li>
+    <li>最上位ビット = <b>MSB</b>(Most Significant Bit)、最下位ビット = <b>LSB</b>(Least Significant Bit)</li>
+    <li>ビットの数 = <b>ビット長</b></li>
+    <li>接頭語は通常 10<sup>3n</sup> だが、<b>ビット・バイト(メモリ容量)では 2<sup>10n</sup></b> として使うことが多い:k = 2<sup>10</sup> = 1024、M = 2<sup>20</sup>、G = 2<sup>30</sup></li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>8 ビットを押して値を作る</div>
+    <div class="bitlab"><span>← MSB(重み 128)</span><span>LSB(重み 1)→</span></div>
+    <div class="bits" id="bits"></div>
+    <div class="stats" id="bst"></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">換算</span>ノートの問題を計算機で</div>
+    <div class="row"><input id="pv" class="nin" type="number" value="82" step="any" aria-label="数値"><select id="pp" class="nin" style="width:auto"><option value="1">k</option><option value="2">M</option><option value="3">G</option><option value="4">T</option></select><span>バイト</span></div>
+    <div class="row" style="margin-top:2px"><button class="btn sub" type="button" data-ex="82,1">問1:82 kbyte</button><button class="btn sub" type="button" data-ex="0.125,3">問2:0.125 Gbyte</button></div>
+    <div class="stats" id="pst"></div>
+    <div class="formula" id="pform" aria-live="polite"></div>
+  </div>
+  <details class="ans"><summary><span class="tag">ノート</span>問1・問2 の解き方<span class="tap"></span></summary><div class="body">
+    <p><b>問1</b>:82 kbyte = 82 × 2<sup>10</sup> = 82 × 1024 = <b>83968 バイト</b></p>
+    <p><b>問2</b>:0.125 Gbyte = 0.125 × 2<sup>30</sup> = (1/8) × 2<sup>30</sup> = 2<sup>27</sup> = <b>134217728 バイト</b></p>
+  </div></details>
+</section>
+
+<section class="task" id="time">
+  <h2><span class="no">1.7-1</span>処理時間での評価</h2>
+  <ul>
+    <li><b>性能 = 1 / 実行時間</b>(実行時間が短いほど性能が高い)</li>
+    <li><b>応答時間</b>:すべての作業が完了するまでの時間(待ち時間や入出力も含む)</li>
+    <li><b>CPU 時間</b>:CPU が実際にそのプログラムのために動いた時間。① <b>ユーザ CPU 時間</b>(プログラム自身の処理)② <b>システム CPU 時間</b>(OS がそのプログラムのために行った処理)</li>
+  </ul>
+  <div class="point"><b>性能の比べ方</b>:A の実行時間が 10 秒、B が 8 秒なら、性能比は (1/8) ÷ (1/10) = 10/8 = <b>1.25</b>。「B は A の 1.25 倍の性能」と言います。</div>
+</section>
+
+<section class="task" id="cpu">
+  <h2><span class="no">1.7-2</span>CPU 時間での評価</h2>
+  <div class="formula">クロック周波数 = <span class="frac"><span>1</span><span>クロック周期</span></span></div>
+  <div class="formula">CPU 時間 = CPU クロックサイクル数 × クロックサイクル時間<small>クロックサイクル時間 = 1 / クロック周波数</small></div>
+  <div class="formula">CPU クロックサイクル数 = 実行命令数 × <b>CPI</b><small>CPI(Cycles Per Instruction):1命令の実行に必要なクロック数の平均</small></div>
+  <p>まとめると <span class="mono">CPU 時間 = 実行命令数 × CPI ÷ クロック周波数</span>。性能を上げるには、命令数を減らす・CPI を下げる・クロック周波数を上げる、の3通りがあります。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">比較</span>2つの CPU で同じプログラムを動かすと</div>
+    <div class="cmp">
+      <div class="c"><b>CPU A</b><label>CPI <input id="a_cpi" class="nin" type="number" value="2" step="any"></label> <label>クロック GHz <input id="a_hz" class="nin" type="number" value="4" step="any"></label></div>
+      <div class="c"><b>CPU B</b><label>CPI <input id="b_cpi" class="nin" type="number" value="1.2" step="any"></label> <label>クロック GHz <input id="b_hz" class="nin" type="number" value="3" step="any"></label></div>
+    </div>
+    <div class="formula" id="abform" aria-live="polite"></div>
+    <p class="legend">実行命令数はどちらも同じ(上の計算機の値)とします。クロック周波数が高い方が速いとは限りません。</p>
+  </div>
+</section>
+
+<section class="task" id="other">
+  <h2><span class="no">1.7-3</span>その他の性能評価</h2>
+  <div class="tbl"><table>
+    <tr><th>指標</th><th>意味・式</th></tr>
+    <tr><td><b>MIPS</b></td><td><span class="mono">実行命令数 / (実行時間 × 10<sup>6</sup>)</span>:1秒あたり何百万命令実行できるか</td></tr>
+    <tr><td><b>MFLOPS</b></td><td><span class="mono">浮動小数点演算数 / (実行時間 × 10<sup>6</sup>)</span>:1秒あたり何百万回の浮動小数点演算ができるか</td></tr>
+    <tr><td><b>スループット</b></td><td>単位時間あたりの処理能力(1秒に何件処理できるか)</td></tr>
+    <tr><td><b>レイテンシ</b></td><td>1つの処理に要する時間(1件が終わるまで何秒か)</td></tr>
+  </table></div>
+  <div class="point"><b>スループットとレイテンシ</b>:レジに10人並んでいるとき、レジを増やすと1時間に会計できる人数(スループット)は増えますが、1人の会計にかかる時間(レイテンシ)は変わりません。</div>
+</section>
+
+<section class="task" id="rel">
+  <h2><span class="no">信頼性</span>MTBF と MTTR</h2>
+  <div class="tbl"><table>
+    <tr><th>指標</th><th>意味</th><th>使い方</th></tr>
+    <tr><td><b>MTBF</b></td><td>平均故障間隔(Mean Time Between Failures):故障してから次に故障するまでの平均時間</td><td><span class="mono">1 / MTBF</span> = <b>故障率</b></td></tr>
+    <tr><td><b>MTTR</b></td><td>平均修復時間(Mean Time To Repair):故障してから直るまでの平均時間</td><td><span class="mono">MTBF / (MTBF + MTTR)</span> = <b>稼働率</b></td></tr>
+  </table></div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>稼働率の計算</div>
+    <div class="row"><label for="mtbf">MTBF(時間)</label><input id="mtbf" class="nin" type="number" value="990" step="any"><label for="mttr">MTTR(時間)</label><input id="mttr" class="nin" type="number" value="10" step="any"></div>
+    <div class="updown" id="ud"></div>
+    <div class="stats" id="rst"></div>
+  </div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+  <p>数値で答えてください(小数・分数どちらでも可)。</p>
+  <div class="qbox" data-ans="83968"><div class="qno">問1(ノート)</div><p>82 kbyte は何バイト?(k = 2<sup>10</sup>)</p>
+    <div class="check"><input class="ans" placeholder="例 1024" aria-label="問1の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+  <div class="qbox" data-ans="134217728"><div class="qno">問2(ノート)</div><p>0.125 Gbyte は何バイト?(G = 2<sup>30</sup>)</p>
+    <div class="check"><input class="ans" placeholder="例 1024" aria-label="問2の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+  <div class="qbox" data-ans="0.5"><div class="qno">問3</div><p>クロック周波数 2 GHz のとき、クロックサイクル時間は何 ns?</p>
+    <div class="check"><input class="ans" placeholder="例 1" aria-label="問3の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:0.5 ns</b></p><p>1 / (2 × 10<sup>9</sup>) = 0.5 × 10<sup>−9</sup> 秒 = 0.5 ns。</p></div></details></div>
+  <div class="qbox" data-ans="1"><div class="qno">問4</div><p>実行命令数 2 × 10<sup>9</sup>、CPI 1.5、クロック周波数 3 GHz のとき、CPU 時間は何秒?</p>
+    <div class="check"><input class="ans" placeholder="例 2" aria-label="問4の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:1 秒</b></p><p>サイクル数 = 2 × 10<sup>9</sup> × 1.5 = 3 × 10<sup>9</sup>。CPU 時間 = 3 × 10<sup>9</sup> ÷ (3 × 10<sup>9</sup>) = 1 秒。ページ上部の計算機の初期値と同じです。</p></div></details></div>
+  <div class="qbox" data-ans="2000"><div class="qno">問5</div><p>問4 のプログラムの MIPS 値は?</p>
+    <div class="check"><input class="ans" placeholder="例 100" aria-label="問5の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:2000 MIPS</b></p><p>2 × 10<sup>9</sup> ÷ (1 × 10<sup>6</sup>) = 2000。</p></div></details></div>
+  <div class="qbox" data-ans="1.25"><div class="qno">問6</div><p>同じプログラムの実行時間が A は 10 秒、B は 8 秒。B の性能は A の何倍?</p>
+    <div class="check"><input class="ans" placeholder="例 2" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+  <div class="qbox" data-ans="0.99"><div class="qno">問7</div><p>MTBF が 990 時間、MTTR が 10 時間のシステムの稼働率は?</p>
+    <div class="check"><input class="ans" placeholder="例 0.9" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+  <div class="qbox" data-ans="0.002"><div class="qno">問8</div><p>MTBF が 500 時間のとき、故障率(1時間あたり)は?</p>
+    <div class="check"><input class="ans" placeholder="例 0.01" aria-label="問8の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+  <div class="qbox"><div class="qno">問9</div><p>「単位時間あたりの処理能力」を表す指標は?</p>
+    <div class="opts"><button>レイテンシ</button><button data-ok>スループット</button><button>MTTR</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="qbox"><div class="qno">問10</div><p>8 ビットの 2 進数 1000 0000 で、1 になっているビットは?</p>
+    <div class="opts"><button data-ok>MSB(最上位ビット)</button><button>LSB(最下位ビット)</button></div><span class="fb" aria-live="polite"></span></div>
+  <div class="score" id="score"></div>
+</section>
+
+<footer>数値はすべて計算で確認しています。ノートの問1・問2 の答えと一致しています。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  function f(n,d){if(!isFinite(n))return '—'; if(Math.abs(n)>=1e6||(Math.abs(n)<1e-3&&n!==0))return n.toExponential(3).replace('e',' × 10^').replace('^+','^'); return (+n.toFixed(d===undefined?4:d)).toLocaleString('ja-JP',{maximumFractionDigits:6});}
+  /* CPU 時間 */
+  function cpu(){var ic=+document.getElementById('ic').value*1e8, cpi=+document.getElementById('cpi').value, hz=+document.getElementById('hz').value*1e9;
+    var cyc=ic*cpi, ct=1/hz, t=cyc*ct, mips=ic/(t*1e6);
+    document.getElementById('cst').innerHTML='<div class="stat"><div class="k">クロックサイクル時間</div><div class="v">'+f(ct*1e9,4)+' ns</div></div><div class="stat"><div class="k">CPU クロックサイクル数</div><div class="v">'+f(cyc)+'</div></div><div class="stat hl"><div class="k">CPU 時間</div><div class="v">'+f(t)+' 秒</div></div><div class="stat"><div class="k">MIPS</div><div class="v">'+f(mips,1)+'</div></div>';
+    document.getElementById('cform').innerHTML='CPU 時間 = '+f(ic)+' 命令 × CPI '+cpi+' ÷ '+f(hz)+' Hz = <b>'+f(t)+' 秒</b>';
+    ab();}
+  ['ic','cpi','hz'].forEach(function(id){document.getElementById(id).addEventListener('input',cpu);});
+  function ab(){var ic=+document.getElementById('ic').value*1e8, ta=ic*+document.getElementById('a_cpi').value/(+document.getElementById('a_hz').value*1e9), tb=ic*+document.getElementById('b_cpi').value/(+document.getElementById('b_hz').value*1e9);
+    var r=ta/tb, fast=r>1?'B':'A', ratio=r>1?r:1/r;
+    document.getElementById('abform').innerHTML='A:'+f(ta)+' 秒 / B:'+f(tb)+' 秒 → '+(Math.abs(r-1)<1e-9?'同じ性能':'<b>CPU '+fast+' の方が '+f(ratio,3)+' 倍の性能</b>(性能 = 1 / 実行時間)');}
+  ['a_cpi','a_hz','b_cpi','b_hz'].forEach(function(id){document.getElementById(id).addEventListener('input',ab);});
+  cpu();
+
+  /* ビット */
+  var bv=[0,1,0,1,0,0,1,1], bx=document.getElementById('bits');
+  function bits(){bx.innerHTML='';bv.forEach(function(v,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-pressed',v?'true':'false');b.innerHTML=v+'<small>'+(1<<(7-i))+'</small>';b.setAttribute('aria-label','ビット'+(7-i)+'(重み'+(1<<(7-i))+')');b.addEventListener('click',function(){bv[i]^=1;bits();});bx.appendChild(b);});
+    var n=bv.reduce(function(s,v,i){return s+v*(1<<(7-i));},0);
+    document.getElementById('bst').innerHTML='<div class="stat hl"><div class="k">10 進</div><div class="v">'+n+'</div></div><div class="stat"><div class="k">16 進</div><div class="v">'+n.toString(16).toUpperCase().padStart(2,'0')+'</div></div><div class="stat"><div class="k">MSB / LSB</div><div class="v">'+bv[0]+' / '+bv[7]+'</div></div><div class="stat"><div class="k">ビット長 8 で表せる数</div><div class="v">2<sup>8</sup> = 256 通り</div></div>';}
+  bits();
+
+  /* 接頭語換算 */
+  var pv=document.getElementById('pv'), pp=document.getElementById('pp'), NM=['','k','M','G','T'];
+  function pref(){var v=+pv.value, n=+pp.value, bin=v*Math.pow(2,10*n), dec=v*Math.pow(10,3*n);
+    document.getElementById('pst').innerHTML='<div class="stat hl"><div class="k">2 進接頭語(2<sup>'+(10*n)+'</sup>)</div><div class="v">'+(Number.isInteger(bin)?bin.toLocaleString('ja-JP'):f(bin))+' バイト</div></div><div class="stat"><div class="k">10 進接頭語(10<sup>'+(3*n)+'</sup>)</div><div class="v">'+(Number.isInteger(dec)?dec.toLocaleString('ja-JP'):f(dec))+' バイト</div></div><div class="stat"><div class="k">差</div><div class="v">'+((bin/dec-1)*100).toFixed(1)+'%</div></div>';
+    document.getElementById('pform').innerHTML=v+' '+NM[n]+'byte = '+v+' × 2<sup>'+(10*n)+'</sup> = <b>'+(Number.isInteger(bin)?bin.toLocaleString('ja-JP'):f(bin))+'</b> バイト';}
+  pv.addEventListener('input',pref); pp.addEventListener('change',pref);
+  document.querySelectorAll('[data-ex]').forEach(function(b){b.addEventListener('click',function(){var e=b.getAttribute('data-ex').split(',');pv.value=e[0];pp.value=e[1];pref();});});
+  pref();
+
+  /* 稼働率 */
+  function rel(){var a=+document.getElementById('mtbf').value, r=+document.getElementById('mttr').value, av=a/(a+r);
+    document.getElementById('ud').innerHTML='<span style="flex:'+a+';background:var(--ok)">稼働 '+a+'h</span><span style="flex:'+Math.max(r,a*0.03)+';background:var(--warn)">修理 '+r+'h</span>';
+    document.getElementById('rst').innerHTML='<div class="stat hl"><div class="k">稼働率 MTBF/(MTBF+MTTR)</div><div class="v">'+f(av,4)+'('+(av*100).toFixed(2)+'%)</div></div><div class="stat"><div class="k">故障率 1/MTBF</div><div class="v">'+f(1/a,6)+' /時間</div></div><div class="stat"><div class="k">1年(8760h)で止まる時間の目安</div><div class="v">'+f(8760*(1-av),1)+' 時間</div></div>';}
+  ['mtbf','mttr'].forEach(function(id){document.getElementById(id).addEventListener('input',rel);}); rel();
+})();
+</script>
+</body>
+</html>
