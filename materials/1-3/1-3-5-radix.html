@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>位取り記数法と基数変換</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+:root{--g1:#1F6FB2;--g2:#C77700;--g1s:#E3EEF8;--g2s:#FFF4D6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g1:#6DB3F2;--g2:#F2BE3A;--g1s:#1B2D46;--g2s:#3A3016}}
+:root[data-theme="dark"]{--g1:#6DB3F2;--g2:#F2BE3A;--g1s:#1B2D46;--g2s:#3A3016}
+.sw{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.sw button{font:inherit;font-size:.85rem;font-weight:700;padding:5px 11px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.nin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.1rem;padding:7px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;max-width:230px;text-transform:uppercase}
+.nin:focus{outline:none;border-color:var(--accent)}
+.nin.err{border-color:var(--warn)}
+.demo .nin{font-size:1.1rem;padding:7px 10px;width:100%;max-width:230px}
+.res{font-family:"JetBrains Mono",monospace;font-size:1.5rem;font-weight:700;word-break:break-all;margin:6px 0}
+.res sub,.stat sub{font-size:.6em;color:var(--sub);font-weight:400}
+.rep{text-decoration:overline;color:var(--warn)}
+.steps{background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:.92rem;overflow-x:auto}
+.steps .st{font-weight:700;margin-bottom:4px}
+.div{width:auto;border-collapse:collapse;font-family:"JetBrains Mono",monospace;font-size:.9rem;margin:4px 0}
+.div td{padding:2px 8px;border:none;background:none}
+.div tr td:first-child{color:var(--sub)}
+.div .r{color:var(--warn);font-weight:700}
+.div .cyc td{background:var(--mark-soft)}
+.grp{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;font-family:"JetBrains Mono",monospace;margin:6px 0}
+.grp .g{display:flex;flex-direction:column;align-items:center;border-radius:6px;padding:3px 6px}
+.grp .g b{font-size:1.05rem;letter-spacing:.08em}
+.grp .g span{font-size:1.05rem;font-weight:700}
+.grp .g small{font-size:.66rem;color:var(--sub)}
+.grp .g.a{background:var(--g1s)}.grp .g.a span{color:var(--g1)}
+.grp .g.b{background:var(--g2s)}.grp .g.b span{color:var(--g2)}
+.grp .pt{font-size:1.4rem;font-weight:700;padding-bottom:18px}
+.exp{font-family:"JetBrains Mono",monospace;font-size:.88rem;line-height:2;word-break:break-word}
+.hex{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;font-family:"JetBrains Mono",monospace;font-size:.82rem;text-align:center}
+.hex div{background:var(--bg);border-radius:6px;padding:3px 0}
+.hex b{display:block;font-size:1rem;color:var(--accent)}
+.gq{font-family:"JetBrains Mono",monospace;font-size:1.3rem;font-weight:700}
+.msg{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.92rem;margin-top:8px}
+@media (max-width:600px){.hex{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>位取り記数法と基数変換</h1>
+  <p>コンピュータアーキテクチャ 第5回のノートのまとめです。MIPS の計算のおさらいのあと、2進数・8進数・10進数・16進数を行き来する「基数変換」を、途中の計算を見ながら練習します。</p>
+  <div class="demo">
+    <label for="nin">基数変換マシン:数を入れて、何進数から何進数に変えるか選ぼう(小数点も使えます)</label>
+    <div class="row" style="margin-top:0"><input id="nin" class="nin" value="672" aria-label="変換する数" autocomplete="off" spellcheck="false">
+      <select id="fb" aria-label="元の基数"><option value="2">2進数</option><option value="8">8進数</option><option value="10" selected>10進数</option><option value="16">16進数</option></select>
+      <span>→</span>
+      <select id="tb" aria-label="変換先の基数"><option value="2" selected>2進数</option><option value="8">8進数</option><option value="10">10進数</option><option value="16">16進数</option></select></div>
+    <div class="sw" id="pre"><button data-v="1011.0011" data-f="2" data-t="10">1011.0011₂→10</button><button data-v="421" data-f="10" data-t="2">421→2</button><button data-v="421" data-f="10" data-t="16">421→16</button><button data-v="0.1" data-f="10" data-t="2">0.1→2</button><button data-v="672" data-f="10" data-t="16">672→16</button><button data-v="E4A" data-f="16" data-t="8">E4A₁₆→8</button></div>
+    <div class="res" id="res" aria-live="polite"></div>
+    <div class="stats" id="all"></div>
+    <div class="steps" id="steps"></div>
+  </div>
+</header>
+
+<div class="blbar"><span class="t">穴埋め:<span id="blcount"></span></span><button class="btn sub" id="blhide" type="button">すべて隠す</button><button class="btn sub" id="blshow" type="button">すべて表示</button></div>
+
+<nav class="toc">
+  <a href="#mips">MIPS の復習</a><a href="#pos">位取り記数法</a><a href="#b2d">2→10</a><a href="#d2b">10→2</a><a href="#hex">16進数</a><a href="#grp">16・8→2</a><a href="#ex">例題</a><a href="#game">変換ゲーム</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="mips">
+  <h2><span class="no">1</span>MIPS の復習:100MIPS で 1ms の間に実行できる命令数</h2>
+  <p>MIPS = 1 秒間に実行できる命令数を <b>100万(10<sup>6</sup>)</b> 単位で表したもの。</p>
+  <div class="formula">MIPS = 実行命令数 ÷ (実行時間[秒] × 10<sup>6</sup>)</div>
+  <p>1ms = 10<sup>−3</sup> 秒なので、</p>
+  <div class="formula"><span class="mono" style="font-size:.95rem">100 = 実行命令数 ÷ (10<sup>−3</sup> × 10<sup>6</sup>) = 実行命令数 ÷ 10<sup>3</sup><br>∴ 実行命令数 = 100 × 10<sup>3</sup> = <b class="bl">10<sup>5</sup></b>(10万命令)</span></div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>MIPS 計算機</div>
+    <div class="row"><input id="mp" class="nin" type="number" value="100" min="0" step="any" style="max-width:110px;text-transform:none" aria-label="MIPS値"><span>MIPS で</span><input id="mt" class="nin" type="number" value="1" min="0" step="any" style="max-width:100px;text-transform:none" aria-label="時間"><select id="mu" aria-label="時間の単位"><option value="1">秒</option><option value="1e-3" selected>ms</option><option value="1e-6">μs</option></select></div>
+    <div class="msg" id="mres" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="pos">
+  <h2><span class="no">2</span>位取り記数法(2章 2.1)</h2>
+  <p>数字を書く「位置」によって重みが決まる書き方。n 進法では、位が1つ上がるごとに重みが n 倍になる。</p>
+  <h3>2.1-1 整数(n 進法のとき)</h3>
+  <div class="formula">X = a<sub>m</sub>×n<sup>m</sup> + a<sub>m−1</sub>×n<sup>m−1</sup> + … + a<sub>1</sub>×n<sup>1</sup> + a<sub>0</sub>×n<sup>0</sup><small>a<sub>i</sub> は 0〜(n−1) の数字。n<sup>0</sup> = 1</small></div>
+  <h3>2.1-2 小数(p 進法のとき)</h3>
+  <div class="formula">N = d<sub>−1</sub>×p<sup>−1</sup> + d<sub>−2</sub>×p<sup>−2</sup> + … + d<sub>−m</sub>×p<sup>−m</sup><small>小数点の右は p<sup>−1</sup>, p<sup>−2</sup>, … と重みが 1/p ずつになる</small></div>
+  <p>例:10進数の 421 = 4×10<sup>2</sup> + 2×10<sup>1</sup> + 1×10<sup>0</sup>。2進数の 1011 = 1×2<sup>3</sup> + 0×2<sup>2</sup> + 1×2<sup>1</sup> + 1×2<sup>0</sup> = 11。</p>
+  <div class="tbl"><table>
+    <tr><th>2<sup>k</sup></th><td>2<sup>9</sup></td><td>2<sup>8</sup></td><td>2<sup>7</sup></td><td>2<sup>6</sup></td><td>2<sup>5</sup></td><td>2<sup>4</sup></td><td>2<sup>3</sup></td><td>2<sup>2</sup></td><td>2<sup>1</sup></td><td>2<sup>0</sup></td><td>2<sup>−1</sup></td><td>2<sup>−2</sup></td><td>2<sup>−3</sup></td><td>2<sup>−4</sup></td></tr>
+    <tr><th>値</th><td>512</td><td>256</td><td>128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td><td>0.5</td><td>0.25</td><td>0.125</td><td>0.0625</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="b2d">
+  <h2><span class="no">3</span>2.4 基数変換 (1) 2進数 → 10進数</h2>
+  <p>各桁に位の重みを掛けて足す。整数部と小数部に分けて考えるとよい。</p>
+  <div class="formula"><span class="mono" style="font-size:.95rem">1011.0011<sub>(2)</sub></span><small>整数部 1011 = 8 + 2 + 1 = <b>11</b> / 小数部 0.0011 = 0.125 + 0.0625 = <b>0.1875</b></small><b class="bl mono">11.1875</b></div>
+</section>
+
+<section class="task" id="d2b">
+  <h2><span class="no">4</span>(2) 10進数 → 2進数</h2>
+  <ul>
+    <li><b>整数部</b>:<b class="bl">2で割り続け</b>、出た余りを記録する。商が 0 になったら終わり。余りを<b>下から上へ</b>読む。<br>例:421 → <b class="bl mono">110100101</b><sub>(2)</sub></li>
+    <li><b>小数部</b>:<b class="bl">2を掛け続け</b>、整数部分に出た 0 か 1 を記録する(1 が出たら取り除いて続ける)。小数部が 0 になれば<b>有限回で終了</b>。<br>例:0.1 → 0.0001100110011…<sub>(2)</sub> の<b class="bl">無限循環小数</b>(終了しないこともある)。</li>
+  </ul>
+  <p class="legend">基数変換マシンでは、くり返す部分を<span class="rep">赤い上線</span>で示しています。</p>
+  <div class="warn">10進数ではきりのよい 0.1 も、2進数では無限に続く。コンピュータは途中で打ち切って記憶するので、わずかな誤差が出る。<br>このブラウザで <span class="mono">0.1 + 0.2</span> を計算すると → <b class="mono" id="fp"></b></div>
+  <p class="legend">上の「基数変換マシン」で「421→2」「0.1→2」を押すと、割り算・掛け算の途中経過が見られます。</p>
+</section>
+
+<section class="task" id="hex">
+  <h2><span class="no">5</span>(3) 16進数 ↔ 10進数</h2>
+  <p>16進数は 0〜9 と A〜F の16種類の数字を使う。</p>
+  <div class="hex">
+    <div><b>0</b>0000</div><div><b>1</b>0001</div><div><b>2</b>0010</div><div><b>3</b>0011</div><div><b>4</b>0100</div><div><b>5</b>0101</div><div><b>6</b>0110</div><div><b>7</b>0111</div>
+    <div><b>8</b>1000</div><div><b>9</b>1001</div><div><b>A</b>1010 = 10</div><div><b>B</b>1011 = 11</div><div><b>C</b>1100 = 12</div><div><b>D</b>1101 = 13</div><div><b>E</b>1110 = 14</div><div><b>F</b>1111 = 15</div>
+  </div>
+  <ul>
+    <li><b>10 → 16</b>:16 で割り続けて余りを下から読む。421 ÷ 16 = 26 余り 5、26 ÷ 16 = 1 余り 10(=<b>A</b>)、1 ÷ 16 = 0 余り 1 → <b class="bl mono">1A5</b></li>
+    <li><b>16 → 10</b>:位の重み 16<sup>2</sup>=256, 16<sup>1</sup>=16, 16<sup>0</sup>=1 を掛けて足す。1A5 = 1×256 + 10×16 + 5 = 256 + 160 + 5 = <b class="bl mono">421</b></li>
+  </ul>
+</section>
+
+<section class="task" id="grp">
+  <h2><span class="no">6</span>(4) 16進数 ↔ 2進数、8進数 ↔ 2進数</h2>
+  <ul>
+    <li>16 = 2<sup>4</sup> なので、16進数1桁は2進数 <b class="bl">4</b> ビットにぴったり対応する(1111 = F)。</li>
+    <li>8 = 2<sup>3</sup> なので、8進数1桁は2進数 <b class="bl">3</b> ビットに対応する(111 = 7)。</li>
+    <li>2進数から変換するときは、<b>小数点(整数なら右端)から</b>4ビット(または3ビット)ずつ区切る。足りない左端は 0 で埋める。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">見る</span>ノートの例:16進数 E4A を8進数に</div>
+    <div id="e4a"></div>
+    <p style="margin:6px 0 0;font-size:.9rem">① 16進数を1桁ずつ4ビットに直す → ② 右端から3ビットずつ区切り直す → ③ 3ビットずつ8進数1桁に。<b>左から</b>区切ると「1 6 2 3 2」のように間違えるので注意(ノートで消してある計算)。</p>
+  </div>
+</section>
+
+<section class="task" id="ex">
+  <h2><span class="no">7</span>例題 2.4(ノートの数)</h2>
+  <p>ノートにある数を変換してみる。問題文はノートに書かれていないので、各基数での値を並べます。タップすると上の基数変換マシンで途中経過を確認できます。</p>
+  <div class="tbl"><table id="extab"></table></div>
+  <h3>ノートの計算:672<sub>(10)</sub> を 2進数・16進数に</h3>
+  <p>672 = 512 + 128 + 32 なので、2<sup>9</sup>, 2<sup>7</sup>, 2<sup>5</sup> の位が 1 → <span class="mono">1010100000</span><sub>(2)</sub>。右から4ビットずつ <span class="mono">10 | 1010 | 0000</span> → <b class="mono">2A0</b><sub>(16)</sub>。</p>
+  <p class="legend">大きい数は「2で割り続ける」より、「含まれる 2<sup>k</sup> を大きい方から引いていく」方が速いこともある。</p>
+</section>
+
+<section class="task" id="game">
+  <h2><span class="no">8</span>変換ゲーム</h2>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">ゲーム</span>次の数を変換しよう</div>
+    <div class="row"><span class="gq" id="gq"></span></div>
+    <div class="row"><input id="ga" class="nin" aria-label="答え" autocomplete="off" spellcheck="false" style="max-width:200px"><button class="btn" id="gchk" type="button">判定</button><button class="btn sub" id="ghint" type="button">ヒント</button><button class="btn sub" id="gnext" type="button">次の問題</button></div>
+    <div class="msg" id="gmsg" aria-live="polite"></div>
+    <div class="stats" id="gst"></div>
+  </div>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox" data-ans="100000"><div class="qno">問1</div><p>100MIPS のコンピュータが 1ms の間に実行できる命令数は?</p>
+    <div class="check"><input class="ans" placeholder="例 1000" aria-label="問1の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:100000(10<sup>5</sup>)</b></p><p>100×10<sup>6</sup> 命令/秒 × 10<sup>−3</sup> 秒 = 10<sup>5</sup> 命令。</p></div></details></div>
+
+  <div class="qbox" data-ans="11.1875"><div class="qno">問2</div><p>1011.0011<sub>(2)</sub> を10進数に。</p>
+    <div class="check"><input class="ans" placeholder="例 5.25" aria-label="問2の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:11.1875</b></p><p>整数部 8+2+1 = 11、小数部 2<sup>−3</sup>+2<sup>−4</sup> = 0.125+0.0625 = 0.1875。</p></div></details></div>
+
+  <div class="qbox" data-ans="110100101"><div class="qno">問3</div><p>421<sub>(10)</sub> を2進数に。</p>
+    <div class="check"><input class="ans" placeholder="例 1010" aria-label="問3の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">ヒント</span>大きい方から<span class="tap"></span></summary><div class="body"><p>421 = 256 + 128 + 32 + 4 + 1。2<sup>8</sup>, 2<sup>7</sup>, 2<sup>5</sup>, 2<sup>2</sup>, 2<sup>0</sup> の位が 1。</p></div></details>
+    <details class="ans"><summary><span class="tag">答え</span>答え<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:110100101</b>(9桁)</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問4</div><p>421<sub>(10)</sub> を16進数にすると?</p>
+    <div class="opts"><button>1A4</button><button data-ok>1A5</button><button>2A5</button><button>165</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="981"><div class="qno">問5</div><p>3D5<sub>(16)</sub> を10進数に。</p>
+    <div class="check"><input class="ans" placeholder="例 255" aria-label="問5の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:981</b></p><p>3×256 + 13×16 + 5 = 768 + 208 + 5 = 981(D = 13)。</p></div></details></div>
+
+  <div class="qbox" data-ans="394"><div class="qno">問6</div><p>110001010<sub>(2)</sub> を10進数に。</p>
+    <div class="check"><input class="ans" placeholder="例 255" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:394</b></p><p>256 + 128 + 8 + 2 = 394。</p></div></details></div>
+
+  <div class="qbox" data-ans="101101010"><div class="qno">問7</div><p>16A<sub>(16)</sub> を2進数に。</p>
+    <div class="check"><input class="ans" placeholder="例 1111" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:101101010</b></p><p>1 → 0001、6 → 0110、A → 1010。つなげて 0001 0110 1010、先頭の 0 を省いて 101101010。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問8</div><p>672<sub>(10)</sub> を16進数にすると?</p>
+    <div class="opts"><button>2A</button><button data-ok>2A0</button><button>A20</button><button>1A0</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="7112"><div class="qno">問9</div><p>E4A<sub>(16)</sub> を8進数に。</p>
+    <div class="check"><input class="ans" placeholder="例 777" aria-label="問9の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:7112</b></p><p>1110 0100 1010 → 右から3ビットずつ 111 001 001 010 → 7 1 1 2。</p></div></details></div>
+
+  <div class="qbox" data-ans="0.11"><div class="qno">問10</div><p>0.75<sub>(10)</sub> を2進数に。</p>
+    <div class="check"><input class="ans" placeholder="例 0.101" aria-label="問10の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:0.11</b></p><p>0.75×2 = 1.5 → 1、0.5×2 = 1.0 → 1、小数部が 0 になったので終了。0.11<sub>(2)</sub> = 0.5 + 0.25。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問11</div><p>10進数の 0.1 を2進数にすると?</p>
+    <div class="opts"><button>0.1</button><button>0.0001(ちょうど)</button><button data-ok>0.000110011…(無限に続く)</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問12</div><p>2進数を16進数に変換するとき、何ビットずつ、どこから区切る?</p>
+    <div class="opts"><button>3ビットずつ、左から</button><button>4ビットずつ、左から</button><button data-ok>4ビットずつ、右(小数点)から</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>ノートの内容をもとにまとめています。ノートの「421 → 2進数」は読み取りにくかったため、計算した値(110100101)を載せています。例題 2.4 の問題文はノートにないため、各基数での値を示しました。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  function $(id){return document.getElementById(id);}
+  var DG='0123456789ABCDEF';
+  function sup(n){return '<sup>'+n+'</sup>';}
+  /* 文字列を {i:整数部, fd:[小数の各桁], b} に */
+  function parse(s,b){
+    s=String(s).trim().toUpperCase().replace(/[_\s]/g,'');
+    var m=s.match(/^([0-9A-F]*)(?:\.([0-9A-F]*))?$/); if(!m||(!m[1]&&!m[2])) return null;
+    var ip=m[1]||'0', fp=m[2]||'';
+    if(fp.length>12||ip.length>40) return null;
+    for(var k=0;k<(ip+fp).length;k++) if(DG.indexOf((ip+fp)[k])>=b) return null;
+    var i=0; for(k=0;k<ip.length;k++){i=i*b+DG.indexOf(ip[k]); if(i>2e14) return null;}
+    var num=0, den=1; for(k=0;k<fp.length;k++){num=num*b+DG.indexOf(fp[k]);den*=b;}
+    return {i:i,num:num,den:den,ip:ip.replace(/^0+(?=.)/,''),fp:fp.replace(/0+$/,''),b:b};
+  }
+  /* 小数 num/den を t 進数の桁へ(循環検出) */
+  function frac(num,den,t,lim){
+    var ds=[],seen={},rows=[],cyc=-1;
+    while(num!==0&&ds.length<(lim||24)){
+      if(seen[num]!==undefined){cyc=seen[num];break;}
+      seen[num]=ds.length; var p=num*t, d=Math.floor(p/den); rows.push([num,p,d]); ds.push(d); num=p-d*den;
+    }
+    return {ds:ds,cyc:cyc,end:num===0,rows:rows};
+  }
+  function decStr(num,den){ // 有限小数を正確に(den は 2^k,8^k,16^k,10^k)
+    if(num===0) return '0'; var s='', k=0; while(num!==0&&k<40){num*=10;var d=Math.floor(num/den);s+=d;num-=d*den;k++;} return '0.'+s;}
+  function conv(v,t){
+    var ip=v.i.toString(t).toUpperCase();
+    if(v.num===0) return {txt:ip,html:ip,f:null};
+    var f=frac(v.num,v.den,t,t===10?40:24), h='', s='';
+    f.ds.forEach(function(d,k){var c=DG[d]; if(k===f.cyc) h+='<span class="rep">'; h+=c; s+=c;});
+    if(f.cyc>=0){var rp=f.ds.slice(f.cyc).map(function(d){return DG[d];}).join(''), more=rp; while(more.length<8) more+=rp; h+='</span><span style="color:var(--sub)">'+more+'</span>…'; s+=more+'…';}
+    else if(!f.end){h+='…'; s+='…';}
+    return {txt:ip+'.'+s,html:ip+'.'+h,f:f};
+  }
+  var nin=$('nin'), fb=$('fb'), tb=$('tb');
+  function draw(){
+    var b=+fb.value, t=+tb.value, v=parse(nin.value,b);
+    nin.classList.toggle('err',!v);
+    document.querySelectorAll('#pre button').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-v')===nin.value.trim().toUpperCase()&&x.getAttribute('data-f')===fb.value&&x.getAttribute('data-t')===tb.value?'true':'false');});
+    if(!v){$('res').innerHTML='<span style="color:var(--warn);font-size:.95rem">'+b+'進数で使える数字は '+DG.slice(0,b).split('').join(' ')+' です(小数部は12桁まで)</span>';$('all').innerHTML='';$('steps').innerHTML='';return;}
+    var r=conv(v,t);
+    $('res').innerHTML=esc(nin.value.trim().toUpperCase())+'<sub>('+b+')</sub> = '+r.html+'<sub>('+t+')</sub>';
+    $('all').innerHTML=[2,8,10,16].map(function(k){return '<div class="stat'+(k===t?' hl':'')+'"><div class="k">'+k+'進数</div><div class="v" style="word-break:break-all">'+conv(v,k).html+'</div></div>';}).join('');
+    $('steps').innerHTML=steps(v,b,t,r);
+  }
+  function esc(s){return s.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function steps(v,b,t,r){
+    if(b===t) return '<div class="st">同じ基数なので変換は不要です。</div>';
+    var h='';
+    if(t===10){ // 位の重みで展開
+      h+='<div class="st">位の重みを掛けて足す('+b+'進数 → 10進数)</div><div class="exp">';
+      var ip=v.ip, terms=[], vals=[];
+      for(var k=0;k<ip.length;k++){var d=DG.indexOf(ip[k]), p=ip.length-1-k; if(d){terms.push(ip[k]+(d>9?'('+d+')':'')+'×'+b+sup(p)); vals.push(d*Math.pow(b,p));}}
+      h+='整数部:'+(terms.length?terms.join(' + ')+' = '+vals.join(' + ')+' = <b>'+v.i+'</b>':'0');
+      if(v.fp){var ft=[],fv=[]; for(k=0;k<v.fp.length;k++){var e=DG.indexOf(v.fp[k]); if(e){ft.push(v.fp[k]+'×'+b+sup('−'+(k+1))); fv.push(decStr(e,Math.pow(b,k+1)));}}
+        h+='<br>小数部:'+ft.join(' + ')+' = '+fv.join(' + ')+' = <b>'+decStr(v.num,v.den)+'</b>';}
+      return h+'</div>';
+    }
+    if(b===10){ // 割り算・掛け算
+      h+='<div class="st">整数部:'+t+' で割り続けて、余りを下から上へ読む</div><table class="div">';
+      var n=v.i; if(n===0) h+='<tr><td>0</td><td>→ 0</td></tr>';
+      var cnt=0; while(n>0&&cnt<60){var q=Math.floor(n/t), re=n-q*t; h+='<tr><td>'+n+' ÷ '+t+'</td><td>= '+q+'</td><td>余り <span class="r">'+re+(re>9?'('+DG[re]+')':'')+'</span></td></tr>'; n=q; cnt++;}
+      h+='</table><div>↑ 下から読む → <b class="mono">'+v.i.toString(t).toUpperCase()+'</b></div>';
+      if(v.num){var f=r.f; h+='<div class="st" style="margin-top:8px">小数部:'+t+' を掛け続けて、整数部分を上から読む</div><table class="div">';
+        f.rows.forEach(function(rw,k){h+='<tr'+(k===f.cyc?' class="cyc"':'')+'><td>'+decStr(rw[0],v.den)+' × '+t+'</td><td>= '+(rw[2]?(rw[2]+decStr(rw[1]-rw[2]*v.den,v.den).slice(1)):decStr(rw[1],v.den))+'</td><td>→ <span class="r">'+DG[rw[2]]+'</span></td></tr>';});
+        h+='</table><div>'+(f.end?'小数部が 0 になったので<b>終了</b>(有限小数)。':f.cyc>=0?'色を付けた行と同じ小数がまた出てきた → ここから先は<b>くり返し</b>(無限循環小数)。':'まだ続く(24桁で打ち切り)。')+' ↓ 上から読む → <b class="mono">0.'+f.ds.map(function(d){return DG[d];}).join('')+(f.end?'':'…')+'</b></div>';}
+      return h;
+    }
+    // 2・8・16 の間はビットのグループで
+    var bin=conv(v,2).txt, gb=t===2?(b===16?4:3):(t===16?4:3), parts=bin.split('.'), ip2=parts[0], fp2=parts[1]||'';
+    var gIn=b===2?gb:(b===16?4:3);
+    function groups(g,lbl){var a=ip2, c=fp2; while(a.length%g) a='0'+a; while(c.length%g) c+='0';
+      var o='<div class="grp">', cls=0;
+      for(var k=0;k<a.length;k+=g){var s=a.substr(k,g); o+='<div class="g '+(cls++%2?'b':'a')+'"><b>'+s+'</b><span>'+DG[parseInt(s,2)]+'</span><small>'+lbl+'</small></div>';}
+      if(c){o+='<div class="pt">.</div>'; for(k=0;k<c.length;k+=g){s=c.substr(k,g); o+='<div class="g '+(cls++%2?'b':'a')+'"><b>'+s+'</b><span>'+DG[parseInt(s,2)]+'</span><small>'+lbl+'</small></div>';}}
+      return o+'</div>';}
+    if(b===2){h+='<div class="st">小数点から '+gb+' ビットずつ区切る(足りない所は 0 で埋める)→ 1 グループが'+t+'進数1桁</div>'+groups(gb,t+'進');}
+    else if(t===2){h+='<div class="st">'+b+'進数1桁を '+gIn+' ビットの2進数に置き換えて並べる</div>'+groups(gIn,b+'進')+'<div>→ 先頭の 0 を省いて <b class="mono">'+bin+'</b></div>';}
+    else{h+='<div class="st">① '+b+'進数1桁ずつを '+gIn+' ビットの2進数に</div>'+groups(gIn,b+'進')+'<div class="st">② 小数点から '+gb+' ビットずつ区切り直す → '+t+'進数</div>'+groups(gb,t+'進');}
+    return h;
+  }
+  [nin,fb,tb].forEach(function(e){e.addEventListener('input',draw);e.addEventListener('change',draw);});
+  function setNum(v,f,t){nin.value=v;fb.value=f;tb.value=t;draw();var d=document.querySelector('.demo'); if(d&&d.scrollIntoView&&window.scrollY>d.offsetTop+200) d.scrollIntoView({behavior:'smooth',block:'start'});}
+  document.querySelectorAll('#pre button').forEach(function(x){x.type='button';x.addEventListener('click',function(){setNum(x.getAttribute('data-v'),x.getAttribute('data-f'),x.getAttribute('data-t'));});});
+  draw();
+
+  /* 0.1+0.2 */
+  $('fp').textContent=String(0.1+0.2);
+
+  /* E4A の図 */
+  (function(){var v=parse('E4A',16); $('e4a').innerHTML=steps(v,16,8,conv(v,8))+'<div>→ <b class="mono">7112</b><sub>(8)</sub></div>';})();
+
+  /* 例題の表 */
+  var EX=[['110001010',2],['3D5',16],['16A',16],['1002',10],['672',10],['E4A',16]];
+  $('extab').innerHTML='<tr><th>ノートの数</th><th>2進数</th><th>8進数</th><th>10進数</th><th>16進数</th></tr>'+EX.map(function(e,i){var v=parse(e[0],e[1]);
+    return '<tr><td><button class="btn sub" type="button" data-i="'+i+'" style="padding:2px 8px;font-family:\'JetBrains Mono\',monospace">'+e[0]+'<sub>('+e[1]+')</sub></button></td>'+[2,8,10,16].map(function(k){return '<td class="mono"'+(k===e[1]?' style="color:var(--sub)"':'')+'>'+conv(v,k).txt+'</td>';}).join('')+'</tr>';}).join('');
+  $('extab').querySelectorAll('button').forEach(function(x){x.addEventListener('click',function(){var e=EX[+x.getAttribute('data-i')];setNum(e[0],String(e[1]),e[1]===10?'2':'10');});});
+  $('extab').insertAdjacentHTML('afterend','<p class="legend">1002 は基数が書かれていないので10進数として扱っています。</p>');
+
+  /* MIPS */
+  function drawM(){var m=+$('mp').value, t=+$('mt').value*(+$('mu').value), n=m*1e6*t;
+    $('mres').innerHTML=(isFinite(n)&&n>=0)?'実行命令数 = '+m+' × 10'+sup(6)+' × '+$('mt').value+' '+$('mu').selectedOptions[0].text+' = <b>'+(n>=1?Math.round(n).toLocaleString('ja-JP'):n.toPrecision(3))+' 命令</b>'+(n>=10&&Math.log10(n)%1===0?'(= 10'+sup(Math.log10(n))+')':''):'数値を入力してください';}
+  ['mp','mt','mu'].forEach(function(id){$(id).addEventListener('input',drawM);$(id).addEventListener('change',drawM);}); drawM();
+
+  /* 変換ゲーム */
+  var G=null, gok=0, gn=0, streak=0, best=0, tried=false;
+  function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+  var TYPES=[[2,10,function(){return rnd(5,255);}],[10,2,function(){return rnd(5,255);}],[16,10,function(){return rnd(16,4095);}],[10,16,function(){return rnd(16,1023);}],[16,2,function(){return rnd(16,255);}],[2,16,function(){return rnd(16,4095);}],[16,8,function(){return rnd(64,4095);}],[8,2,function(){return rnd(8,511);}]];
+  function newG(){var T=TYPES[rnd(0,TYPES.length-1)], n=T[2](); G={f:T[0],t:T[1],n:n,q:n.toString(T[0]).toUpperCase(),a:n.toString(T[1]).toUpperCase()}; tried=false;
+    $('gq').innerHTML=G.q+'<sub>('+G.f+')</sub> → ?<sub>('+G.t+')</sub>'; $('ga').value=''; $('gmsg').textContent='答えを入力して「判定」。'; drawGS();}
+  function drawGS(){$('gst').innerHTML='<div class="stat"><div class="k">正解</div><div class="v">'+gok+' / '+gn+'</div></div><div class="stat hl"><div class="k">連続正解</div><div class="v">'+streak+'</div></div><div class="stat"><div class="k">最高記録</div><div class="v">'+best+'</div></div>';}
+  function hint(){var f=G.f,t=G.t,n=G.n;
+    if(t===10) return '位の重み('+f+sup('k')+')を掛けて足す。'+G.q.split('').map(function(c,i){return c+'×'+f+sup(G.q.length-1-i);}).join(' + ');
+    if(f===10) return t+' で割り続けて余りを下から読む。最初は '+n+' ÷ '+t+' = '+Math.floor(n/t)+' 余り '+(n%t)+(n%t>9?'('+DG[n%t]+')':'');
+    var g=(f===16||t===16)?4:3; return (f===2?'右から '+g+' ビットずつ区切る。':'1桁ずつ '+(f===16?4:3)+' ビットの2進数に。')+(f!==2&&t!==2?' そのあと右から '+g+' ビットずつ区切り直す。':'');}
+  function chk(){var a=$('ga').value.trim().toUpperCase().replace(/^0+(?=.)/,'');
+    if(!a){$('gmsg').textContent='答えを入力してください';return;}
+    if(!tried){gn++;tried=true;}
+    if(a===G.a){gok++;streak++;best=Math.max(best,streak);$('gmsg').innerHTML='<b style="color:var(--ok)">◯ 正解!</b> '+G.q+'<sub>('+G.f+')</sub> = '+G.a+'<sub>('+G.t+')</sub>(10進数で '+G.n+')。「次の問題」へ';G.done=true;}
+    else{streak=0;$('gmsg').innerHTML='<b style="color:var(--warn)">✕ ちがいます。</b> もう一度考えるか「ヒント」を見よう。<br><button class="btn sub" type="button" id="gshow" style="margin-top:6px">答えを見る</button>';
+      $('gshow').addEventListener('click',function(){$('gmsg').innerHTML='答え:<b class="mono">'+G.a+'</b><sub>('+G.t+')</sub>(10進数で '+G.n+')';});}
+    drawGS();}
+  $('gchk').addEventListener('click',chk); $('ga').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});
+  $('ghint').addEventListener('click',function(){$('gmsg').innerHTML='ヒント:'+hint();});
+  $('gnext').addEventListener('click',newG); newG();
+})();
+</script>
+</body>
+</html>

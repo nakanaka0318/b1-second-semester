@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>平均と分散</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.sw{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.sw button{font:inherit;font-size:.85rem;font-weight:700;padding:5px 11px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.wts{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:6px 0}
+.wts label{display:flex;flex-direction:column;align-items:center;font-size:.78rem;color:var(--sub);margin:0}
+.wts input{width:100%;min-width:0;accent-color:var(--accent);padding:0;border:none;background:none}
+.wts b{font-family:"JetBrains Mono",monospace;color:var(--ink);font-size:.82rem}
+#dc,#lc{max-width:540px;margin-left:auto;margin-right:auto}
+.chart .mean{stroke:var(--mark);stroke-width:2.5}
+.chart .fulc{fill:var(--mark)}
+.chart .band{fill:var(--mark-soft);opacity:.9}
+.chart .sim{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 3}
+.chart .lbl2{font-family:inherit;font-size:11px;fill:var(--ink);font-weight:700}
+.calc td,.calc th{font-family:"JetBrains Mono",monospace;font-size:.8rem;text-align:right}
+.calc th{text-align:center;font-family:inherit}
+.calc tr.tot td{font-weight:700;background:var(--mark-soft)}
+.jt{border-collapse:separate;border-spacing:4px;margin:6px auto}
+.jt th{font-size:.8rem;color:var(--sub);font-weight:700;padding:2px 6px;background:none;border:none}
+.jt td{border:none;padding:0;background:none}
+.jt .cell{width:64px;height:52px;border-radius:10px;border:1.5px solid var(--line);font:inherit;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+.jt .cell b{font-family:"JetBrains Mono",monospace;font-size:.9rem}
+.jt .cell small{font-size:.66rem;color:var(--sub)}
+.jt .mg{width:64px;height:52px;border-radius:10px;background:var(--mark-soft);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:.85rem;font-weight:700;line-height:1.2}
+.jt .mg small{font-family:inherit;font-size:.62rem;color:var(--sub);font-weight:400}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.cmp .stat .v{font-size:.95rem}
+.yes{color:var(--ok);font-weight:700}.no{color:var(--warn);font-weight:700}
+.msg{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.92rem;margin-top:8px}
+@media (max-width:600px){.cmp{grid-template-columns:1fr}.jt .cell,.jt .mg{width:54px;height:48px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>平均(期待値)と分散</h1>
+  <p>確率統計 第5回のノートのまとめです。前回の分布関数の例の続きと、離散型確率変数の平均(期待値)・分散・標準偏差、平均に関する公式と同時確率を学びます。</p>
+  <div class="demo">
+    <label>サイコロ実験室:目の出やすさを変えると、平均(重心)と分散(ばらつき)はどう変わる?</label>
+    <div class="sw" id="pre"><button data-w="1,1,1,1,1,1">公平なサイコロ</button><button data-w="1,1,1,1,1,5">6が出やすい</button><button data-w="1,0,0,0,0,1">1と6だけ</button><button data-w="0,1,4,4,1,0">真ん中が出やすい</button><button data-w="5,4,3,2,1,0">小さい目が出やすい</button></div>
+    <div class="wts" id="wts"></div>
+    <svg class="chart" id="dc" viewBox="0 0 360 210" role="img" aria-label="確率関数と平均・標準偏差"></svg>
+    <div class="legend2"><span><i style="background:var(--accent)"></i>P(x)</span><span><i style="background:var(--mark)"></i>平均 μ(▲が重心)</span><span><i style="background:var(--mark-soft)"></i>μ ± σ の範囲</span><span><i style="border:1.5px dashed var(--ink);background:none"></i>実際に振った割合</span></div>
+    <div class="stats" id="dst"></div>
+    <div class="row"><button class="btn" type="button" data-n="10">10回振る</button><button class="btn" type="button" data-n="100">100回</button><button class="btn" type="button" data-n="1000">1000回</button><button class="btn sub" type="button" id="sreset">リセット</button></div>
+    <div class="msg" id="smsg" aria-live="polite"></div>
+  </div>
+</header>
+
+<div class="blbar"><span class="t">穴埋め:<span id="blcount"></span></span><button class="btn sub" id="blhide" type="button">すべて隠す</button><button class="btn sub" id="blshow" type="button">すべて表示</button></div>
+
+<nav class="toc">
+  <a href="#cont">連続型の例</a><a href="#mean">平均(期待値)</a><a href="#calc">計算表</a><a href="#rule">平均の公式</a><a href="#joint">同時確率</a><a href="#var">分散・標準偏差</a><a href="#lin">aX+b</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="cont">
+  <h2><span class="no">1</span>前回の続き:確率密度関数と分布関数の例</h2>
+  <p>f(x) = c(−1 ≤ x ≤ 1)、それ以外で 0 が確率密度関数になるように c を決め、分布関数 F(x) を求める。</p>
+  <p>確率密度関数であるためには、全体の面積が 1 でなければならない。</p>
+  <div class="formula">∫<sub>−∞</sub><sup>∞</sup> f(x) dx = ∫<sub>−1</sub><sup>1</sup> c dx = <b class="bl">2c</b> = 1 &nbsp;∴ c = <b class="bl">1/2</b></div>
+  <div class="formula">F(x) = ∫<sub>−∞</sub><sup>x</sup> f(t) dt = ∫<sub>−1</sub><sup>x</sup> ½ dt = <b class="bl">½(x+1)</b>(−1 ≤ x ≤ 1)</div>
+  <div class="formula" style="text-align:left;display:inline-block">F(x) = { 0(x &lt; −1)、 ½(x+1)(−1 ≤ x ≤ 1)、 1(x &gt; 1)}</div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>x を動かして F(x) = 塗った面積 を確かめる</div>
+    <div class="row"><label for="cx">x = <b id="cxv"></b></label><input id="cx" type="range" min="-150" max="150" value="0"></div>
+    <svg class="chart" id="cc" viewBox="0 0 360 150" role="img" aria-label="一様分布の密度と分布関数"></svg>
+    <div class="formula" id="cform" aria-live="polite" style="font-size:1rem"></div>
+  </div>
+</section>
+
+<section class="task" id="mean">
+  <h2><span class="no">2</span>平均と分散 4.1 離散的な場合:平均(期待値)</h2>
+  <p>確率変数 X(値 x<sub>1</sub>, …, x<sub>n</sub>)に対する平均、あるいは <b class="bl">期待値</b> は</p>
+  <div class="formula">μ<sub>x</sub> = E[X] = Σ<sub>i=1</sub><sup>n</sup> <b class="bl">x<sub>i</sub>・P(x<sub>i</sub>)</b><small>値 × その確率 を全部足す</small></div>
+  <p>X<sup>2</sup> の期待値なら、x<sub>i</sub> を x<sub>i</sub><sup>2</sup> に置き換えて E[X<sup>2</sup>] = Σ x<sub>i</sub><sup>2</sup>・P(x<sub>i</sub>)。</p>
+  <p><b>例</b>:サイコロの出る目の平均(期待値)</p>
+  <div class="formula">μ<sub>x</sub> = 1×⅙ + 2×⅙ + … + 6×⅙ = 21/6 = <b class="bl">3.5</b></div>
+  <p>平均は、確率を「重さ」と考えたときの<b>重心(つり合う点)</b>。上のサイコロ実験室の ▲ がその位置です。</p>
+</section>
+
+<section class="task" id="calc">
+  <h2><span class="no">3</span>計算表で確かめる</h2>
+  <p>サイコロ実験室で選んだ分布について、平均と分散を表で計算します(小数第4位で四捨五入)。</p>
+  <div class="tbl"><table class="calc" id="ctab"></table></div>
+</section>
+
+<section class="task" id="rule">
+  <h2><span class="no">4</span>平均に関する公式</h2>
+  <div class="tbl"><table>
+    <tr><td>(1)</td><td><b>E(aX + b) = aE(X) + b</b></td><td>定数倍・定数の足し算はそのまま外に出せる</td></tr>
+    <tr><td>(2)</td><td><b>E(X + Y) = E(X) + E(Y)</b></td><td>X と Y が独立でなくても<b>いつでも</b>成り立つ</td></tr>
+    <tr><td>(3)</td><td><b>E(XY) = E(X)E(Y)</b></td><td>X と Y が <b class="bl">独立</b> のときに成り立つ</td></tr>
+  </table></div>
+  <div class="warn">(3) は X と Y が独立でないと成り立たない。下の「同時確率の表」で、独立でない例(Y = X など)を選ぶと E(XY) ≠ E(X)E(Y) になることを確かめられます。</div>
+</section>
+
+<section class="task" id="joint">
+  <h2><span class="no">5</span>同時確率と (2) の証明</h2>
+  <p><b class="bl">同時確率</b>(結合確率)とは、複数の事象が同時に起こる確率のこと。X = x<sub>i</sub> かつ Y = y<sub>j</sub> となる確率を P(x<sub>i</sub>, y<sub>j</sub>) と書く。</p>
+  <p>表の行や列ごとに足した値を <b class="bl">周辺和</b> といい、X だけの確率になる。</p>
+  <div class="formula">P(x<sub>i</sub>) = Σ<sub>j=1</sub><sup>m</sup> P(x<sub>i</sub>, y<sub>j</sub>)</div>
+  <h3>証明:E[X ± Y] = E[X] ± E[Y]</h3>
+  <div class="formula" style="text-align:left;font-size:1rem">E[X ± Y] = Σ<sub>i</sub>Σ<sub>j</sub> (x<sub>i</sub> ± y<sub>j</sub>) P(x<sub>i</sub>, y<sub>j</sub>)<br>
+    = Σ<sub>i</sub> x<sub>i</sub> {Σ<sub>j</sub> P(x<sub>i</sub>, y<sub>j</sub>)} ± Σ<sub>j</sub> y<sub>j</sub> {Σ<sub>i</sub> P(x<sub>i</sub>, y<sub>j</sub>)}<br>
+    = Σ<sub>i</sub> x<sub>i</sub> P(x<sub>i</sub>) ± Σ<sub>j</sub> y<sub>j</sub> P(y<sub>j</sub>) &nbsp;(周辺和)<br>
+    = E[X] ± E[Y]</div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>同時確率の表(X, Y はそれぞれ 1, 2, 3 の値をとる)</div>
+    <p style="margin:0;font-size:.9rem">マスをタップすると重みが 1 増えます(9 の次は 0)。重みの割合が同時確率になります。</p>
+    <div class="sw" id="jpre"><button data-w="1,1,1,1,1,1,1,1,1">独立(一様)</button><button data-w="1,2,1,2,4,2,1,2,1">独立(偏りあり)</button><button data-w="1,0,0,0,1,0,0,0,1">Y = X</button><button data-w="0,0,1,0,1,0,1,0,0">Y = 4 − X</button><button data-w="2,1,0,1,2,1,0,1,2">似た値が出やすい</button></div>
+    <table class="jt" id="jt"></table>
+    <div class="cmp" id="jcmp"></div>
+    <div class="msg" id="jmsg" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="var">
+  <h2><span class="no">6</span>分散と標準偏差</h2>
+  <p>分散は、平均からのずれの2乗の期待値。ばらつきの大きさを表す。</p>
+  <div class="formula">σ<sub>x</sub><sup>2</sup> = E[(X − μ<sub>x</sub>)<sup>2</sup>] = Σ<sub>i=1</sub><sup>n</sup> <b class="bl">(x<sub>i</sub> − μ<sub>x</sub>)<sup>2</sup></b> P(x<sub>i</sub>)</div>
+  <p>分散の正の平方根 σ<sub>x</sub> を <b class="bl">標準偏差</b> という(元の値と同じ単位になる)。</p>
+  <p><b>例</b>:サイコロの分散</p>
+  <div class="formula" style="font-size:1rem">σ<sub>x</sub><sup>2</sup> = (1−3.5)<sup>2</sup>×⅙ + (2−3.5)<sup>2</sup>×⅙ + … + (6−3.5)<sup>2</sup>×⅙ = 8.75/3 = 35/12 ≒ <b class="bl">2.92</b><br>σ<sub>x</sub> = √(35/12) ≒ <b class="bl">1.71</b></div>
+  <p><b>別の求め方</b>:σ<sup>2</sup> = E[X<sup>2</sup>] − (E[X])<sup>2</sup>。サイコロなら E[X<sup>2</sup>] = (1+4+9+16+25+36)/6 = 91/6 なので、91/6 − 3.5<sup>2</sup> = 91/6 − 49/4 = 35/12。計算が楽になることが多い。</p>
+</section>
+
+<section class="task" id="lin">
+  <h2><span class="no">7</span>Y = aX + b にすると?</h2>
+  <p>公式 (1) を確かめる。X は上のサイコロ実験室の分布。目を a 倍して b を足した Y = aX + b の平均と分散を、直接計算した値と公式の値で比べる。</p>
+  <div class="panel">
+    <div class="row"><label for="la">a = <b id="lav"></b></label><input id="la" type="range" min="-3" max="3" step="0.5" value="2"><label for="lb">b = <b id="lbv"></b></label><input id="lb" type="range" min="-10" max="10" step="1" value="1"></div>
+    <svg class="chart" id="lc" viewBox="0 0 360 90" role="img" aria-label="Yの値の位置"></svg>
+    <div class="cmp" id="lcmp"></div>
+  </div>
+  <p>平均はずらした分(b)だけ動くが、<b>分散は b に関係なく a<sup>2</sup> 倍</b>(全体をずらしてもばらつきは変わらない)。標準偏差は |a| 倍。</p>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox" data-ans="1/2"><div class="qno">問1</div><p>f(x) = c(−1 ≤ x ≤ 1)、それ以外で 0 が確率密度関数になるための c は?</p>
+    <div class="check"><input class="ans" placeholder="例 1/3" aria-label="問1の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox" data-ans="3/4"><div class="qno">問2</div><p>問1 の分布で F(0.5) は?</p>
+    <div class="check"><input class="ans" placeholder="例 1/3" aria-label="問2の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:3/4</b></p><p>F(x) = ½(x+1) に x = 0.5 を代入して ½ × 1.5 = 0.75。</p></div></details></div>
+
+  <div class="qbox" data-ans="3.5"><div class="qno">問3</div><p>公平なサイコロの出る目の期待値 E[X] は?</p>
+    <div class="check"><input class="ans" placeholder="例 2.5" aria-label="問3の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox" data-ans="8"><div class="qno">問4</div><p>公平なサイコロの目を X とするとき、E[2X + 1] は?</p>
+    <div class="check"><input class="ans" placeholder="例 5" aria-label="問4の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:8</b></p><p>E(aX+b) = aE(X)+b より 2 × 3.5 + 1 = 8。</p></div></details></div>
+
+  <div class="qbox" data-ans="35/12"><div class="qno">問5</div><p>公平なサイコロの目の分散は?(分数で)</p>
+    <div class="check"><input class="ans" placeholder="例 7/6" aria-label="問5の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:35/12(≒ 2.92)</b></p><p>(x−3.5)<sup>2</sup> は 6.25, 2.25, 0.25, 0.25, 2.25, 6.25。合計 17.5 を 6 で割って 17.5/6 = 35/12。</p></div></details></div>
+
+  <div class="qbox" data-ans="7"><div class="qno">問6</div><p>サイコロを2個振ったときの目の和 X + Y の期待値は?</p>
+    <div class="check"><input class="ans" placeholder="例 6" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:7</b></p><p>E(X+Y) = E(X) + E(Y) = 3.5 + 3.5 = 7。36通りを全部数えなくてよい。</p></div></details></div>
+
+  <div class="qbox" data-ans="12.25"><div class="qno">問7</div><p>サイコロを2個振ったときの目の積 XY の期待値は?(2個は独立)</p>
+    <div class="check"><input class="ans" placeholder="例 10" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:12.25(= 49/4)</b></p><p>独立なので E(XY) = E(X)E(Y) = 3.5 × 3.5 = 12.25。</p></div></details></div>
+
+  <div class="qbox" data-ans="35/3"><div class="qno">問8</div><p>公平なサイコロの目 X について、2X + 5 の分散は?(分数で)</p>
+    <div class="check"><input class="ans" placeholder="例 7/6" aria-label="問8の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">ヒント</span>b はどうなる?<span class="tap"></span></summary><div class="body"><p>足した 5 はばらつきに関係しない。a = 2 なので分散は a<sup>2</sup> = 4 倍。</p></div></details>
+    <details class="ans"><summary><span class="tag">答え</span>答え<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:35/3</b></p><p>4 × 35/12 = 35/3 ≒ 11.67。</p></div></details></div>
+
+  <div class="qbox" data-ans="0.21"><div class="qno">問9</div><p>X が 1 になる確率が 0.3、0 になる確率が 0.7 のとき、X の分散は?</p>
+    <div class="check"><input class="ans" placeholder="例 0.5" aria-label="問9の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:0.21</b></p><p>E[X] = 0.3、E[X<sup>2</sup>] = 0.3 なので σ<sup>2</sup> = 0.3 − 0.3<sup>2</sup> = 0.21。(定義どおり:(0−0.3)<sup>2</sup>×0.7 + (1−0.3)<sup>2</sup>×0.3 = 0.063 + 0.147 = 0.21)</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問10</div><p>E(XY) = E(X)E(Y) が成り立つのはどんなとき?</p>
+    <div class="opts"><button>いつでも</button><button data-ok>X と Y が独立のとき</button><button>X と Y が同じ値をとるとき</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問11</div><p>標準偏差とは?</p>
+    <div class="opts"><button>平均の2乗</button><button data-ok>分散の正の平方根</button><button>分散の2乗</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>ノートの内容をもとにまとめています。ノートの公式 (3) E(XY) = E(X)E(Y) には「X と Y が独立のとき」という条件を補いました。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  function $(id){return document.getElementById(id);}
+  function r4(v){return (Math.round(v*10000)/10000).toString();}
+  var W=[1,1,1,1,1,1], sim=[0,0,0,0,0,0], simN=0;
+  function probs(){var s=W.reduce(function(a,b){return a+b;},0); return W.map(function(w){return s?w/s:0;});}
+  function moments(P){var m=0,m2=0;P.forEach(function(p,i){m+=(i+1)*p;m2+=(i+1)*(i+1)*p;});return {m:m,m2:m2,v:m2-m*m};}
+  /* --- 重みスライダー --- */
+  $('wts').innerHTML=W.map(function(w,i){return '<label>'+(i+1)+'の目<input type="range" min="0" max="10" value="'+w+'" data-i="'+i+'" aria-label="'+(i+1)+'の目の重み"><b id="wv'+i+'"></b></label>';}).join('');
+  $('wts').querySelectorAll('input').forEach(function(s){s.addEventListener('input',function(){W[+s.getAttribute('data-i')]=+s.value;if(W.every(function(w){return w===0;})){W[+s.getAttribute('data-i')]=1;s.value=1;}resetSim();drawAll();});});
+  document.querySelectorAll('#pre button').forEach(function(b){b.type='button';b.addEventListener('click',function(){W=b.getAttribute('data-w').split(',').map(Number);$('wts').querySelectorAll('input').forEach(function(s,i){s.value=W[i];});resetSim();drawAll();});});
+  function drawDice(){
+    var P=probs(), M=moments(P), sd=Math.sqrt(Math.max(0,M.v));
+    W.forEach(function(w,i){$('wv'+i).textContent=(P[i]*100).toFixed(0)+'%';});
+    var L=36,R=346,T=14,B=170,maxP=Math.max(0.35,Math.max.apply(null,P)*1.15), X=function(x){return L+(x-0.5)*(R-L)/6;}, Y=function(p){return B-p/maxP*(B-T);};
+    var h='<rect class="band" x="'+X(Math.max(0.5,M.m-sd))+'" y="'+T+'" width="'+(X(Math.min(6.5,M.m+sd))-X(Math.max(0.5,M.m-sd)))+'" height="'+(B-T)+'"/>';
+    [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1].forEach(function(g){if(g<=maxP){h+='<line class="grid" x1="'+L+'" x2="'+R+'" y1="'+Y(g)+'" y2="'+Y(g)+'"/><text x="'+(L-4)+'" y="'+(Y(g)+4)+'" text-anchor="end">'+g+'</text>';}});
+    P.forEach(function(p,i){var x=X(i+1); h+='<rect class="bar on" x="'+(x-16)+'" y="'+Y(p)+'" width="32" height="'+(B-Y(p))+'"/><text x="'+x+'" y="'+(B+14)+'" text-anchor="middle">'+(i+1)+'</text>';
+      if(simN){var q=sim[i]/simN; h+='<rect class="sim" x="'+(x-20)+'" y="'+Y(q)+'" width="40" height="'+(B-Y(q))+'"/>';}});
+    h+='<line class="mean" x1="'+X(M.m)+'" x2="'+X(M.m)+'" y1="'+T+'" y2="'+B+'"/><path class="fulc" d="M'+X(M.m)+' '+(B+2)+' l-8 14 h16 z"/><text class="lbl2" x="'+Math.min(R-30,Math.max(L+30,X(M.m)))+'" y="'+(B+34)+'" text-anchor="middle">μ = '+r4(M.m)+'</text>';
+    $('dc').innerHTML=h;
+    $('dst').innerHTML='<div class="stat hl"><div class="k">平均 μ = E[X]</div><div class="v">'+r4(M.m)+'</div></div><div class="stat"><div class="k">E[X²]</div><div class="v">'+r4(M.m2)+'</div></div><div class="stat hl"><div class="k">分散 σ² = E[X²] − μ²</div><div class="v">'+r4(M.v)+'</div></div><div class="stat"><div class="k">標準偏差 σ</div><div class="v">'+r4(sd)+'</div></div>';
+    document.querySelectorAll('#pre button').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-w')===W.join(',')?'true':'false');});
+    /* 計算表 */
+    var rows='<tr><th>x</th><th>P(x)</th><th>x・P(x)</th><th>x²・P(x)</th><th>(x−μ)²</th><th>(x−μ)²・P(x)</th></tr>', s1=0,s2=0,s3=0;
+    P.forEach(function(p,i){var x=i+1,d=(x-M.m)*(x-M.m); s1+=x*p; s2+=x*x*p; s3+=d*p; rows+='<tr><td>'+x+'</td><td>'+r4(p)+'</td><td>'+r4(x*p)+'</td><td>'+r4(x*x*p)+'</td><td>'+r4(d)+'</td><td>'+r4(d*p)+'</td></tr>';});
+    rows+='<tr class="tot"><td>合計</td><td>1</td><td>'+r4(s1)+' = μ</td><td>'+r4(s2)+' = E[X²]</td><td></td><td>'+r4(s3)+' = σ²</td></tr>';
+    $('ctab').innerHTML=rows;
+    return M;
+  }
+  function resetSim(){sim=[0,0,0,0,0,0];simN=0;$('smsg').textContent='「振る」を押すと、実際に振った結果の割合(点線)と平均が出ます。回数を増やすと理論値に近づく(大数の法則)。';}
+  function roll(n){var P=probs(), c=[];var acc=0;P.forEach(function(p){acc+=p;c.push(acc);});
+    for(var k=0;k<n;k++){var r=Math.random()*acc, i=0; while(i<5&&r>=c[i]) i++; sim[i]++;} simN+=n;
+    var mean=sim.reduce(function(a,s,i){return a+s*(i+1);},0)/simN, m2=sim.reduce(function(a,s,i){return a+s*(i+1)*(i+1);},0)/simN, M=moments(P);
+    $('smsg').innerHTML='合計 <b>'+simN+'</b> 回振った:実際の平均 <b>'+r4(mean)+'</b>(理論値 '+r4(M.m)+')、実際の分散 <b>'+r4(m2-mean*mean)+'</b>(理論値 '+r4(M.v)+')';}
+  document.querySelectorAll('.demo button[data-n]').forEach(function(b){b.addEventListener('click',function(){roll(+b.getAttribute('data-n'));drawAll();});});
+  $('sreset').addEventListener('click',function(){resetSim();drawAll();});
+
+  /* --- 連続型 --- */
+  function drawC(){var x=+$('cx').value/100; $('cxv').textContent=x.toFixed(2);
+    var L=30,R=350,X=function(v){return L+(v+1.5)/3*(R-L);}, B=120, T=20, Y=function(v){return B-v*(B-T);};
+    var F=x<-1?0:x>1?1:(x+1)/2;
+    var h='<line class="grid" x1="'+L+'" x2="'+R+'" y1="'+B+'" y2="'+B+'"/><line class="grid" x1="'+L+'" x2="'+R+'" y1="'+Y(0.5)+'" y2="'+Y(0.5)+'"/><line class="grid" x1="'+L+'" x2="'+R+'" y1="'+Y(1)+'" y2="'+Y(1)+'"/>';
+    h+='<text x="'+(L-4)+'" y="'+(Y(0.5)+4)+'" text-anchor="end">½</text><text x="'+(L-4)+'" y="'+(Y(1)+4)+'" text-anchor="end">1</text>';
+    [-1,0,1].forEach(function(v){h+='<text x="'+X(v)+'" y="'+(B+14)+'" text-anchor="middle">'+v+'</text>';});
+    var a=Math.max(-1,Math.min(1,x)); if(x>-1) h+='<rect x="'+X(-1)+'" y="'+Y(0.5)+'" width="'+(X(a)-X(-1))+'" height="'+(B-Y(0.5))+'" style="fill:var(--accent);opacity:.3"/>';
+    h+='<path class="line" d="M'+X(-1.5)+' '+B+' H'+X(-1)+' V'+Y(0.5)+' H'+X(1)+' V'+B+' H'+X(1.5)+'"/>';
+    h+='<path class="line" style="stroke:var(--mark)" d="M'+X(-1.5)+' '+B+' H'+X(-1)+' L'+X(1)+' '+Y(1)+' H'+X(1.5)+'"/>';
+    h+='<line class="ref" x1="'+X(x)+'" x2="'+X(x)+'" y1="'+T+'" y2="'+B+'"/><circle cx="'+X(x)+'" cy="'+Y(F)+'" r="4" style="fill:var(--mark)"/>';
+    h+='<text class="lbl" x="'+(L+4)+'" y="12" style="fill:var(--accent)">f(x) = ½(青)</text><text class="lbl" x="'+(R-4)+'" y="12" text-anchor="end" style="fill:var(--mark)">F(x)(オレンジ)</text>';
+    $('cc').innerHTML=h;
+    $('cform').innerHTML='F('+x.toFixed(2)+') = '+(x<-1?'0(まだ面積がない)':x>1?'1(全部の面積)':'½('+x.toFixed(2)+' + 1) = <b>'+F.toFixed(3)+'</b>');}
+  $('cx').addEventListener('input',drawC); drawC();
+
+  /* --- 同時確率 --- */
+  var J=[1,1,1,1,1,1,1,1,1];
+  function drawJ(){var s=J.reduce(function(a,b){return a+b;},0)||1, P=J.map(function(w){return w/s;}), px=[0,0,0], py=[0,0,0];
+    for(var i=0;i<3;i++)for(var j=0;j<3;j++){px[i]+=P[i*3+j];py[j]+=P[i*3+j];}
+    var h='<tr><th></th><th>Y=1</th><th>Y=2</th><th>Y=3</th><th>周辺和</th></tr>';
+    for(i=0;i<3;i++){h+='<tr><th>X='+(i+1)+'</th>';for(j=0;j<3;j++){var w=J[i*3+j];h+='<td><button type="button" class="cell" data-k="'+(i*3+j)+'" style="background:color-mix(in srgb, var(--accent) '+Math.round(P[i*3+j]*100*1.6)+'%, var(--bg))" aria-label="X='+(i+1)+', Y='+(j+1)+' の重み '+w+'"><b>'+r4(P[i*3+j]).slice(0,5)+'</b><small>重み '+w+'</small></button></td>';}
+      h+='<td><div class="mg">'+r4(px[i]).slice(0,5)+'<small>P(X='+(i+1)+')</small></div></td></tr>';}
+    h+='<tr><th>周辺和</th>'+py.map(function(p,j){return '<td><div class="mg">'+r4(p).slice(0,5)+'<small>P(Y='+(j+1)+')</small></div></td>';}).join('')+'<td><div class="mg">1</div></td></tr>';
+    $('jt').innerHTML=h;
+    $('jt').querySelectorAll('.cell').forEach(function(b){b.addEventListener('click',function(){var k=+b.getAttribute('data-k');J[k]=(J[k]+1)%10;if(J.every(function(w){return w===0;}))J[k]=1;drawJ();var nb=$('jt').querySelector('[data-k="'+k+'"]');if(nb)nb.focus();});});
+    var EX=0,EY=0,ES=0,EP=0,ind=true;
+    for(i=0;i<3;i++)for(j=0;j<3;j++){var p=P[i*3+j];EX+=(i+1)*p;EY+=(j+1)*p;ES+=(i+j+2)*p;EP+=(i+1)*(j+1)*p;if(Math.abs(p-px[i]*py[j])>1e-9)ind=false;}
+    $('jcmp').innerHTML='<div class="stat"><div class="k">E[X+Y](表から直接)</div><div class="v">'+r4(ES)+'</div></div><div class="stat"><div class="k">E[X] + E[Y] = '+r4(EX)+' + '+r4(EY)+'</div><div class="v">'+r4(EX+EY)+' <span class="yes">一致 ✓</span></div></div>'+
+      '<div class="stat"><div class="k">E[XY](表から直接)</div><div class="v">'+r4(EP)+'</div></div><div class="stat'+(ind?'':' hl')+'"><div class="k">E[X]・E[Y]</div><div class="v">'+r4(EX*EY)+' '+(Math.abs(EP-EX*EY)<1e-9?'<span class="yes">一致 ✓</span>':'<span class="no">不一致 ✕</span>')+'</div></div>';
+    $('jmsg').innerHTML='X と Y は '+(ind?'<span class="yes">独立</span>(すべてのマスで P(x,y) = P(x)P(y))':'<span class="no">独立ではない</span>(P(x,y) ≠ P(x)P(y) のマスがある)')+'。(2) E[X+Y] = E[X]+E[Y] はいつでも成り立つが、(3) E[XY] = E[X]E[Y] は'+(ind?'独立なので成り立つ。':(Math.abs(EP-EX*EY)<1e-9?'この表ではたまたま一致している(独立でなくても一致することはある)。':'独立でないので成り立たない。'));
+    document.querySelectorAll('#jpre button').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-w')===J.join(',')?'true':'false');});}
+  document.querySelectorAll('#jpre button').forEach(function(b){b.type='button';b.addEventListener('click',function(){J=b.getAttribute('data-w').split(',').map(Number);drawJ();});});
+  drawJ();
+
+  /* --- aX+b --- */
+  function drawL(){var a=+$('la').value, b=+$('lb').value, P=probs(), M=moments(P), vals=P.map(function(p,i){return a*(i+1)+b;});
+    $('lav').textContent=a; $('lbv').textContent=b;
+    var EY=0,EY2=0; P.forEach(function(p,i){EY+=vals[i]*p;EY2+=vals[i]*vals[i]*p;}); var VY=EY2-EY*EY;
+    var lo=-30,hi=30, L=20,R=340, X=function(v){return L+(v-lo)/(hi-lo)*(R-L);};
+    var h='<line class="grid" x1="'+L+'" x2="'+R+'" y1="50" y2="50"/>';
+    [-30,-20,-10,0,10,20,30].forEach(function(t){h+='<line class="grid" x1="'+X(t)+'" x2="'+X(t)+'" y1="46" y2="54"/><text x="'+X(t)+'" y="70" text-anchor="middle">'+t+'</text>';});
+    P.forEach(function(p,i){if(p>0) h+='<circle cx="'+X(vals[i])+'" cy="50" r="'+(3+Math.sqrt(p)*14)+'" style="fill:var(--accent);opacity:.55"/>';});
+    h+='<line class="mean" x1="'+X(EY)+'" x2="'+X(EY)+'" y1="18" y2="58"/><text class="lbl2" x="'+Math.min(R-40,Math.max(L+40,X(EY)))+'" y="14" text-anchor="middle">E[Y] = '+r4(EY)+'</text>';
+    $('lc').innerHTML=h;
+    $('lcmp').innerHTML='<div class="stat"><div class="k">E[Y](直接 Σ(ax+b)P)</div><div class="v">'+r4(EY)+'</div></div><div class="stat hl"><div class="k">公式 aE[X] + b = '+a+'×'+r4(M.m)+' + '+b+'</div><div class="v">'+r4(a*M.m+b)+'</div></div>'+
+      '<div class="stat"><div class="k">V[Y](直接)</div><div class="v">'+r4(VY)+'</div></div><div class="stat hl"><div class="k">a²V[X] = '+(a*a)+'×'+r4(M.v)+'</div><div class="v">'+r4(a*a*M.v)+'</div></div>';}
+  ['la','lb'].forEach(function(id){$(id).addEventListener('input',drawL);});
+
+  function drawAll(){drawDice();drawL();}
+  resetSim(); drawAll();
+})();
+</script>
+</body>
+</html>

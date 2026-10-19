@@ -12,9 +12,9 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 
 | 番号 | 科目 | ページ | 教材 |
 |------|------|--------|------|
-| 1-1 | 確率統計 | [courses/1-1.html](courses/1-1.html) | 4件 |
-| 1-2 | テクニカルリテラシー | [courses/1-2.html](courses/1-2.html) | 4件 |
-| 1-3 | コンピュータアーキテクチャ | [courses/1-3.html](courses/1-3.html) | 4件 |
+| 1-1 | 確率統計 | [courses/1-1.html](courses/1-1.html) | 5件 |
+| 1-2 | テクニカルリテラシー | [courses/1-2.html](courses/1-2.html) | 5件 |
+| 1-3 | コンピュータアーキテクチャ | [courses/1-3.html](courses/1-3.html) | 5件 |
 | 1-4 | 情報通信ネットワーク | [courses/1-4.html](courses/1-4.html) | 5件 |
 | 2-1 | 社会科学基礎 | [courses/2-1.html](courses/2-1.html) | 1件 |
 | 2-2 | 微分積分2 | [courses/2-2.html](courses/2-2.html) | – |
@@ -36,6 +36,7 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 | 1-1-2 | 独立な試行と条件付き確率 | [materials/1-1/1-1-2-conditional.html](materials/1-1/1-1-2-conditional.html) | – |
 | 1-1-3 | 全確率の定理とベイズの定理 | [materials/1-1/1-1-3-bayes.html](materials/1-1/1-1-3-bayes.html) | – |
 | 1-1-4 | 確率変数と分布関数 | [materials/1-1/1-1-4-random-variable.html](materials/1-1/1-1-4-random-variable.html) | – |
+| 1-1-5 | 平均(期待値)と分散 | [materials/1-1/1-1-5-mean-variance.html](materials/1-1/1-1-5-mean-variance.html) | – |
 
 ### 1-2 テクニカルリテラシー
 
@@ -45,6 +46,7 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 | 1-2-2 | 理系の文書で必要なこと・不要なこと | [materials/1-2/1-2-2-writing-rules.html](materials/1-2/1-2-2-writing-rules.html) | – |
 | 1-2-3 | 文章の構造と逆茂木型の文 | [materials/1-2/1-2-3-document-structure.html](materials/1-2/1-2-3-document-structure.html) | – |
 | 1-2-4 | 逆茂木文の書き直し | [materials/1-2/1-2-4-rewriting.html](materials/1-2/1-2-4-rewriting.html) | – |
+| 1-2-5 | 書き言葉と客観的な表現 | [materials/1-2/1-2-5-written-style.html](materials/1-2/1-2-5-written-style.html) | – |
 
 ### 1-3 コンピュータアーキテクチャ
 
@@ -54,6 +56,7 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 | 1-3-2 | プロセッサの基本動作と命令サイクル | [materials/1-3/1-3-2-instruction-cycle.html](materials/1-3/1-3-2-instruction-cycle.html) | – |
 | 1-3-3 | アドレッシングと記憶装置 | [materials/1-3/1-3-3-addressing.html](materials/1-3/1-3-3-addressing.html) | – |
 | 1-3-4 | 数の接頭語と性能評価 | [materials/1-3/1-3-4-performance.html](materials/1-3/1-3-4-performance.html) | – |
+| 1-3-5 | 位取り記数法と基数変換 | [materials/1-3/1-3-5-radix.html](materials/1-3/1-3-5-radix.html) | – |
 
 ### 1-4 情報通信ネットワーク
 
