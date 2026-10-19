@@ -342,6 +342,11 @@ window.COURSES = [
 <script>
 /* アーティファクト版ポータル(1ページで トップ → 科目 → 教材 を # で切り替える) */
 (function () {
+  /* 万一ポータルが自分の教材ビューア(iframe)の中に読み込まれたら、入れ子にせず何も表示しない */
+  try {
+    var pf = window.frameElement;
+    if (pf && pf.id === "vframe") { document.documentElement.innerHTML = ""; return; }
+  } catch (e) {}
   var courses = window.COURSES || [];
   var MAXL = window.LESSON_COUNT || 15;
 
@@ -406,6 +411,19 @@ window.COURSES = [
 
   /* ---------- 教材ビューア ---------- */
   var frame = document.getElementById("vframe"), loaded = null;
+  /* srcdoc の中のリンクは親ページの URL を基準に解決されるため、目次の「#見出し」を押すと
+     iframe にポータル自体が読み込まれてしまう(ホームに戻る・ヘッダが何重にもなる)。
+     ページ内リンクはその場でスクロールし、外部リンクは新しいタブで開くスクリプトを差し込む。 */
+  var LINK_FIX = "<script>(function(){document.addEventListener('click',function(e){" +
+    "var a=e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href');" +
+    "if(h.charAt(0)==='#'){e.preventDefault();var id=decodeURIComponent(h.slice(1)),t=id?document.getElementById(id):null;" +
+    "var bar=document.querySelector('.blbar'),off=(bar?bar.offsetHeight:0)+8;" +
+    "window.scrollTo({top:t?t.getBoundingClientRect().top+window.pageYOffset-off:0,behavior:'smooth'});}" +
+    "else{e.preventDefault();window.open(a.href,'_blank','noopener');}},true);})();<\/script>";
+  function withLinkFix(t) {
+    var i = t.toLowerCase().lastIndexOf("</body>");
+    return i < 0 ? t + LINK_FIX : t.slice(0, i) + LINK_FIX + t.slice(i);
+  }
   function openMat(c, m) {
     var list = c.materials.filter(function (x) { return x.file; }), k = list.indexOf(m);
     document.getElementById("vid").textContent = c.id + "-" + m.lesson;
@@ -426,7 +444,7 @@ window.COURSES = [
       fresh.title = m.title; frame.parentNode.replaceChild(fresh, frame); frame = fresh;
       /* 同じアーティファクト内のファイルを読み込んで表示(読めない環境では直接開く) */
       fetch(m.file).then(function (r) { if (!r.ok) throw 0; return r.text(); })
-        .then(function (t) { if (loaded === m.file) frame.srcdoc = t; })
+        .then(function (t) { if (loaded === m.file) frame.srcdoc = withLinkFix(t); })
         .catch(function () { if (loaded === m.file) frame.src = m.file; });
     }
   }
