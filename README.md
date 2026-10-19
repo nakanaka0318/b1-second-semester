@@ -15,7 +15,7 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 | 1-1 | 確率統計 | [courses/1-1.html](courses/1-1.html) | 5件 |
 | 1-2 | テクニカルリテラシー | [courses/1-2.html](courses/1-2.html) | 5件 |
 | 1-3 | コンピュータアーキテクチャ | [courses/1-3.html](courses/1-3.html) | 5件 |
-| 1-4 | 情報通信ネットワーク | [courses/1-4.html](courses/1-4.html) | 5件 |
+| 1-4 | 情報通信ネットワーク | [courses/1-4.html](courses/1-4.html) | 6件 |
 | 2-1 | 社会科学基礎 | [courses/2-1.html](courses/2-1.html) | 1件 |
 | 2-2 | 微分積分2 | [courses/2-2.html](courses/2-2.html) | – |
 | 3-2 | 中国語 | [courses/3-2.html](courses/3-2.html) | 2件 |
@@ -67,6 +67,7 @@ Claude Code で作った各科目の教材へ遷移するためのホームペ�
 | 1-4-3 | 物理層と伝送媒体 | [materials/1-4/1-4-3-physical-layer.html](materials/1-4/1-4-3-physical-layer.html) | – |
 | 1-4-4 | データリンク層 | [materials/1-4/1-4-4-datalink.html](materials/1-4/1-4-4-datalink.html) | – |
 | 1-4-5 | IPとIPアドレス | [materials/1-4/1-4-5-ip.html](materials/1-4/1-4-5-ip.html) | – |
+| 1-4-6 | ルーティングプロトコル | [materials/1-4/1-4-6-routing.html](materials/1-4/1-4-6-routing.html) | – |
 
 ### 2-1 社会科学基礎
 

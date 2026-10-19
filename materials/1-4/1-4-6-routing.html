@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ルーティングプロトコル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.sw{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.sw button{font:inherit;font-size:.85rem;font-weight:700;padding:5px 11px;border-radius:99px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.net svg{width:100%;max-width:560px;display:block;margin:0 auto}
+.net .lk{stroke:var(--line);stroke-width:5;stroke-linecap:round;cursor:pointer}
+.net .lk.on{stroke:var(--accent);stroke-width:7}
+.net .lk.down{stroke:var(--warn);stroke-dasharray:6 6}
+.net .hit{stroke:transparent;stroke-width:22;cursor:pointer}
+.net .rt{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.net .rt.src{fill:var(--ok)}.net .rt.dst{fill:var(--mark)}
+.net .rt.done{fill:var(--accent-soft);stroke:var(--accent)}
+.net .rt.cur{fill:var(--accent)}
+.net text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--ink)}
+.net text.n{font-weight:700;font-size:12px;pointer-events:none}
+.net text.c{font-size:10px;fill:var(--sub)}
+.net .lbg{fill:var(--paper);pointer-events:none}
+.net text{pointer-events:none}
+.net .pkt{fill:var(--mark);stroke:var(--ink);stroke-width:1.5}
+.ipin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.05rem;padding:6px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;max-width:200px}
+.ipin.err{border-color:var(--warn)}
+.ipin:focus{outline:none;border-color:var(--accent)}
+.rtab td,.rtab th{font-family:"JetBrains Mono",monospace;font-size:.8rem}
+.rtab th{font-family:inherit}
+.rtab tr.m td{background:var(--accent-soft)}
+.rtab tr.win td{background:var(--mark-soft);font-weight:700}
+.rtab tr.x td{color:var(--sub)}
+.dv{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
+.dv .r{background:var(--bg);border-radius:10px;padding:6px 8px;font-size:.78rem}
+.dv .r b{display:block;font-size:.85rem;margin-bottom:2px}
+.dv .r div{font-family:"JetBrains Mono",monospace;line-height:1.5}
+.dv .r .new{background:var(--mark-soft);border-radius:4px}
+.inf{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.inf .r{background:var(--bg);border-radius:10px;padding:8px;text-align:center}
+.inf .r b{display:block}
+.inf .m{font-family:"JetBrains Mono",monospace;font-size:1.4rem;font-weight:700}
+.inf .m.bad{color:var(--warn)}
+.inf small{color:var(--sub);font-size:.72rem}
+.dj td,.dj th{font-family:"JetBrains Mono",monospace;font-size:.8rem;text-align:center}
+.dj th{font-family:inherit}
+.dj tr.fix td{background:var(--accent-soft)}
+.dj tr.now td{background:var(--mark-soft);font-weight:700}
+.frag{display:flex;flex-direction:column;gap:3px;margin:8px 0}
+.frag .f{display:flex;flex-direction:column;gap:1px;font-size:.76rem;margin-bottom:3px}
+.frag .bar{height:22px;border-radius:5px;display:flex;align-items:center;overflow:hidden;color:#fff;font-weight:700;font-size:.72rem;white-space:nowrap}
+.frag .hd{background:var(--sub);padding:0 4px;height:100%;display:flex;align-items:center}
+.frag .ud{background:var(--warn);padding:0 4px;height:100%;display:flex;align-items:center}
+.frag .pl{background:var(--accent);flex:1;padding:0 6px;height:100%;display:flex;align-items:center}
+.frag .meta{font-family:"JetBrains Mono",monospace;color:var(--sub)}
+.msg{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.92rem;margin-top:8px}
+@media (max-width:600px){.dv{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>ルーティングプロトコル</h1>
+  <p>情報通信ネットワーク 第6回(#6 ルーティングプロトコル)のまとめです。ルータがパケットの行き先を決めるしくみ(経路制御表・Longest Match)と、経路を自動で作る RIP・OSPF、パケットの分割(MTU)を学びます。</p>
+  <div class="demo net">
+    <label>経路シミュレータ:方式を選んで送信。線をタップすると回線が切れる(もう一度で復旧)</label>
+    <div class="sw" id="mode"><button data-m="static">スタティック</button><button data-m="rip">RIP(ホップ数)</button><button data-m="ospf">OSPF(コスト)</button></div>
+    <div class="row"><label for="rs">送信元</label><select id="rs"></select><label for="rd">宛先</label><select id="rd"></select><button class="btn" id="go" type="button">パケットを送る</button><button class="btn sub" id="fix" type="button">全回線を復旧</button></div>
+    <svg id="nsvg" viewBox="0 0 380 230" role="img" aria-label="6台のルータのネットワーク"></svg>
+    <div class="msg" id="nmsg" aria-live="polite"></div>
+  </div>
+</header>
+
+<div class="blbar"><span class="t">穴埋め:<span id="blcount"></span></span><button class="btn sub" id="blhide" type="button">すべて隠す</button><button class="btn sub" id="blshow" type="button">すべて表示</button></div>
+
+<nav class="toc">
+  <a href="#what">経路制御とは</a><a href="#hop">ホップ</a><a href="#table">経路制御表</a><a href="#special">特別なエントリー</a><a href="#lm">Longest Match</a><a href="#sd">静的と動的</a><a href="#as">AS・IGP/EGP</a><a href="#algo">2つのアルゴリズム</a><a href="#rip">RIP</a><a href="#inf">無限カウント</a><a href="#ospf">OSPF</a><a href="#area">エリア</a><a href="#mtu">MTUと分割</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="what">
+  <h2><span class="no">1</span><b class="bl">経路制御(ルーティング)</b> とは</h2>
+  <ul>
+    <li><b class="bl">目的のホスト</b> まで <b class="bl">パケット</b> を届けるためのしくみ。</li>
+    <li>パケットの IP ヘッダには送信元・宛先 IP アドレスが書かれている。ネットワークが複雑につながっていても、目的のノードまでの経路(ルート)を決める。</li>
+    <li>経路制御が正しく動くことで、地球上のすべてのノードへパケットを送り届けられる。</li>
+  </ul>
+</section>
+
+<section class="task" id="hop">
+  <h2><span class="no">2</span>ホップバイホップルーティング方式</h2>
+  <ul>
+    <li><b class="bl">1</b> ホップごとに次のルートが決まり、最終目的地までパケットが転送される。各ルータは「全経路」ではなく「次にどこへ渡すか」だけを知っていればよい。</li>
+    <li><b>ホップ(hop)</b>:ネットワークの1区間(MAC アドレスを使ってフレームが配送される区間)。ルータを中継せずに届く隣のホストやルータの NIC までの区間。</li>
+    <li>リピータやスイッチはホップの終端にはならない(L1/L2 の機器なので)。</li>
+    <li>たとえ:新幹線を乗り継ぐ旅で、各駅の窓口で「次の乗り換え駅までの切符」だけを買っていく。切符(MAC アドレス)は区間ごとに変わるが、目的地(IP アドレス)は変わらない。</li>
+  </ul>
+</section>
+
+<section class="task" id="table">
+  <h2><span class="no">3</span>経路制御表(ルーティングテーブル)</h2>
+  <ul>
+    <li>IP パケットを <b class="bl">次にどのルータへ転送</b> すればよいかを書いた表。ルータはこの表にしたがってパケットを中継(ルーティング)する。</li>
+    <li>表の中身:<b>宛先ネットワークアドレス</b>と、次に配送すべき隣のルータの IP アドレス(<b>ネクストホップ</b>)。</li>
+    <li>IP アドレスの <b class="bl">ネットワークアドレス部</b> を使ってルーティングする(ホスト1台ずつではなく、ネットワーク単位で表を持つ)。</li>
+    <li>確認コマンド:<span class="mono">netstat -rn</span>(Windows・Mac/Linux)。宛先・転送先(ゲートウェイ)・送信 NIC が並ぶ。</li>
+  </ul>
+</section>
+
+<section class="task" id="special">
+  <h2><span class="no">4</span>経路制御表の特別なエントリー</h2>
+  <div class="tbl"><table>
+    <tr><th>エントリー</th><th>内容</th></tr>
+    <tr><td><b class="bl">デフォルトルート</b></td><td>登録されているどのネットワークアドレスにも一致しないときに使う経路。「<b class="bl mono">0.0.0.0/0</b>」または「<b class="bl mono">default</b>」と書く。</td></tr>
+    <tr><td><b>ホストルート</b></td><td>特定の1台のホスト(IP アドレス)への経路。「IP アドレス/32」と書く。</td></tr>
+    <tr><td><b class="bl">ループバックアドレス</b></td><td>127.0.0.0/8 の範囲(主に <b class="bl mono">127.0.0.1</b>)。自分のノード上で動くプログラム同士の通信に使う。仮想 NIC(lo0 など)に設定され、物理ネットワークには流れない。</td></tr>
+    <tr><td><b>リンクローカルアドレス</b></td><td>ルータを越えない同じリンク内だけで使うアドレス。DHCP 等で IP アドレスを取得できなかったとき、「<b class="bl mono">169.254.0.0/16</b>」の範囲のアドレスが自動設定される。</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="lm">
+  <h2><span class="no">5</span>ルーティングの様子と Longest Match 規則</h2>
+  <ul>
+    <li>パケット送信時、IP ヘッダの宛先 IP アドレスで経路制御表を検索し、一致するネットワークアドレスを探す。</li>
+    <li>一致するものが複数あるときは、ネットワークアドレスのビット長が<b>最も長い</b>ものを優先する(<b>Longest Match 規則</b>)。より詳しい(狭い)経路ほど優先される。</li>
+  </ul>
+  <div class="panel net">
+    <div class="ptitle"><span class="badge">試す</span>経路制御表を引いてみる</div>
+    <div class="row"><label for="lmi">宛先 IP</label><input id="lmi" class="ipin" value="10.1.2.200" autocomplete="off" spellcheck="false" inputmode="decimal"></div>
+    <div class="sw" id="lmex"><button>10.1.2.200</button><button>10.1.2.10</button><button>10.1.2.5</button><button>10.1.9.9</button><button>8.8.8.8</button><button>127.0.0.1</button></div>
+    <div class="tbl"><table class="rtab" id="lmt"></table></div>
+    <div class="msg" id="lmm" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="sd">
+  <h2><span class="no">6</span>スタティックルーティングとダイナミックルーティング</h2>
+  <div class="tbl"><table>
+    <tr><th></th><th>スタティック(静的経路制御)</th><th>ダイナミック(動的経路制御)</th></tr>
+    <tr><td>設定方法</td><td>ルータやホストに <b class="bl">手動</b> で経路情報を設定</td><td>ルータ間で <b class="bl">ルーティングプロトコル</b> を使って <b class="bl">自動的</b> に経路情報を交換・設定</td></tr>
+    <tr><td>規模が大きくなると</td><td>管理者の作業負担が <b class="bl">増大</b> する</td><td>管理者の設定負担はそれほど増えない</td></tr>
+    <tr><td>ネットワークが増えたら</td><td>すべてのルータへ追加の手動設定が必要</td><td>新しく追加したルータの設定だけで済む</td></tr>
+    <tr><td>障害が起きたら</td><td>自動で障害地点を <b class="bl">迂回</b> する制御ができない</td><td>自動的に障害地点を迂回する経路に切り替わる</td></tr>
+  </table></div>
+  <p class="legend">上の経路シミュレータで「スタティック」を選び、経路上の線を切ってから送信すると、パケットが届かなくなります。RIP・OSPF では迂回します。</p>
+  <h3>ダイナミックルーティングの基礎</h3>
+  <p>隣接するルータ間で、各ルータが <b class="bl">知っているネットワークの接続情報</b> を互いに教え合う。情報がバケツリレー式に伝わり、ネットワーク全体の経路制御表が完成する(<b>収束</b>)。</p>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">見る</span>バケツリレーで経路が広がる(RIP の距離=ホップ数)</div>
+    <div class="dv" id="dv"></div>
+    <div class="row"><button class="btn" id="dvn" type="button">情報を交換する(30秒ごと)</button><button class="btn sub" id="dvr" type="button">最初から</button><span class="legend" id="dvs" style="margin:0"></span></div>
+    <div class="msg" id="dvm" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="as">
+  <h2><span class="no">7</span>経路を制御する範囲</h2>
+  <ul>
+    <li><b>自律システム(<b class="bl">AS:Autonomous System</b>)/経路制御ドメイン</b>:統一された経路制御ポリシーのもとで管理・運用されるネットワークの範囲(地域ネットワークや ISP など)。</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th>分類</th><th>使う場所</th><th>例</th></tr>
+    <tr><td><b>IGP</b>(Interior Gateway Protocol)</td><td>AS(ドメイン)の<b>内部</b></td><td>RIP、OSPF</td></tr>
+    <tr><td><b>EGP</b>(Exterior Gateway Protocol)</td><td>AS(ドメイン)<b>間</b></td><td>BGP</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="algo">
+  <h2><span class="no">8</span>経路制御アルゴリズムの分類</h2>
+  <div class="tbl"><table>
+    <tr><th></th><th><b class="bl">距離ベクトル型</b>(Distance-Vector)</th><th><b class="bl">リンク状態型</b>(Link-State)</th></tr>
+    <tr><td>考え方</td><td>距離(メトリック)と方向(ベクトル)で経路を決める。「ネットワーク A は右へ距離 3」</td><td>各ルータがネットワーク全体の接続状態(トポロジー)を把握し、最短経路を計算する。「地図を見て決める」</td></tr>
+    <tr><td>交換する情報</td><td>向きと距離だけ</td><td>全ルータが共通のトポロジーデータベースを持つ</td></tr>
+    <tr><td>長所・短所</td><td>単純だが、大規模ネットワークでは経路の<b>収束に時間がかかる</b></td><td>収束が速く安定しているが、<b>計算負荷が高い</b>(巨大なネットワークでは高性能なルータが必要)</td></tr>
+    <tr><td>代表例</td><td>RIP</td><td>OSPF</td></tr>
+  </table></div>
+</section>
+
+<section class="task" id="rip">
+  <h2><span class="no">9</span>RIP(Routing Information Protocol)</h2>
+  <ul>
+    <li>距離ベクトル型の IGP(主に RIP2 が使われる)。</li>
+    <li>ルータは周期的に(<b>30 秒</b>間隔で)自分の知っている経路制御情報をブロードキャストで送信する。6 回(180 秒)連続で情報が届かないと、そのルータとの接続が切れたと判断する。</li>
+    <li>メトリックの単位は「<b class="bl">ホップ数</b>」= 通過するルータの数。受信した経路情報を他へ転送するとき、メトリックを <b class="bl">1 加算</b> する。</li>
+    <li>受信した経路情報を<b>距離ベクトルデータベース</b>に保存し、そこからメトリックが <b class="bl">最小</b> の経路を採用して経路制御表を作る。</li>
+  </ul>
+  <h3>RIP2 の主な改善点</h3>
+  <ul>
+    <li>ブロードキャストから<b>マルチキャスト(224.0.0.9)</b>へ変更 → 無関係なホストの負荷を減らす。</li>
+    <li><b>サブネットマスク</b>の情報を伝えられる → 可変長サブネットのネットワークの経路制御ができる。</li>
+    <li>明示的な<b>認証機能</b> → パスワードが違う RIP パケットを無視し、経路情報の偽装や改ざんを防ぐ。</li>
+  </ul>
+</section>
+
+<section class="task" id="inf">
+  <h2><span class="no">10</span>無限カウント問題とループ対策</h2>
+  <p><b>無限カウント問題</b>:障害が起きたとき、古い経路情報がルータ間で循環し、メトリックが無限に増えていく現象。</p>
+  <ul>
+    <li>対策①:メトリックの上限を「<b class="bl">16</b>」と決める(<b class="bl">16</b> に達した経路は <b class="bl">到達不能</b> とみなす)。</li>
+    <li>対策②:ある NIC から受け取った経路情報は、同じ NIC へは送り返さない(<b class="bl">スプリットホライズン</b>:Split Horizon)。</li>
+  </ul>
+  <p>ループの外で障害が起きると、正しい経路になるまで時間がかかる。そこで:</p>
+  <ul>
+    <li><b class="bl">ポイズンリバース</b>(Poison Reverse):障害を検出したら、メトリック 16(到達不能)の情報を通知する。</li>
+    <li><b class="bl">トリガードアップデート</b>(Triggered Update):30 秒周期を待たずに、すぐに通知する。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>ネットワーク X ― ルータA ― ルータB ― ルータC。X と A の間が切れたら?</div>
+    <div class="sw" id="infm"><button data-m="0">対策なし</button><button data-m="1">スプリットホライズン+ポイズンリバース</button></div>
+    <div class="inf" id="infv"></div>
+    <div class="row"><button class="btn" id="infn" type="button">次の交換(30秒後)</button><button class="btn sub" id="infa" type="button">最後まで</button><button class="btn sub" id="infr" type="button">最初から</button></div>
+    <div class="msg" id="infmsg" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="ospf">
+  <h2><span class="no">11</span>OSPF(Open Shortest Path First)</h2>
+  <ul>
+    <li>リンク状態型の IGP。トポロジーデータベースを全ルータで共有し、<b class="bl">ダイクストラ法</b> を使ってコストの合計が最小となる最短経路を計算する。</li>
+    <li>RIP は簡易なネットワーク向け、OSPF は複雑なネットワーク向け。</li>
+    <li>各リンクのコスト(<b class="bl">回線の帯域</b> などに応じた重み)をメトリックとして使う。管理者が自由に設定できるので柔軟に運用できる。<br>→ RIP は通過するルータが少ない経路、OSPF はコストの合計が小さい(速い回線を通る)経路を選ぶ。</li>
+  </ul>
+  <h3>OSPF の動作概要</h3>
+  <ul>
+    <li>10 秒に 1 回 <b>HELLO パケット</b>をマルチキャストして隣のルータを確認。4 回待っても返事がなければ切断と判断。</li>
+    <li>接続状態が変わったら、<b>リンク状態更新パケット</b>を送信して他のルータに知らせる。NLSA(ネットワークにつながっているルータの情報)、RLSA(ルータにつながっているネットワークの情報)。</li>
+    <li>受信後、リンク状態データベースを作り、ダイクストラ法でメトリックが最短の経路を求めて経路制御表を作る。</li>
+  </ul>
+  <div class="panel net">
+    <div class="ptitle"><span class="badge">見る</span>ダイクストラ法を1ステップずつ(上のシミュレータと同じネットワーク)</div>
+    <div class="row"><label for="djs">出発ルータ</label><select id="djs"></select><button class="btn" id="djn" type="button">次のステップ</button><button class="btn sub" id="dja" type="button">最後まで</button><button class="btn sub" id="djr" type="button">最初から</button></div>
+    <svg id="djsvg" viewBox="0 0 380 230" role="img" aria-label="ダイクストラ法の進み具合"></svg>
+    <div class="tbl"><table class="dj" id="djt"></table></div>
+    <div class="msg" id="djm" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="task" id="area">
+  <h2><span class="no">12</span>階層化されたエリアに分割して管理</h2>
+  <ul>
+    <li>リンク状態型はネットワークが大きくなると、トポロジーデータベースが大きくなり計算が大変になる。</li>
+    <li>ネットワークの論理的な領域を意味する <b class="bl">エリア</b> の概念を導入し、ネットワークを複数のエリアに分割して階層的に管理する。</li>
+    <li>あるエリアを<b>バックボーンエリア(エリア ID = 0)</b>とし、他のエリアはバックボーンエリアにつなぐ。</li>
+    <li>エリア境界ルータは距離情報だけを伝える → 経路情報を減らし、<b class="bl">計算の負荷を軽くする</b>。</li>
+    <li><b>スタブエリア</b>:エリアからの出口となるエリア境界ルータが 1 つしかないエリア。エリア外の経路情報は伝えなくてよく、エリア境界ルータがデフォルトゲートウェイになるように経路情報を流すだけでよい。</li>
+  </ul>
+</section>
+
+<section class="task" id="mtu">
+  <h2><span class="no">13</span>IP パケットの分割処理と再構築処理</h2>
+  <ul>
+    <li>データリンクごとに最大転送単位 <b class="bl">MTU</b>(Maximum Transmission Unit)が異なる。例:Ethernet・Wi-Fi = <b>1500</b> オクテット(ジャンボフレーム対応なら 8000〜16000 オクテット)。</li>
+    <li><b class="bl">フラグメンテーション</b>(分割処理):パケットが途中のデータリンクの MTU を超える場合、IP 層でパケットを細かく分けて送る。<b>再構築は最終目的地のホストでのみ</b>行う。</li>
+    <li>IP データグラム(ペイロード)部分だけを分割し(UDP の場合)、分割後のデータには IP ヘッダだけを付け、分割されていることを示すフラグをセットする → 断片の始まり・中間・終わりが分かる。</li>
+    <li>この分割はルータにとって大きな負荷。ルータはフィルタリングなど高度な処理もするので、できるだけ分割したくない。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>フラグメント計算機(UDP の場合、IP ヘッダ 20・UDP ヘッダ 8 オクテット)</div>
+    <div class="row"><label for="fd">UDP データ</label><input id="fd" class="ipin" type="number" value="8192" min="1" max="65000" style="max-width:110px"><span>オクテット</span><label for="fm">MTU</label><select id="fm"><option>1500</option><option>1280</option><option>576</option><option>9000</option></select></div>
+    <div class="frag" id="frag"></div>
+    <div class="stats" id="fst"></div>
+  </div>
+  <h3>経路 MTU 探索(PMTUD:Path MTU Discovery)</h3>
+  <ol>
+    <li>送信元ホストは IP ヘッダに<b>分割禁止フラグ</b>(DF)を設定して送信する。</li>
+    <li>途中のルータで MTU オーバーが起きたら、ルータはパケットを<b>破棄</b>し、「ICMP Destination Unreachable(Fragmentation Needed)」で <b class="bl">次のリンクの MTU</b> を送信元へ通知する。</li>
+    <li>送信元ホストは通知された最小 MTU に合わせて、最初から分割して送る → 途中のルータで分割しなくて済み、<b>ルータの処理負荷を減らせる</b>。</li>
+  </ol>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox"><div class="qno">問1</div><p>経路制御表に書かれている主な情報の組み合わせは?</p>
+    <div class="opts"><button>宛先 MAC アドレスとポート番号</button><button data-ok>宛先ネットワークアドレスとネクストホップ</button><button>送信元 IP アドレスとホスト名</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問2</div><p>デフォルトルートの書き方は?</p>
+    <div class="opts"><button>127.0.0.1</button><button data-ok>0.0.0.0/0</button><button>255.255.255.255</button><button>169.254.0.0/16</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問3</div><p>経路制御表に 10.0.0.0/8、10.1.0.0/16、10.1.2.0/24 がある。宛先 10.1.2.3 のパケットに使われるのは?</p>
+    <div class="opts"><button>10.0.0.0/8</button><button>10.1.0.0/16</button><button data-ok>10.1.2.0/24</button></div><span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">解説</span>Longest Match<span class="tap"></span></summary><div class="body"><p>3 つとも一致するが、ネットワーク部が最も長い /24 が選ばれる。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問4</div><p>ネットワーク障害時に自動で迂回できないのは?</p>
+    <div class="opts"><button data-ok>スタティックルーティング</button><button>RIP</button><button>OSPF</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問5</div><p>AS と AS の間の経路制御に使うプロトコルは?</p>
+    <div class="opts"><button>RIP</button><button>OSPF</button><button data-ok>BGP</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="30"><div class="qno">問6</div><p>RIP が経路情報を送る周期は何秒?</p>
+    <div class="check"><input class="ans" placeholder="例 10" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox" data-ans="16"><div class="qno">問7</div><p>RIP で「到達不能」とみなすメトリックはいくつ?</p>
+    <div class="check"><input class="ans" placeholder="例 8" aria-label="問7の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox"><div class="qno">問8</div><p>「ある NIC から受け取った経路情報を、同じ NIC へは送り返さない」対策は?</p>
+    <div class="opts"><button>トリガードアップデート</button><button data-ok>スプリットホライズン</button><button>ポイズンリバース</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問9</div><p>OSPF が最短経路の計算に使うアルゴリズムは?</p>
+    <div class="opts"><button>ベルマン・フォード法</button><button data-ok>ダイクストラ法</button><button>二分探索</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問10</div><p>RIP と OSPF のメトリックの組み合わせとして正しいのは?</p>
+    <div class="opts"><button>RIP:コスト / OSPF:ホップ数</button><button data-ok>RIP:ホップ数 / OSPF:コスト(帯域などに応じた重み)</button><button>どちらもホップ数</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="0"><div class="qno">問11</div><p>OSPF のバックボーンエリアのエリア ID は?</p>
+    <div class="check"><input class="ans" placeholder="例 1" aria-label="問11の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox" data-ans="6"><div class="qno">問12</div><p>UDP データ 8192 オクテットを MTU 1500 の Ethernet で送ると、IP パケットはいくつに分割される?</p>
+    <div class="check"><input class="ans" placeholder="例 4" aria-label="問12の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:6</b></p><p>IP ペイロードは UDP ヘッダ込みで 8192 + 8 = 8200 オクテット。1 つのパケットに入るのは 1500 − 20 = 1480 オクテット。8200 ÷ 1480 = 5 余り 800 なので 5 + 1 = 6 個(1480 × 5 + 800)。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問13</div><p>分割されたパケットの再構築を行うのは?</p>
+    <div class="opts"><button>途中のすべてのルータ</button><button>最初のルータ</button><button data-ok>最終目的地のホスト</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問14</div><p>DHCP でアドレスを取得できなかったときに自動設定されるアドレスの範囲は?</p>
+    <div class="opts"><button>127.0.0.0/8</button><button data-ok>169.254.0.0/16</button><button>192.168.0.0/16</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>名城大学 情報工学部「情報通信ネットワーク」#6 のスライドをもとに作成しました。穴埋めの答えは教科書(マスタリングTCP/IP 入門編)の用語とスライドの文脈から補っています(p.5「どこへ転送」、p.24「計算の負荷を軽くする」、p.28「次のリンクの MTU」などは推測を含みます)。シミュレータのネットワークとコストは説明用に作ったものです。授業での解答と違うときは授業を優先してください。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  function $(id){return document.getElementById(id);}
+  /* ===== ネットワーク(シミュレータとダイクストラ共通) ===== */
+  var N=[['R1',40,115],['R2',140,40],['R3',250,40],['R4',340,115],['R5',140,190],['R6',250,190]];
+  var LK=[[0,1,'1Gbps',1],[1,2,'1Gbps',1],[2,3,'1Gbps',1],[0,4,'100Mbps',10],[4,5,'100Mbps',10],[5,3,'100Mbps',10],[0,3,'10Mbps',100]];
+  var down={};
+  function adj(useCost){var g=N.map(function(){return [];});LK.forEach(function(l,i){if(down[i])return;var w=useCost?l[3]:1;g[l[0]].push([l[1],w,i]);g[l[1]].push([l[0],w,i]);});return g;}
+  function shortest(s,useCost){var g=adj(useCost),dist=N.map(function(){return Infinity;}),prev=N.map(function(){return -1;}),pl=N.map(function(){return -1;}),done=N.map(function(){return false;});dist[s]=0;
+    for(var k=0;k<N.length;k++){var u=-1;for(var i=0;i<N.length;i++)if(!done[i]&&(u<0||dist[i]<dist[u]))u=i;if(u<0||dist[u]===Infinity)break;done[u]=true;
+      g[u].forEach(function(e){if(dist[u]+e[1]<dist[e[0]]){dist[e[0]]=dist[u]+e[1];prev[e[0]]=u;pl[e[0]]=e[2];}});}
+    return {dist:dist,prev:prev,pl:pl};}
+  function pathOf(r,d){if(r.dist[d]===Infinity)return null;var nodes=[d],links=[];while(r.prev[nodes[0]]>=0){links.unshift(r.pl[nodes[0]]);nodes.unshift(r.prev[nodes[0]]);}return {nodes:nodes,links:links};}
+  function drawNet(svg,opt){
+    var h='';
+    LK.forEach(function(l,i){var a=N[l[0]],b=N[l[1]],cls='lk'+(down[i]?' down':'')+(opt.on&&opt.on.indexOf(i)>=0?' on':'');
+      h+='<line class="'+cls+'" x1="'+a[1]+'" y1="'+a[2]+'" x2="'+b[1]+'" y2="'+b[2]+'"/>';
+      if(opt.click) h+='<line class="hit" data-l="'+i+'" x1="'+a[1]+'" y1="'+a[2]+'" x2="'+b[1]+'" y2="'+b[2]+'"><title>'+l[2]+'(タップで切断/復旧)</title></line>';
+      var mx=(a[1]+b[1])/2, my=(a[2]+b[2])/2;
+      h+='<rect class="lbg" x="'+(mx-27)+'" y="'+(my-9)+'" width="54" height="'+(opt.cost===false?11:20)+'" rx="3"/><text class="c" x="'+mx+'" y="'+(my)+'" text-anchor="middle">'+l[2]+'</text>'+(opt.cost===false?'':'<text class="c" x="'+mx+'" y="'+(my+10)+'" text-anchor="middle" style="fill:var(--ink)">コスト'+l[3]+'</text>');});
+    N.forEach(function(n,i){var c='rt'+(opt.cls&&opt.cls[i]?' '+opt.cls[i]:'');h+='<rect class="'+c+'" x="'+(n[1]-20)+'" y="'+(n[2]-14)+'" width="40" height="28" rx="8"/><text class="n" x="'+n[1]+'" y="'+(n[2]+4)+'" text-anchor="middle">'+n[0]+'</text>';
+      if(opt.lab&&opt.lab[i]!==undefined) h+='<text x="'+n[1]+'" y="'+(n[2]+(n[2]<100?-20:30))+'" text-anchor="middle" style="font-weight:700;fill:var(--accent)">'+opt.lab[i]+'</text>';});
+    if(opt.pkt) h+='<circle class="pkt" id="'+svg.id+'pk" r="7" cx="'+N[opt.pkt][1]+'" cy="'+N[opt.pkt][2]+'"/>';
+    svg.innerHTML=h;}
+
+  /* ===== シミュレータ ===== */
+  var mode='ospf', staticRoutes=null, nsvg=$('nsvg'), anim=null;
+  N.forEach(function(n,i){$('rs').add(new Option(n[0],i));$('rd').add(new Option(n[0],i));}); $('rd').value=3;
+  function curPath(){var s=+$('rs').value,d=+$('rd').value;
+    if(mode==='static'){var r=staticRoutes[s];var p=pathOf(r,d);if(!p)return {p:null};var broken=p.links.filter(function(l){return down[l];});return {p:p,broken:broken.length?broken[0]:-1};}
+    var r2=shortest(s,mode==='ospf');return {p:pathOf(r2,d),dist:r2.dist[d]};}
+  function cost(p){return p.links.reduce(function(a,l){return a+LK[l][3];},0);}
+  function drawSim(msg){var s=+$('rs').value,d=+$('rd').value,c=curPath(),cls={};cls[s]='src';cls[d]='dst';
+    var on=c.p?(c.broken>=0?c.p.links.slice(0,c.p.links.indexOf(c.broken)):c.p.links):[];
+    drawNet(nsvg,{click:true,on:on,cls:cls});
+    nsvg.querySelectorAll('.hit').forEach(function(l){l.addEventListener('click',function(){var i=+l.getAttribute('data-l');down[i]=!down[i];drawSim(LK[i][2]+' の回線('+N[LK[i][0]][0]+'–'+N[LK[i][1]][0]+')を'+(down[i]?'切断':'復旧')+'しました。');});});
+    document.querySelectorAll('#mode button').forEach(function(b){b.type='button';b.setAttribute('aria-pressed',b.getAttribute('data-m')===mode?'true':'false');});
+    var t='';
+    if(s===d) t='送信元と宛先が同じです。';
+    else if(!c.p) t='<b style="color:var(--warn)">経路がありません</b>(どの回線を通っても届かない)。';
+    else{var names=c.p.nodes.map(function(i){return N[i][0];}).join(' → ');
+      t='経路:<b>'+names+'</b>(ホップ数 '+c.p.links.length+'、コスト合計 '+cost(c.p)+')<br>';
+      t+=mode==='rip'?'RIP は<b>通過するルータ(ホップ数)が最も少ない</b>経路を選ぶ。回線の速さは考えない。':mode==='ospf'?'OSPF は<b>コストの合計が最小</b>の経路を選ぶ(速い回線ほどコストが小さい)。':
+        (c.broken>=0?'<b style="color:var(--warn)">スタティックは手動で設定した経路のまま。途中の回線が切れているので届かない!</b>(管理者が設定し直すまで復旧しない)':'スタティックは、管理者が最初に手で設定した経路を使い続ける。');}
+    $('nmsg').innerHTML=(msg?msg+'<br>':'')+t;}
+  function send(){var c=curPath(),s=+$('rs').value; if(!c.p||c.p.nodes.length<2){drawSim();return;}
+    drawSim(); if(anim) cancelAnimationFrame(anim);
+    var stop=c.broken>=0?c.p.links.indexOf(c.broken):c.p.links.length, pts=c.p.nodes.slice(0,stop+1).map(function(i){return [N[i][1],N[i][2]];});
+    if(c.broken>=0){var a=N[LK[c.broken][0]],b=N[LK[c.broken][1]];pts.push([(a[1]+b[1])/2,(a[2]+b[2])/2]);}
+    nsvg.insertAdjacentHTML('beforeend','<circle class="pkt" id="pk" r="7" cx="'+pts[0][0]+'" cy="'+pts[0][1]+'"/>');
+    var pk=$('pk'), seg=0, t0=null, dur=550;
+    function step(ts){if(t0===null)t0=ts;var f=(ts-t0)/dur;if(f>=1){seg++;t0=ts;f=0;}
+      if(seg>=pts.length-1){pk.setAttribute('cx',pts[pts.length-1][0]);pk.setAttribute('cy',pts[pts.length-1][1]);if(c.broken>=0){pk.style.fill='var(--warn)';}return;}
+      var a=pts[seg],b=pts[seg+1];pk.setAttribute('cx',a[0]+(b[0]-a[0])*f);pk.setAttribute('cy',a[1]+(b[1]-a[1])*f);anim=requestAnimationFrame(step);}
+    if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){var e=pts[pts.length-1];pk.setAttribute('cx',e[0]);pk.setAttribute('cy',e[1]);}
+    else anim=requestAnimationFrame(step);}
+  function initStatic(){var save=down;down={};staticRoutes=N.map(function(_,i){return shortest(i,true);});down=save;}
+  initStatic();
+  document.querySelectorAll('#mode button').forEach(function(b){b.addEventListener('click',function(){mode=b.getAttribute('data-m');drawSim(mode==='static'?'スタティック:全回線が正常なときに管理者が設定した経路を使います。':'');});});
+  $('rs').addEventListener('change',function(){drawSim();}); $('rd').addEventListener('change',function(){drawSim();});
+  $('go').addEventListener('click',send); $('fix').addEventListener('click',function(){down={};drawSim('全回線を復旧しました。');});
+  drawSim('まずはそのまま送信。次に R1–R2 の線をタップして切ってから、もう一度送ってみよう。RIP に切り替えると経路が変わります。');
+
+  /* ===== Longest Match ===== */
+  var RT=[['0.0.0.0',0,'10.1.1.1','デフォルトルート'],['10.1.0.0',16,'10.1.1.30',''],['10.1.2.0',24,'10.1.0.2',''],['10.1.2.128',25,'10.1.0.3',''],['10.1.2.10',32,'10.1.0.4','ホストルート'],['127.0.0.0',8,'lo0(自分自身)','ループバック']];
+  function pip(s){var m=String(s).trim().match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);if(!m)return null;var v=0;for(var i=1;i<5;i++){if(+m[i]>255)return null;v=v*256+(+m[i]);}return v;}
+  function mk(p){return p?(0xFFFFFFFF<<(32-p))>>>0:0;}
+  function drawLM(){var v=pip($('lmi').value); $('lmi').classList.toggle('err',v===null);
+    if(v===null){$('lmm').textContent='IP アドレスを正しく入力してください';return;}
+    var best=-1; RT.forEach(function(r,i){var m=mk(r[1]);if(((v&m)>>>0)===((pip(r[0])&m)>>>0)&&(best<0||r[1]>RT[best][1]))best=i;});
+    $('lmt').innerHTML='<tr><th>宛先ネットワーク</th><th>ネクストホップ</th><th>一致?</th></tr>'+RT.map(function(r,i){var m=mk(r[1]),ok=((v&m)>>>0)===((pip(r[0])&m)>>>0);
+      return '<tr class="'+(i===best?'win':ok?'m':'x')+'"><td>'+r[0]+'/'+r[1]+(r[3]?'<br><small style="font-family:inherit">'+r[3]+'</small>':'')+'</td><td>'+r[2]+'</td><td>'+(ok?'◯ /'+r[1]+(i===best?' ← 採用':''):'✕')+'</td></tr>';}).join('');
+    var n=RT.filter(function(r){var m=mk(r[1]);return ((v&m)>>>0)===((pip(r[0])&m)>>>0);}).length;
+    $('lmm').innerHTML=n+' 個のエントリーが一致。ビット長が最も長い <b>'+RT[best][0]+'/'+RT[best][1]+'</b> を採用 → <b>'+RT[best][2]+'</b> へ転送。'+(best===0?'(ほかに一致がないのでデフォルトルート)':'');
+    document.querySelectorAll('#lmex button').forEach(function(b){b.setAttribute('aria-pressed',b.textContent===$('lmi').value.trim()?'true':'false');});}
+  $('lmi').addEventListener('input',drawLM);
+  document.querySelectorAll('#lmex button').forEach(function(b){b.type='button';b.addEventListener('click',function(){$('lmi').value=b.textContent;drawLM();});});
+  drawLM();
+
+  /* ===== 距離ベクトルの伝搬 ===== */
+  var DR=['ルータC','ルータA','ルータB','ルータD'], NETS=['192.168.1.0','192.168.2.0','192.168.3.0'], CON=[[0],[0,1],[1,2],[2]];
+  var tabs, rnd, last;
+  function dvInit(){tabs=DR.map(function(_,r){var t={};CON[r].forEach(function(n){t[n]=1;});return t;});rnd=0;last=DR.map(function(){return {};});dvDraw('最初は、自分に直接つながったネットワーク(距離1)だけを知っている。');}
+  function dvStep(){var nt=tabs.map(function(t){var c={};for(var k in t)c[k]=t[k];return c;}), ch=false; last=DR.map(function(){return {};});
+    for(var r=0;r<4;r++)[r-1,r+1].forEach(function(nb){if(nb<0||nb>3)return;for(var k in tabs[nb]){var m=tabs[nb][k]+1;if(nt[r][k]===undefined||m<nt[r][k]){nt[r][k]=m;ch=true;last[r][k]=1;}}});
+    tabs=nt; rnd++; dvDraw(ch?'隣から教わった経路に距離(ホップ数)を 1 足して登録した(色付き)。':'もう新しい情報がない → <b>収束</b>。全ルータが全ネットワークへの経路を知った。');}
+  function dvDraw(m){$('dv').innerHTML=DR.map(function(n,r){return '<div class="r"><b>'+n+'</b>'+[0,1,2].map(function(k){var d=tabs[r][k];return '<div class="'+(last[r][k]?'new':'')+'">'+NETS[k].replace('192.168.','…')+':'+(d===undefined?'?':'距離'+d)+'</div>';}).join('')+'</div>';}).join('');
+    $('dvs').textContent='交換 '+rnd+' 回目(約 '+rnd*30+' 秒後)'; $('dvm').innerHTML=m;}
+  $('dvn').addEventListener('click',dvStep); $('dvr').addEventListener('click',dvInit); dvInit();
+
+  /* ===== 無限カウント ===== */
+  var im=0, M, NH, ir, idone;
+  function infInit(){M=[1,2,3];NH=['直結','A','B'];ir=0;idone=false;infDraw('正常時:A は X まで距離 1、B は 2、C は 3。「次の交換」で X–A 間の回線が切れます。');}
+  function infStep(){if(idone)return;
+    if(ir===0){M=[16,2,3];NH=['—','A','B'];ir++;infDraw('X–A 間が切れた! A は X への経路を<b>16(到達不能)</b>にした。でも B と C はまだ古い情報を持っている。');return;}
+    var nm=M.slice(), nn=NH.slice(), nb=[[1],[0,2],[1]], nm2=['A','B','C'];
+    for(var r=0;r<3;r++){var best=16,bh='—';nb[r].forEach(function(n){var adv=M[n];
+        if(im===1&&NH[n]===nm2[r]) adv=16; // スプリットホライズン+ポイズンリバース:教わった相手には 16 を返す
+        var m=Math.min(16,adv+1); if(m<best){best=m;bh=nm2[n];}});
+      nm[r]=best; nn[r]=best>=16?'—':bh;}
+    M=nm; NH=nn; ir++;
+    if(M.every(function(v){return v>=16;})){idone=true;infDraw('全ルータが「X は到達不能(16)」と判断して<b>収束</b>。障害から約 '+(ir-1)*30+' 秒'+(im===1?'。対策があると速い!':'もかかった。メトリックが 1 つずつ 16 まで増えていった(無限カウント)。'));return;}
+    infDraw(im===0?'<b>古い情報がループ</b>:B は C の「X まで 3」を信じて 4 に、A は B を信じて…と、ルータ同士で互いを経由する経路を教え合い、メトリックが増えていく。':'教わった相手には「16(到達不能)」を返すので、古い情報がループしない。');}
+  function infDraw(m){$('infv').innerHTML=['A','B','C'].map(function(n,i){return '<div class="r"><b>ルータ'+n+'</b><div class="m'+(M[i]>=16?' bad':'')+'">'+(M[i]>=16?'16':M[i])+'</div><small>'+(M[i]>=16?'到達不能':'次:'+NH[i])+'</small></div>';}).join('');
+    $('infmsg').innerHTML='<span class="legend" style="margin:0">交換 '+ir+' 回目</span><br>'+m;
+    document.querySelectorAll('#infm button').forEach(function(b){b.type='button';b.setAttribute('aria-pressed',+b.getAttribute('data-m')===im?'true':'false');});
+    $('infn').disabled=idone; $('infa').disabled=idone;}
+  document.querySelectorAll('#infm button').forEach(function(b){b.addEventListener('click',function(){im=+b.getAttribute('data-m');infInit();});});
+  $('infn').addEventListener('click',infStep); $('infa').addEventListener('click',function(){var k=0;while(!idone&&k<40){infStep();k++;}}); $('infr').addEventListener('click',infInit);
+  infInit();
+
+  /* ===== ダイクストラ ===== */
+  var DJ, djsvg=$('djsvg');
+  N.forEach(function(n,i){$('djs').add(new Option(n[0],i));});
+  function djInit(){var s=+$('djs').value;DJ={s:s,dist:N.map(function(){return Infinity;}),prev:N.map(function(){return -1;}),fix:N.map(function(){return false;}),cur:-1,step:0,end:false};DJ.dist[s]=0;djDraw('出発点 '+N[s][0]+' の距離を 0、ほかを ∞ にする。');}
+  function djStep(){if(DJ.end)return;var u=-1;for(var i=0;i<N.length;i++)if(!DJ.fix[i]&&DJ.dist[i]<Infinity&&(u<0||DJ.dist[i]<DJ.dist[u]))u=i;
+    if(u<0){DJ.end=true;djDraw('すべて確定した。これで出発点から各ルータへの最短経路(コスト最小)が決まった。');return;}
+    DJ.fix[u]=true;DJ.cur=u;DJ.step++;var up=[];
+    adj(true)[u].forEach(function(e){if(!DJ.fix[e[0]]&&DJ.dist[u]+e[1]<DJ.dist[e[0]]){DJ.dist[e[0]]=DJ.dist[u]+e[1];DJ.prev[e[0]]=u;up.push(N[e[0]][0]+'='+DJ.dist[e[0]]);}});
+    if(DJ.fix.every(function(f){return f;}))DJ.end=true;
+    djDraw('未確定の中で距離が最小の <b>'+N[u][0]+'(距離 '+DJ.dist[u]+')を確定</b>。'+(up.length?'その隣を更新:'+up.join('、'):'更新できる隣はない。')+(DJ.end?'<br>すべて確定!':''));}
+  function djDraw(m){var cls={},lab={},on=[];N.forEach(function(_,i){cls[i]=i===DJ.cur?'cur':DJ.fix[i]?'done':'';lab[i]=DJ.dist[i]===Infinity?'∞':DJ.dist[i];
+      if(DJ.fix[i]&&DJ.prev[i]>=0){LK.forEach(function(l,k){if((l[0]===i&&l[1]===DJ.prev[i])||(l[1]===i&&l[0]===DJ.prev[i]))on.push(k);});}});
+    cls[DJ.s]=DJ.cur===DJ.s?'cur':'src';
+    drawNet(djsvg,{on:on,cls:cls,lab:lab});
+    $('djt').innerHTML='<tr><th>ルータ</th>'+N.map(function(n){return '<th>'+n[0]+'</th>';}).join('')+'</tr><tr><th>距離</th>'+N.map(function(_,i){return '<td'+(i===DJ.cur?' style="background:var(--mark-soft);font-weight:700"':DJ.fix[i]?' style="background:var(--accent-soft)"':'')+'>'+(DJ.dist[i]===Infinity?'∞':DJ.dist[i])+'</td>';}).join('')+'</tr><tr><th>直前</th>'+N.map(function(_,i){return '<td>'+(DJ.prev[i]>=0?N[DJ.prev[i]][0]:'—')+'</td>';}).join('')+'</tr><tr><th>確定</th>'+N.map(function(_,i){return '<td>'+(DJ.fix[i]?'✓':'')+'</td>';}).join('')+'</tr>';
+    $('djm').innerHTML='ステップ '+DJ.step+':'+m; $('djn').disabled=DJ.end; $('dja').disabled=DJ.end;}
+  $('djs').addEventListener('change',djInit); $('djn').addEventListener('click',djStep); $('dja').addEventListener('click',function(){var k=0;while(!DJ.end&&k<20){djStep();k++;}}); $('djr').addEventListener('click',djInit);
+  djInit();
+
+  /* ===== フラグメント ===== */
+  function drawF(){var d=Math.max(1,Math.min(65000,Math.floor(+$('fd').value||1))), mtu=+$('fm').value, pl=d+8, per=Math.floor((mtu-20)/8)*8, n=Math.ceil(pl/per), h='', off=0;
+    for(var k=0;k<n;k++){var sz=Math.min(per,pl-off), w=Math.max(18,sz/per*100);
+      h+='<div class="f"><span class="meta">#'+(k+1)+' 長さ '+(sz+20)+' オクテット / オフセット '+off/8+'(×8 = '+off+')/ MF='+(k<n-1?'1(続きあり)':'0(最後)')+'</span><div class="bar" style="width:calc('+w+'% - 0px);max-width:100%;min-width:90px"><span class="hd">IP 20</span>'+(k===0?'<span class="ud">UDP 8</span>':'')+'<span class="pl">'+(k===0?sz-8:sz)+'</span></div></div>';
+      off+=sz;}
+    $('frag').innerHTML=h;
+    $('fst').innerHTML='<div class="stat hl"><div class="k">分割数</div><div class="v">'+n+' 個</div></div><div class="stat"><div class="k">IP ペイロード(UDP ヘッダ込み)</div><div class="v">'+pl+'</div></div><div class="stat"><div class="k">1 個に入る最大データ</div><div class="v">'+per+'</div></div><div class="stat"><div class="k">ヘッダの合計(IP 20 × '+n+')</div><div class="v">'+20*n+'</div></div>';}
+  $('fd').addEventListener('input',drawF); $('fm').addEventListener('change',drawF); drawF();
+})();
+</script>
+</body>
+</html>

@@ -99,7 +99,11 @@ window.COURSES = [
     { id: "1-4-5-ip", refs: [{ label: "スライド #5", dir: "refs/slide-05", pages: 25 }],
       lesson: 5, title: "IPとIPアドレス",
       file: "materials/1-4/1-4-5-ip.html",
-      note: "#5 IPの役割・ルータ・IPアドレスとクラス・ネットワーク/ブロードキャストアドレス・サブネットマスク・プライベートIP・IPv6。ビットを動かせるIPアドレス計算機と穴埋め付き" }
+      note: "#5 IPの役割・ルータ・IPアドレスとクラス・ネットワーク/ブロードキャストアドレス・サブネットマスク・プライベートIP・IPv6。ビットを動かせるIPアドレス計算機と穴埋め付き" },
+    { id: "1-4-6-routing", refs: [{ label: "スライド #6", dir: "refs/slide-06", pages: 28 }],
+      lesson: 6, title: "ルーティングプロトコル",
+      file: "materials/1-4/1-4-6-routing.html",
+      note: "#6 経路制御表・Longest Match・静的/動的ルーティング・RIP・無限カウント・OSPF・エリア・MTUと分割。回線を切れる経路シミュレータ、ダイクストラ法の手順表示付き" }
   ] },
   { id: "2-1", name: "社会科学基礎",           materials: [
     { id: "2-1-1-cold-war", refs: [{ label: "スライド 第1・2回", dir: "refs/2-1-1", pages: 7 }],
