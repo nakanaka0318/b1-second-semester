@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>課題3 解説</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.coins{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.coin{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;border:3px solid;flex-direction:column;line-height:1.05}
+.coin small{font-size:.58rem;font-family:"JetBrains Mono",monospace;font-weight:400}
+.coin.h{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.coin.t{background:var(--bg);border-color:var(--line);color:var(--sub)}
+.coin.flip{animation:flip .35s ease-out}
+@keyframes flip{from{transform:rotateY(90deg)}to{transform:rotateY(0)}}
+@media (prefers-reduced-motion: reduce){.coin.flip{animation:none}}
+.cw{display:flex;flex-direction:column;align-items:center;gap:2px}
+.cw span{font-family:"JetBrains Mono",monospace;font-size:.66rem;color:var(--sub)}
+.plist{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper);font-family:"JetBrains Mono",monospace;font-size:.85rem}
+.plist div{display:flex;gap:10px;padding:2px 10px;border-bottom:1px solid var(--bg);align-items:center}
+.plist .no{color:var(--sub);min-width:3.2em;text-align:right}
+.plist .pt b{color:var(--mark)}
+.plist .pt i{font-style:normal;color:var(--sub)}
+.plist .pt b.run{background:var(--mark-soft);border-radius:3px}
+.plist .mr{margin-left:auto;font-weight:700}
+.msg{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.92rem;margin-top:8px}
+.out{font-family:"JetBrains Mono",monospace;font-size:.82rem;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 12px;white-space:pre;overflow-x:auto;max-height:22em}
+.bars{width:100%;max-width:600px;display:block;margin:6px auto}
+.bars text{font-family:"JetBrains Mono",monospace;font-size:10px;fill:var(--sub)}
+.bars .b1{fill:var(--accent)}
+.bars .b2{fill:var(--mark)}
+.bars .l20{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:5 4}
+.bars .lbl{fill:var(--ink);font-weight:700}
+.bars .best{stroke:var(--ink);stroke-width:2;fill:none}
+.tag2{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:99px;background:var(--mark-soft);color:var(--ink);margin-left:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>課題3 解説<br>コイン投げのパターンと確率</h1>
+  <p>課題3-1〜3-5 のヒント・解答例・解説・別解です。ヒントは段階的に開けるようになっています。まずはヒント1だけ見て考え、詰まったら次のヒントへ進みましょう。</p>
+  <div class="demo">
+    <label>配列 coin[ ] で「コイン n 枚」を表す:+1 ボタンで次のパターンへ(2進数の足し算)</label>
+    <div class="row"><label for="cn">n = <b id="cnv"></b></label><input id="cn" type="range" min="1" max="10" value="4"></div>
+    <div class="coins" id="coins" aria-live="polite"></div>
+    <div class="row"><button class="btn" id="cplus" type="button">+1(次のパターン)</button><button class="btn sub" id="cauto" type="button">自動で全部</button><button class="btn sub" id="creset" type="button">最初に戻す</button></div>
+    <div class="msg" id="cmsg" aria-live="polite"></div>
+  </div>
+</header>
+
+<nav class="toc"><a href="#k1">3-1 全パターン</a><a href="#k2">3-2 連続表の最大数</a><a href="#k3">3-3 確率</a><a href="#k4">3-4 m回以上</a><a href="#k5">3-5 20%以上</a><a href="#tips">共通のコツ</a></nav>
+
+<!-- ================= 3-1 ================= -->
+<section class="task" id="k1">
+  <h2><span class="no">3-1</span>コインを n 回振ったときの全パターン</h2>
+  <div class="problem"><p>コインを n 回振ったときに、表または裏が出るパターンをすべて表示するプログラムを作成せよ。n は最大 10 まで対応していればよい。n=4 の出力を、提出するソースコードの末尾に注釈として挿入せよ。</p>
+  <div class="sample">例) n=3 の時
+通し番号, パターン
+1, 裏裏裏
+2, 裏裏表
+3, 裏表裏
+4, 裏表表
+5, 表裏裏
+6, 表裏表
+7, 表表裏
+8, 表表表</div></div>
+
+  <details><summary><span class="tag">ヒント1</span>全部で何通り?<span class="tap"></span></summary><div class="body">
+    <p>コイン1枚なら 2 通り(=2<sup>1</sup>)、2枚なら 4 通り(=2<sup>2</sup>)、3枚なら 8 通り(=2<sup>3</sup>)。n 枚なら <b>2<sup>n</sup> 通り</b>。n=10 なら 1024 通り。</p>
+    <p>C には「べき乗の演算子」がない。<span class="mono">2^n</span> は<b>べき乗ではなく XOR(排他的論理和)</b>になるので注意。for 文で 2 を n 回掛けるか、<span class="mono">1 &lt;&lt; n</span>(1 を n ビット左シフト)で作る。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント2</span>コインの表し方<span class="tap"></span></summary><div class="body">
+    <p>コイン1枚を整数 1 つで表す。例:0 なら裏、1 なら表。コインは最大 10 枚なので、<b>配列 <span class="mono">int coin[10];</span></b> を使う(単一の変数×10個やビット列でもできる)。</p>
+    <p>出力例の順番(裏裏裏 → 裏裏表 → 裏表裏 …)は、<b>裏を 0、表を 1</b> とした 2 進数 000, 001, 010, … の順になっている。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント3</span>ループの形<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>for (組み合わせ数の上限まで) {
+    /* (処理1) 組み合わせを確定する */
+    /* (処理2) 組み合わせを出力する */
+}</code></pre>
+    <p>処理1と処理2を別々に考えよう。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント4</span>(処理1)次の組み合わせの作り方<span class="tap"></span></summary><div class="body">
+    <p>コイン配列の値を 2 進数と見て、<b>1 ずつ足していく</b>:0000 → 0001 → 0010 → 0011 → … → 1111。上の「+1」ボタンで動きを確かめよう。</p>
+    <ol>
+      <li>一番右(coin[n−1])から見ていく。</li>
+      <li>1 だったら 0 にして、1つ左へ(繰り上がり)。</li>
+      <li>0 を見つけたら 1 にして終わり。</li>
+    </ol>
+    <p>値を1つずつずらしていく方法はほかにもたくさんある(十人十色)。例:ループの番号 k を 2 進数に分解する方法(別解)。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント5</span>(処理2)出力の仕方<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>if (coin[j] == 1) printf("表");
+else              printf("裏");</code></pre>
+    <p>これを j = 0 〜 n−1 でくり返し、最後に改行。分からなければ前期の内容(if と for)を復習しよう。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>配列に 1 を足していく<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int coin[10] = {0};   /* coin[j] が 0 なら裏、1 なら表 */
+    int n, total, k, j;
+
+    printf("n = ");
+    scanf("%d", &amp;n);
+    if (n &lt; 1 || n &gt; 10) {
+        printf("n は 1〜10 で入力してください\n");
+        return 1;
+    }
+
+    total = 1;
+    for (j = 0; j &lt; n; j++) {    /* 全パターン数 = 2 の n 乗 */
+        total = total * 2;
+    }
+
+    printf("通し番号, パターン\n");
+    for (k = 1; k &lt;= total; k++) {
+        /* (処理2) いまのパターンを表示 */
+        printf("%d, ", k);
+        for (j = 0; j &lt; n; j++) {
+            if (coin[j] == 1) printf("表");
+            else              printf("裏");
+        }
+        printf("\n");
+
+        /* (処理1) 次のパターンへ:2進数として 1 を足す */
+        j = n - 1;                      /* 一番右(最後の桁)から */
+        while (j &gt;= 0 &amp;&amp; coin[j] == 1) {
+            coin[j] = 0;                /* 1 は 0 にして繰り上げる */
+            j--;
+        }
+        if (j &gt;= 0) coin[j] = 1;        /* 最初に見つかった 0 を 1 に */
+    }
+    return 0;
+}</code></pre>
+    <p><b>n=4 の出力</b>(ソースコードの末尾に注釈として入れる部分)</p>
+<div class="out">通し番号, パターン
+1, 裏裏裏裏
+2, 裏裏裏表
+3, 裏裏表裏
+4, 裏裏表表
+5, 裏表裏裏
+6, 裏表裏表
+7, 裏表表裏
+8, 裏表表表
+9, 表裏裏裏
+10, 表裏裏表
+11, 表裏表裏
+12, 表裏表表
+13, 表表裏裏
+14, 表表裏表
+15, 表表表裏
+16, 表表表表</div>
+    <ol class="steps">
+      <li><span class="mono">int coin[10] = {0};</span> で全部 0(裏)から始める。最初のパターンは「裏裏裏裏」。</li>
+      <li>表示したあとで、配列を 2 進数とみて 1 を足す。右端から 1 を 0 にしながら左へ進み、最初の 0 を 1 にする。</li>
+      <li>これを 2<sup>n</sup> 回くり返す。最後(表表表表)の後の +1 では全部 0 に戻るが、ループが終わるので問題ない。</li>
+    </ol>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">別解</span>ループ番号 k を2進数に分解<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int coin[10];
+    int n, k, j;
+
+    printf("n = ");
+    scanf("%d", &amp;n);
+    if (n &lt; 1 || n &gt; 10) {
+        printf("n は 1〜10 で入力してください\n");
+        return 1;
+    }
+
+    printf("通し番号, パターン\n");
+    for (k = 0; k &lt; (1 &lt;&lt; n); k++) {        /* 1 &lt;&lt; n は 2 の n 乗 */
+        /* k を 2 進数にして、各桁を配列に入れる(左端が最上位ビット) */
+        for (j = 0; j &lt; n; j++) {
+            coin[j] = (k &gt;&gt; (n - 1 - j)) &amp; 1;
+        }
+        printf("%d, ", k + 1);
+        for (j = 0; j &lt; n; j++) {
+            printf("%s", coin[j] ? "表" : "裏");
+        }
+        printf("\n");
+    }
+    return 0;
+}</code></pre>
+    <p>k = 0, 1, 2, … , 2<sup>n</sup>−1 の各ビットが、そのままコインの表裏になる。<span class="mono">(k &gt;&gt; (n - 1 - j)) &amp; 1</span> は「k の左から j 番目のビット」を取り出す式(第1回のビット演算)。</p>
+    <p>例:n=3、k=5 のとき 5 = 101<sub>(2)</sub> → 表裏表(6番目)。通し番号は k+1。</p>
+    <p>「前のパターンを覚えておく」必要がないので、3-3 以降のように<b>パターンごとに調べる</b>処理と組み合わせやすい。</p>
+  </div></details>
+</section>
+
+<!-- ================= 3-2 ================= -->
+<section class="task" id="k2">
+  <h2><span class="no">3-2</span>連続した表の最大数を付ける</h2>
+  <div class="problem"><p>課題3-1における出力の一行ごとに、連続した表の最大数を付加せよ。表表表表裏表表 の場合は 4。n=4 の出力を注釈として挿入せよ。</p>
+  <div class="sample">例) n=3 の時
+通し番号, パターン, 連続表最大数
+1, 裏裏裏, 0
+2, 裏裏表, 1
+3, 裏表裏, 1
+4, 裏表表, 2
+5, 表裏裏, 1
+6, 表裏表, 1
+7, 表表裏, 2
+8, 表表表, 3</div></div>
+
+  <div class="panel">
+    <div class="ptitle"><span class="badge">見る</span>n を選ぶと全パターンと連続表の最大数(<b style="background:var(--mark-soft);padding:0 3px;border-radius:3px">色付き</b>=最長の連続)</div>
+    <div class="row"><label for="ln">n = <b id="lnv"></b></label><input id="ln" type="range" min="1" max="10" value="4"><span class="legend" id="lns" style="margin:0"></span></div>
+    <div class="plist" id="plist"></div>
+  </div>
+
+  <details><summary><span class="tag">ヒント1</span>2つの変数を使う<span class="tap"></span></summary><div class="body">
+    <p>「<b>いま何枚続いているか</b>(現連続数)」と「<b>これまでの最大</b>(最大数)」を別々に持つ。現連続数は裏が出るとクリアされるので、最大数を別に覚えておく必要がある。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント2</span>1枚ずつの処理<span class="tap"></span></summary><div class="body">
+    <ul><li>表なら:現連続数を +1。それが最大数より大きければ最大数を更新。</li>
+    <li>裏なら:現連続数を 0 に戻す。</li></ul>
+    <p>例:表表裏表 → 現連続数 1, 2, 0, 1 → 最大数 2。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント3</span>リセットの位置<span class="tap"></span></summary><div class="body">
+    <p>現連続数と最大数は、<b>パターンごとに 0 に戻す</b>(パターンのループの中、コインのループの前)。外に置くと前のパターンの値が残る。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>表示しながら数える<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int coin[10] = {0};
+    int n, total, k, j;
+    int run, maxrun;    /* 現在の連続数と、その最大値 */
+
+    printf("n = ");
+    scanf("%d", &amp;n);
+    if (n &lt; 1 || n &gt; 10) {
+        printf("n は 1〜10 で入力してください\n");
+        return 1;
+    }
+    total = 1 &lt;&lt; n;
+
+    printf("通し番号, パターン, 連続表最大数\n");
+    for (k = 1; k &lt;= total; k++) {
+        printf("%d, ", k);
+        run = 0;
+        maxrun = 0;
+        for (j = 0; j &lt; n; j++) {
+            if (coin[j] == 1) {
+                printf("表");
+                run++;                          /* 表が続いた */
+                if (run &gt; maxrun) maxrun = run; /* 最大を更新 */
+            } else {
+                printf("裏");
+                run = 0;                        /* 裏で途切れたのでクリア */
+            }
+        }
+        printf(", %d\n", maxrun);
+
+        j = n - 1;                              /* 次のパターンへ(+1) */
+        while (j &gt;= 0 &amp;&amp; coin[j] == 1) {
+            coin[j] = 0;
+            j--;
+        }
+        if (j &gt;= 0) coin[j] = 1;
+    }
+    return 0;
+}</code></pre>
+    <p><b>n=4 の出力</b></p>
+<div class="out">通し番号, パターン, 連続表最大数
+1, 裏裏裏裏, 0
+2, 裏裏裏表, 1
+3, 裏裏表裏, 1
+4, 裏裏表表, 2
+5, 裏表裏裏, 1
+6, 裏表裏表, 1
+7, 裏表表裏, 2
+8, 裏表表表, 3
+9, 表裏裏裏, 1
+10, 表裏裏表, 1
+11, 表裏表裏, 1
+12, 表裏表表, 2
+13, 表表裏裏, 2
+14, 表表裏表, 2
+15, 表表表裏, 3
+16, 表表表表, 4</div>
+    <p>3-1 の表示ループの中で、表を表示するときに <span class="mono">run</span> を増やし、裏のときに 0 に戻すだけ。最大数は <span class="mono">", %d\n"</span> で行末に付ける。</p>
+  </div></details>
+  <details><summary><span class="tag">注意</span>よくある間違い<span class="tap"></span></summary><div class="body">
+    <ul>
+      <li><b>最後にまとめて比べる</b>:裏が出たときだけ最大数を更新すると、「裏表表」のように<b>表で終わる</b>パターンで最後の連続が数えられない。表のたびに比べれば安全。</li>
+      <li><b>表の総数を数えてしまう</b>:表表裏表 は表が 3 枚だが、連続の最大は 2。</li>
+    </ul>
+  </div></details>
+</section>
+
+<!-- ================= 3-3 ================= -->
+<section class="task" id="k3">
+  <h2><span class="no">3-3</span>連続した表の最大数が m 回となる確率</h2>
+  <div class="problem"><p>コインを n 回振ったときに、連続した表の最大数が m 回となる確率を書き出せ。n=4 の出力を注釈として挿入せよ。</p>
+  <div class="sample">例) n=3 の時
+m, m回連続で表となる確率
+0, 12.5%
+1, 50.0%
+2, 25.0%
+3, 12.5%</div></div>
+
+  <div class="panel">
+    <div class="ptitle"><span class="badge">見る</span>確率のグラフ(3-3・3-4・3-5 共通)</div>
+    <div class="row"><label for="pn">n = <b id="pnv"></b></label><input id="pn" type="range" min="1" max="10" value="4"></div>
+    <svg class="bars" id="pbars" viewBox="0 0 420 230" role="img" aria-label="連続表の最大数ごとの確率"></svg>
+    <div class="legend2"><span><i style="background:var(--accent)"></i>ちょうど m 回(3-3)</span><span><i style="background:var(--mark)"></i>m 回以上(3-4)</span><span><i style="background:none;border-top:2px dashed var(--warn);height:0;border-radius:0"></i>20%(3-5)</span></div>
+    <div class="out" id="ptab" style="margin-top:8px"></div>
+  </div>
+
+  <details><summary><span class="tag">ヒント1</span>確率の求め方<span class="tap"></span></summary><div class="body">
+    <p>どのパターンも同じ確率(1/2<sup>n</sup>)で出るので、<b>確率 = (最大数が m だったパターンの数) ÷ (全パターン数)</b>。</p>
+    <p>n=3 なら全 8 パターンのうち最大数 1 は 4 パターン → 4/8 = 50%。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント2</span>集計用の配列<span class="tap"></span></summary><div class="body">
+    <p>最大数ごとに数える配列 <span class="mono">int count[11] = {0};</span> を用意し、パターンごとに <span class="mono">count[maxrun]++;</span>。これだけで「m 回が何パターンあったか」がそろう。</p>
+    <p>最大数は 0〜n の <b>n+1 通り</b>なので、n=10 なら 11 個必要(10 個だと count[10] が範囲外)。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント3</span>% の表示と割り算<span class="tap"></span></summary><div class="body">
+    <ul><li>整数同士の割り算は小数が切り捨てられる(<span class="mono">4 / 8</span> は 0)。<span class="mono">100.0 * count[m] / total</span> のように実数を混ぜる。</li>
+    <li>printf で % 記号そのものを出すには <span class="mono">%%</span> と書く:<span class="mono">printf("%d, %.1f%%\n", m, p);</span></li></ul>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>count 配列で集計<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int coin[10];
+    int count[11] = {0};    /* count[m] : 連続表の最大数が m だったパターンの数 */
+    int n, total, k, j, m, run, maxrun;
+
+    printf("n = ");
+    scanf("%d", &amp;n);
+    if (n &lt; 1 || n &gt; 10) {
+        printf("n は 1〜10 で入力してください\n");
+        return 1;
+    }
+    total = 1 &lt;&lt; n;
+
+    for (k = 0; k &lt; total; k++) {
+        for (j = 0; j &lt; n; j++) {
+            coin[j] = (k &gt;&gt; (n - 1 - j)) &amp; 1;
+        }
+        run = 0;
+        maxrun = 0;
+        for (j = 0; j &lt; n; j++) {
+            if (coin[j] == 1) {
+                run++;
+                if (run &gt; maxrun) maxrun = run;
+            } else {
+                run = 0;
+            }
+        }
+        count[maxrun]++;        /* 集計 */
+    }
+
+    printf("m, m回連続で表となる確率\n");
+    for (m = 0; m &lt;= n; m++) {
+        printf("%d, %.1f%%\n", m, 100.0 * count[m] / total);
+    }
+    return 0;
+}</code></pre>
+    <p><b>n=4 の出力</b></p>
+<div class="out">m, m回連続で表となる確率
+0, 6.2%
+1, 43.8%
+2, 31.2%
+3, 12.5%
+4, 6.2%</div>
+    <p>表示は不要になったので、3-1 の別解(k を2進数に分解)でパターンを作り、3-2 と同じ方法で最大数を求めて <span class="mono">count[maxrun]++</span>。最後に m = 0〜n の確率を表示する。</p>
+    <p><b>6.2% について</b>:n=4 で最大数 0 の確率は 1/16 = 6.25%。printf の <span class="mono">%.1f</span> はちょうど真ん中の値を<b>偶数側に丸める</b>ことが多く(6.25 → 6.2、31.25 → 31.2)、四捨五入とは違う結果になる。どちらで書いても計算は合っている。</p>
+  </div></details>
+</section>
+
+<!-- ================= 3-4 ================= -->
+<section class="task" id="k4">
+  <h2><span class="no">3-4</span>連続した表の最大数が m 回<b>以上</b>の確率</h2>
+  <div class="problem"><p>コインを n 回振ったときに、連続した表の最大数が m 回以上の確率を書き出せ。n=4 の出力を注釈として挿入せよ。</p>
+  <div class="sample">例) n=3 の時
+m, m回以上連続で表となる確率
+0, 100.0%
+1, 87.5%
+2, 37.5%
+3, 12.5%</div></div>
+
+  <details><summary><span class="tag">ヒント1</span>3-3 の結果を足す<span class="tap"></span></summary><div class="body">
+    <p>「m 回以上」= m 回 + (m+1) 回 + … + n 回。3-3 の count を <b>m から n まで足せばよい</b>。n=3、m=2 なら 25.0% + 12.5% = 37.5%。</p>
+    <p>m = 0 は必ず 100%(最大数は 0 以上なので)。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント2</span>後ろから足すと楽<span class="tap"></span></summary><div class="body">
+    <p>count[n], count[n]+count[n−1], … と<b>後ろから順に足していく</b>(累積和)と、二重ループなしで全部の m の値が求まる。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>m ごとに足し合わせる<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int coin[10];
+    int count[11] = {0};
+    int n, total, k, j, m, run, maxrun, atleast;
+
+    printf("n = ");
+    scanf("%d", &amp;n);
+    if (n &lt; 1 || n &gt; 10) {
+        printf("n は 1〜10 で入力してください\n");
+        return 1;
+    }
+    total = 1 &lt;&lt; n;
+
+    for (k = 0; k &lt; total; k++) {
+        for (j = 0; j &lt; n; j++) {
+            coin[j] = (k &gt;&gt; (n - 1 - j)) &amp; 1;
+        }
+        run = 0;
+        maxrun = 0;
+        for (j = 0; j &lt; n; j++) {
+            if (coin[j] == 1) {
+                run++;
+                if (run &gt; maxrun) maxrun = run;
+            } else {
+                run = 0;
+            }
+        }
+        count[maxrun]++;
+    }
+
+    printf("m, m回以上連続で表となる確率\n");
+    for (m = 0; m &lt;= n; m++) {
+        atleast = 0;
+        for (j = m; j &lt;= n; j++) {      /* m 以上をすべて足す */
+            atleast += count[j];
+        }
+        printf("%d, %.1f%%\n", m, 100.0 * atleast / total);
+    }
+    return 0;
+}</code></pre>
+    <p><b>n=4 の出力</b></p>
+<div class="out">m, m回以上連続で表となる確率
+0, 100.0%
+1, 93.8%
+2, 50.0%
+3, 18.8%
+4, 6.2%</div>
+  </div></details>
+  <details class="ans"><summary><span class="tag">別解</span>累積和(後ろから足し込む)<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int coin[10];
+    int count[12] = {0};    /* count[n+1] = 0 を番兵として使うため 12 個 */
+    int n, total, k, j, m, run, maxrun;
+
+    printf("n = ");
+    scanf("%d", &amp;n);
+    if (n &lt; 1 || n &gt; 10) {
+        printf("n は 1〜10 で入力してください\n");
+        return 1;
+    }
+    total = 1 &lt;&lt; n;
+
+    for (k = 0; k &lt; total; k++) {
+        for (j = 0; j &lt; n; j++) {
+            coin[j] = (k &gt;&gt; (n - 1 - j)) &amp; 1;
+        }
+        run = 0;
+        maxrun = 0;
+        for (j = 0; j &lt; n; j++) {
+            run = coin[j] ? run + 1 : 0;
+            if (run &gt; maxrun) maxrun = run;
+        }
+        count[maxrun]++;
+    }
+
+    /* 後ろから足し込むと、count[m] が「m 以上」の数になる(累積和) */
+    for (m = n - 1; m &gt;= 0; m--) {
+        count[m] += count[m + 1];
+    }
+
+    printf("m, m回以上連続で表となる確率\n");
+    for (m = 0; m &lt;= n; m++) {
+        printf("%d, %.1f%%\n", m, 100.0 * count[m] / total);
+    }
+    return 0;
+}</code></pre>
+    <p><span class="mono">count[m] += count[m + 1];</span> を m = n−1 から 0 へ向かって行うと、count[m] が「m 回以上のパターン数」に置き換わる。<span class="mono">run = coin[j] ? run + 1 : 0;</span> は if 〜 else を1行で書いた条件演算子。</p>
+  </div></details>
+</section>
+
+<!-- ================= 3-5 ================= -->
+<section class="task" id="k5">
+  <h2><span class="no">3-5</span>m 回以上の確率が 20% 以上となる最大の m</h2>
+  <div class="problem"><p>コインを n 回振ったときに、連続した表の最大数が m 回以上の確率が 20% 以上となる最大の m(n=3 の場合は m=2)を、n=3〜10 に対して求めよ。答えを注釈として挿入せよ。</p>
+  <div class="sample">n,連続した表の最大数がm回以上の確率が20%以上となるmの最大値
+3, 2
+4, ??
+…
+10, ??</div></div>
+
+  <details><summary><span class="tag">ヒント1</span>n=3 で確かめる<span class="tap"></span></summary><div class="body">
+    <p>3-4 の n=3 の結果:m=2 は 37.5%(20% 以上)、m=3 は 12.5%(20% 未満)。だから答えは 2。上のグラフで、オレンジの棒が赤い点線(20%)を超えている一番右の m を探せばよい。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント2</span>n のループを外側に<span class="tap"></span></summary><div class="body">
+    <p>3-4 のプログラム全体を <span class="mono">for (n = 3; n &lt;= 10; n++)</span> で囲む。そのとき <b>count 配列は n ごとに 0 に戻す</b>(前の n の集計が残らないように)。</p>
+  </div></details>
+  <details><summary><span class="tag">ヒント3</span>20% の比べ方<span class="tap"></span></summary><div class="body">
+    <p>確率は m が大きくなるほど小さくなるので、m を 0 から順に調べて「20% 以上」の最後の m を覚えておけばよい。</p>
+    <p>実数の誤差を避けるなら、<span class="mono">count[m] / total &gt;= 0.2</span> の代わりに両辺に 100×total を掛けて <span class="mono">count[m] * 100 &gt;= total * 20</span> と整数で比べる。</p>
+  </div></details>
+
+  <details class="ans"><summary><span class="tag">解答例</span>n=3〜10 をまとめて計算<span class="tap"></span></summary><div class="body">
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int coin[10];
+    int count[12];
+    int n, total, k, j, m, run, maxrun, best;
+
+    printf("n,連続した表の最大数がm回以上の確率が20%%以上となるmの最大値\n");
+    for (n = 3; n &lt;= 10; n++) {
+        for (m = 0; m &lt;= n + 1; m++) count[m] = 0;   /* n ごとに集計し直す */
+        total = 1 &lt;&lt; n;
+
+        for (k = 0; k &lt; total; k++) {
+            for (j = 0; j &lt; n; j++) {
+                coin[j] = (k &gt;&gt; (n - 1 - j)) &amp; 1;
+            }
+            run = 0;
+            maxrun = 0;
+            for (j = 0; j &lt; n; j++) {
+                run = coin[j] ? run + 1 : 0;
+                if (run &gt; maxrun) maxrun = run;
+            }
+            count[maxrun]++;
+        }
+        for (m = n - 1; m &gt;= 0; m--) {               /* 「m 回以上」の数にする */
+            count[m] += count[m + 1];
+        }
+
+        best = 0;
+        for (m = 0; m &lt;= n; m++) {
+            if (count[m] * 100 &gt;= total * 20) {      /* 確率 &gt;= 20% を整数で比べる */
+                best = m;
+            }
+        }
+        printf("%d, %d\n", n, best);
+    }
+    return 0;
+}</code></pre>
+    <p><b>出力(注釈に入れる答え)</b></p>
+<div class="out">n,連続した表の最大数がm回以上の確率が20%以上となるmの最大値
+3, 2
+4, 2
+5, 3
+6, 3
+7, 3
+8, 3
+9, 4
+10, 4</div>
+    <p>n が増えても、20% 以上で起こる「連続表の最大数」はゆっくりしか増えない(n=10 でも 4)。長い連続が起こる確率は、だいたい n に比例して増えるが、長さが1増えるごとに半分になるため。</p>
+  </div></details>
+</section>
+
+<section class="task" id="tips">
+  <h2><span class="no">★</span>5つの課題に共通するコツ</h2>
+  <div class="tbl"><table>
+    <tr><th>コツ</th><th>どの課題で</th></tr>
+    <tr><td>2<sup>n</sup> は <span class="mono">1 &lt;&lt; n</span> か掛け算のループで。<span class="mono">2^n</span> は XOR なので×</td><td>3-1〜3-5</td></tr>
+    <tr><td>配列を2進数とみて +1 する(繰り上がり)/ k を2進数に分解する</td><td>3-1</td></tr>
+    <tr><td>「現在の値」と「最大値」を別の変数で持つ。パターンごとに 0 に戻す</td><td>3-2〜3-5</td></tr>
+    <tr><td>種類ごとの個数は配列で数える(<span class="mono">count[x]++</span>)。大きさは「とりうる値の数」</td><td>3-3〜3-5</td></tr>
+    <tr><td>割合は <span class="mono">100.0 *</span> で実数にしてから割る。% は <span class="mono">%%</span></td><td>3-3, 3-4</td></tr>
+    <tr><td>「以上」は後ろから足す累積和で</td><td>3-4, 3-5</td></tr>
+  </table></div>
+</section>
+
+<footer>名城大学 情報工学部「プログラミング演習II」第3回の課題をもとに作成しました。解答例と別解(全7本)はすべて gcc でコンパイルし、警告なしで動くこと、スライドの n=3 の出力例と一致することを確認済みです。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  function $(id){return document.getElementById(id);}
+  /* ===== +1 カウンタ ===== */
+  var cn=4, C=[], k=0, timer=null;
+  function resetC(){cn=+$('cn').value;C=[];for(var i=0;i<cn;i++)C.push(0);k=0;stop();drawC([], 'すべて 0(裏)から始める。これが 1 番目のパターン。');}
+  function drawC(changed,m){$('cnv').textContent=cn;
+    $('coins').innerHTML=C.map(function(v,i){return '<div class="cw"><span>['+i+']</span><div class="coin '+(v?'h':'t')+(changed.indexOf(i)>=0?' flip':'')+'">'+(v?'表':'裏')+'<small>'+v+'</small></div></div>';}).join('');
+    $('cmsg').innerHTML='<b>'+(k+1)+' 番目</b> / 全 '+(1<<cn)+' 通り(2 進数 '+C.join('')+' = 10 進数 '+k+')<br>'+m;
+    $('cplus').disabled=k>=(1<<cn)-1;}
+  function plus(){if(k>=(1<<cn)-1)return false;var j=cn-1,ch=[],carry=[];
+    while(j>=0&&C[j]===1){C[j]=0;ch.push(j);carry.push(j);j--;}
+    if(j>=0){C[j]=1;ch.push(j);}
+    k++;
+    drawC(ch,carry.length?'右端から見て、1 だった coin['+carry.slice().reverse().join('], coin[')+'] を 0 にして繰り上げ、coin['+j+'] の 0 を 1 にした。':'右端 coin['+j+'] が 0 だったので 1 にしただけ。');
+    return true;}
+  function stop(){if(timer){clearInterval(timer);timer=null;$('cauto').textContent='自動で全部';}}
+  $('cplus').addEventListener('click',function(){stop();plus();});
+  $('cauto').addEventListener('click',function(){if(timer){stop();return;}if(k>=(1<<cn)-1)resetC();$('cauto').textContent='止める';timer=setInterval(function(){if(!plus())stop();},cn>6?120:450);});
+  $('creset').addEventListener('click',resetC); $('cn').addEventListener('input',resetC);
+  resetC();
+
+  /* ===== パターン一覧 ===== */
+  function maxRun(bits){var r=0,m=0,end=-1;for(var j=0;j<bits.length;j++){r=bits[j]?r+1:0;if(r>m){m=r;end=j;}}return {m:m,end:end};}
+  function bitsOf(kk,n){var b=[];for(var j=0;j<n;j++)b.push((kk>>(n-1-j))&1);return b;}
+  function drawL(){var n=+$('ln').value,h='';$('lnv').textContent=n;$('lns').textContent='全 '+(1<<n)+' 通り';
+    for(var kk=0;kk<(1<<n);kk++){var b=bitsOf(kk,n),r=maxRun(b),s='';
+      for(var j=0;j<n;j++){var inRun=r.m>0&&j>r.end-r.m&&j<=r.end; s+=b[j]?'<b'+(inRun?' class="run"':'')+'>表</b>':'<i>裏</i>';}
+      h+='<div><span class="no">'+(kk+1)+',</span><span class="pt">'+s+'</span><span class="mr">'+r.m+'</span></div>';}
+    $('plist').innerHTML=h;}
+  $('ln').addEventListener('input',drawL); drawL();
+
+  /* ===== 確率グラフ ===== */
+  function counts(n){var c=[];for(var m=0;m<=n+1;m++)c.push(0);for(var kk=0;kk<(1<<n);kk++)c[maxRun(bitsOf(kk,n)).m]++;return c;}
+  function fmt(p){var v=p*10,f=Math.floor(v),d=v-f,r=d>0.5?f+1:d<0.5?f:(f%2===0?f:f+1);return (r/10).toFixed(1);} /* C の printf と同じく、ちょうど半分は偶数側へ */
+  function drawP(){var n=+$('pn').value,c=counts(n),tot=1<<n,cum=[],s=0,best=0;$('pnv').textContent=n;
+    for(var m=n;m>=0;m--){s+=c[m];cum[m]=s;}
+    for(m=0;m<=n;m++)if(cum[m]*100>=tot*20)best=m;
+    var L=34,R=410,T=10,B=190,W=(R-L)/(n+1),Y=function(p){return B-p/100*(B-T);},h='';
+    [0,20,40,60,80,100].forEach(function(g){h+='<line x1="'+L+'" x2="'+R+'" y1="'+Y(g)+'" y2="'+Y(g)+'" style="stroke:var(--line)"/><text x="'+(L-4)+'" y="'+(Y(g)+3)+'" text-anchor="end">'+g+'%</text>';});
+    for(m=0;m<=n;m++){var x=L+m*W,p1=c[m]/tot*100,p2=cum[m]/tot*100,bw=Math.min(18,W*0.36);
+      h+='<rect class="b1" x="'+(x+W/2-bw-1)+'" y="'+Y(p1)+'" width="'+bw+'" height="'+(B-Y(p1))+'"/><rect class="b2" x="'+(x+W/2+1)+'" y="'+Y(p2)+'" width="'+bw+'" height="'+(B-Y(p2))+'"/>';
+      if(m===best) h+='<rect class="best" x="'+(x+W/2-bw-4)+'" y="'+(Y(p2)-3)+'" width="'+(2*bw+8)+'" height="'+(B-Y(p2)+3)+'" rx="3"/>';
+      h+='<text x="'+(x+W/2)+'" y="'+(B+13)+'" text-anchor="middle">'+m+'</text>';}
+    h+='<line class="l20" x1="'+L+'" x2="'+R+'" y1="'+Y(20)+'" y2="'+Y(20)+'"/><text x="'+(L+W/2)+'" y="'+(B+27)+'" class="lbl">m(連続した表の最大数)</text>';
+    $('pbars').innerHTML=h;
+    var t='m, ちょうどm回(3-3), m回以上(3-4)\n';for(m=0;m<=n;m++)t+=m+', '+fmt(c[m]/tot*100).padStart(5)+'%  ('+c[m]+'/'+tot+'),  '+fmt(cum[m]/tot*100).padStart(5)+'%  ('+cum[m]+'/'+tot+')\n';
+    t+='\n→ 3-5:20% 以上となる最大の m = '+best+(n<3?'(課題は n=3〜10)':'');
+    $('ptab').textContent=t;}
+  $('pn').addEventListener('input',drawP); drawP();
+
+  /* ===== コードの色付け ===== */
+  var kw=/^(int|char|void|return|for|if|else|while|do|switch|case|break|continue|default|include|define|double|float|long|const|unsigned|sizeof|NULL)$/;
+  document.querySelectorAll('pre.code code').forEach(function(el){
+    var src=el.textContent,out='',re=/(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(#?\b[A-Za-z_]\w*\b)|(\b\d+(?:\.\d+)?\b)|([\s\S])/g,m;
+    function e(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    while((m=re.exec(src))){if(m[1])out+='<span class="tk-com">'+e(m[1])+'</span>';else if(m[2])out+='<span class="tk-str">'+e(m[2])+'</span>';else if(m[3])out+=kw.test(m[3].replace('#',''))?'<span class="tk-kw">'+e(m[3])+'</span>':e(m[3]);else if(m[4])out+='<span class="tk-num">'+m[4]+'</span>';else out+=e(m[5]);}
+    el.innerHTML=out;});
+})();
+</script>
+</body>
+</html>

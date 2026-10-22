@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>配列と文字配列</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#F3F6FA; --paper:#FFFFFF; --ink:#16233B; --sub:#5A6883; --line:#D5DEEA;
+  --accent:#1F6FB2; --accent-soft:#E3EEF8; --mark:#D99A00; --mark-soft:#FFF4D6;
+  --code-bg:#0F1B2E; --code-ink:#E6EDF7; --c-com:#7F93B2; --c-kw:#7CC4FF; --c-str:#F2C46D; --c-num:#B6E3A8;
+  --ok:#1C8A5A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+    --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+    --code-bg:#0A111D; --ok:#5CC993;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --paper:#162033; --ink:#E4EAF4; --sub:#9AA8C0; --line:#2A3850;
+  --accent:#6DB3F2; --accent-soft:#1B2D46; --mark:#F2BE3A; --mark-soft:#3A3016;
+  --code-bg:#0A111D; --ok:#5CC993;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.8;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,"Courier New",monospace}
+
+/* hero */
+header h1{font-size:1.7rem;line-height:1.35;margin:0 0 6px;letter-spacing:.01em}
+header p{margin:0 0 20px;color:var(--sub)}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.demo label{display:block;font-size:.9rem;color:var(--sub);margin-bottom:6px}
+.demo input{
+  width:100%;font:inherit;font-family:"JetBrains Mono",monospace;font-size:1.25rem;
+  padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);
+}
+.demo input:focus{outline:none;border-color:var(--accent)}
+.cells{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cell{
+  min-width:52px;border:1px solid var(--line);border-radius:8px;text-align:center;
+  font-family:"JetBrains Mono",monospace;overflow:hidden;background:var(--bg)
+}
+.cell .i{font-size:.72rem;color:var(--sub);background:var(--accent-soft);padding:1px 0}
+.cell .c{font-size:1.35rem;font-weight:700;padding:2px 0;min-height:1.9rem}
+.cell .h{font-size:.8rem;color:var(--accent);padding:0 0 3px}
+.cell.up{border-color:var(--mark);}
+.cell.up .c{background:var(--mark-soft)}
+.legend{font-size:.82rem;color:var(--sub);margin-top:10px}
+.legend b{color:var(--ink)}
+
+/* sections */
+section.task{margin-top:44px}
+.task > h2{
+  font-size:1.35rem;margin:0 0 14px;display:flex;align-items:baseline;gap:10px;
+  border-bottom:3px solid var(--ink);padding-bottom:6px
+}
+.task > h2 .no{white-space:nowrap;flex:none;font-family:"JetBrains Mono",monospace;color:var(--accent);font-size:1.1rem}
+.problem{background:var(--paper);border-left:5px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0}
+.problem p{margin:.3em 0}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p{margin:.6em 0}
+ul{padding-left:1.3em;margin:.4em 0}
+li{margin:.2em 0}
+:not(pre)>code{background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+.sample{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 14px;
+  font-family:"JetBrains Mono",monospace;font-size:.92rem;line-height:1.55;white-space:pre;overflow-x:auto
+}
+.sample .in{color:var(--c-str)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tbl{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--accent-soft)}
+td.mono{font-family:"JetBrains Mono",monospace}
+.point{background:var(--mark-soft);border-radius:10px;padding:10px 14px;margin:12px 0}
+.point b{color:var(--ink)}
+
+/* reveal */
+details{
+  margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden
+}
+summary{
+  list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;align-items:center;gap:10px;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+summary::-webkit-details-marker{display:none}
+summary .tag{
+  font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff;background:var(--accent);flex:none
+}
+details.ans summary .tag{background:var(--ok)}
+summary .tap{margin-left:auto;font-size:.8rem;font-weight:400;color:var(--sub);flex:none}
+summary .tap::after{content:"タップで表示"}
+details[open] summary .tap::after{content:"閉じる"}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.body{padding:4px 16px 14px}
+details[open] .body{animation:open .22s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){details[open] .body{animation:none}}
+
+pre.code{
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;margin:10px 0;
+  font-size:.86rem;line-height:1.6;overflow-x:auto;tab-size:4
+}
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:var(--paper);font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700
+}
+footer{margin-top:50px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+
+
+:root{--warn:#C8423B;--warn-soft:#FCEBEA;--dim:#E9EEF5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}}
+:root[data-theme="dark"]{--warn:#F07B73;--warn-soft:#3A1E20;--dim:#1B2536}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:.85rem;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);text-decoration:none}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0;text-align:center;font-size:1.15rem;overflow-x:auto}
+.formula small{display:block;font-size:.82rem;color:var(--sub);margin-top:4px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+.panel .ptitle{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .ptitle .badge{font-size:.72rem;background:var(--mark);color:#fff;border-radius:99px;padding:1px 9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{font-size:.88rem;color:var(--sub)}
+select,.btn,input.ans{font:inherit;font-size:.92rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:6px 10px}
+select:focus,input.ans:focus{outline:none;border-color:var(--accent)}
+.btn{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.sub{background:var(--paper);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:120px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat .k{font-size:.78rem;color:var(--sub)}
+.stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.stat.hl{background:var(--mark-soft)}
+.chart{width:100%;height:auto;display:block;margin-top:6px}
+.chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--sub)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .bar{fill:var(--accent);opacity:.35;cursor:pointer}
+.chart .bar.on{opacity:1}
+.chart .bar:hover{opacity:.7}
+.chart .bar.on:hover{opacity:1}
+.chart .emp{fill:var(--paper);stroke:var(--mark);stroke-width:2}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .ref{stroke:var(--mark);stroke-width:1.5;stroke-dasharray:5 4}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--sub);margin-top:4px}
+.legend2 i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0}
+.qno{font-weight:700;color:var(--accent);margin-bottom:4px}
+.qbox details{background:var(--bg)}
+.check{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.check input.ans{width:9em;font-family:"JetBrains Mono",monospace}
+.fb{font-weight:700;font-size:.92rem}
+.fb.ok{color:var(--ok)}.fb.ng{color:var(--warn)}
+.score{position:sticky;bottom:10px;margin:24px auto 0;width:max-content;max-width:100%;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 16px;font-size:.88rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.opts button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{background:var(--accent-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opts button.ng{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.ansline{margin:.4em 0;font-size:1.05rem}
+.bad{background:var(--warn-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.bad::before{content:"✕ ";color:var(--warn);font-weight:700}
+.good{background:var(--accent-soft);border-radius:8px;padding:6px 12px;margin:6px 0}
+.good::before{content:"◯ ";color:var(--ok);font-weight:700}
+.bl{display:inline-block;min-width:3.2em;text-align:center;font-weight:700;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:5px 5px 0 0;padding:0 7px;margin:0 2px;cursor:pointer;user-select:none;line-height:1.5}
+.bl.open{background:var(--mark-soft);border-color:var(--mark);color:var(--ink)}
+.bl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.blbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);padding:8px 0;margin-top:14px;border-bottom:1px solid var(--line)}
+.blbar .t{font-size:.85rem;color:var(--sub)}
+.blbar .btn{padding:4px 12px;font-size:.85rem}
+.wave{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.wave.m{stroke:var(--mark)}
+.wave.s{stroke:var(--sub);stroke-width:1.5}
+.chart .lbl{font-family:inherit;font-size:12px;fill:var(--ink);font-weight:700}
+.chart .bitl{stroke:var(--line);stroke-dasharray:3 3}
+
+.tk-com{color:var(--c-com);font-style:italic}.tk-kw{color:var(--c-kw)}.tk-str{color:var(--c-str)}.tk-num{color:var(--c-num)}
+.cin{font:inherit;font-family:"JetBrains Mono",monospace;font-size:.95rem;padding:5px 8px;border:2px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.cin:focus{outline:none;border-color:var(--accent)}
+.cin.err{border-color:var(--warn)}
+.decl{font-family:"JetBrains Mono",monospace;font-size:.95rem;display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:6px 0}
+.mem{display:flex;flex-wrap:wrap;gap:3px;margin:10px 0 4px}
+.mem .c{min-width:52px;border:2px solid var(--line);border-radius:8px;overflow:hidden;text-align:center;font-family:"JetBrains Mono",monospace;background:var(--bg);transition:border-color .2s}
+.mem .c .i{font-size:.7rem;background:var(--accent-soft);color:var(--accent);padding:1px 0}
+.mem .c .v{font-size:1.05rem;font-weight:700;padding:4px 4px;min-height:1.9em}
+.mem .c .ad{font-size:.6rem;color:var(--sub);padding:0 0 2px}
+.mem .c.z .v{color:var(--sub)}
+.mem .c.hit{border-color:var(--mark);background:var(--mark-soft)}
+.mem .c.nul .v{color:var(--warn)}
+.mem .c.out{border-style:dashed;opacity:.75;background:var(--warn-soft)}
+.mem .c.out .i{background:var(--warn-soft);color:var(--warn)}
+.mem .c.gar .v{color:var(--sub)}
+.res{font-family:"JetBrains Mono",monospace;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:8px 12px;margin-top:6px;font-size:.9rem;white-space:pre-wrap;word-break:break-all}
+.res .bad{color:#F0817A}
+.msg{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:.92rem;margin-top:8px}
+.grid2{display:inline-grid;grid-template-columns:auto repeat(3,64px);gap:3px;font-family:"JetBrains Mono",monospace;font-size:.85rem;margin:8px 0}
+.grid2 div{background:var(--bg);border-radius:6px;padding:6px 4px;text-align:center}
+.grid2 .h{background:none;color:var(--sub);font-size:.75rem}
+.grid2 button{font:inherit;border:2px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer;padding:6px 4px;font-weight:700}
+.grid2 button[aria-pressed="true"]{border-color:var(--mark);background:var(--mark-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>配列と文字配列</h1>
+  <p>プログラミング演習II 第3回(教科書 第7〜8章)のまとめです。たくさんの値をまとめて扱う「配列」と、文字列を入れる「文字配列」を学びます。</p>
+  <div class="demo">
+    <label>配列のメモリを見る:宣言を変えると、メモリの様子が変わります</label>
+    <div class="decl">int a[<input id="an" class="cin" style="width:3.2em" value="5" inputmode="numeric" aria-label="要素数(空欄で省略)">] = {<input id="ai" class="cin" style="width:12em" value="10, 20, 30" aria-label="初期値(カンマ区切り)">};</div>
+    <div class="mem" id="am"></div>
+    <div class="decl">a[<input id="ax" class="cin" style="width:3em" value="4" inputmode="numeric" aria-label="要素番号">] = <input id="av" class="cin" style="width:4.5em" value="99" inputmode="numeric" aria-label="代入する値">; <button class="btn" id="ago" type="button">実行</button><button class="btn sub" id="ar" type="button">宣言からやり直す</button></div>
+    <div class="msg" id="amsg" aria-live="polite"></div>
+  </div>
+</header>
+
+<div class="blbar"><span class="t">穴埋め:<span id="blcount"></span></span><button class="btn sub" id="blhide" type="button">すべて隠す</button><button class="btn sub" id="blshow" type="button">すべて表示</button></div>
+
+<nav class="toc">
+  <a href="#why">配列とは</a><a href="#decl">宣言と要素</a><a href="#init">初期化</a><a href="#loop">for で処理</a><a href="#multi">多次元配列</a><a href="#str">文字配列</a><a href="#sinit">文字配列の初期化</a><a href="#sio">表示と入力</a><a href="#assign">代入の注意</a><a href="#q">練習問題</a>
+</nav>
+
+<section class="task" id="why">
+  <h2><span class="no">1</span>たくさんの値の扱い ― 配列(第7章)</h2>
+  <ul>
+    <li>単一の変数:<b>1つの値</b>しか保持できない。</li>
+    <li><b class="bl">配列</b>:複数の<b>同じ型</b>の変数を1つにまとめたもの。</li>
+    <li>例:クラス全員のテストの点数を保持したい → 変数を <span class="mono">tensu_A, tensu_B, …, tensu_Z</span> と人数分作るのは大変。配列なら <span class="mono">int tensu[N];</span> の1行で N 人分。</li>
+  </ul>
+</section>
+
+<section class="task" id="decl">
+  <h2><span class="no">2</span>配列の宣言と要素</h2>
+  <div class="formula"><span class="mono">int a[10];</span><small>型 配列名[要素数]; → int 型の変数が 10 個用意される</small></div>
+  <ul>
+    <li>宣言した型の変数が、要素数の分だけ<b>連続して</b>メモリに取られる(int が 4 バイトなら、アドレスが 4 ずつ並ぶ)。</li>
+    <li>N 個の要素には、<b class="bl">0</b> 番を先頭に 0, 1, 2, …, N−1 と番号(<b>要素番号</b>、添字)が付く。「<b>配列名[要素番号]</b>」で使う。</li>
+    <li>1番目は a[0]、2番目は a[1]、…、10番目は a[9]。最後の要素番号は <b class="bl">要素数 − 1</b>。</li>
+    <li>各要素は普通の変数と同じように使える。<span class="mono">a[2] = 10;</span> は「3番目の要素に 10 を代入」。scanf で入力するときは <b class="bl mono">&amp;a[2]</b> と & を付ける。</li>
+  </ul>
+  <div class="warn">a[10] のように範囲外の番号を使っても、C ではエラーにならずに動いてしまうことがあり、ほかの変数を壊したり異常終了したりする。上のメモリ図で a[5] や a[-1] に代入してみよう。</div>
+</section>
+
+<section class="task" id="init">
+  <h2><span class="no">3</span>配列の初期化</h2>
+  <p>宣言と同時に <b>{ }</b> で各要素の初期値を代入できる。</p>
+  <div class="tbl"><table>
+    <tr><th>書き方</th><th>結果</th></tr>
+    <tr><td class="mono">int a[5] = {1, 2, 3, 4, 5};</td><td>5 個すべてに値が入る</td></tr>
+    <tr><td class="mono">int a[5] = {1, 2, 3, 4, 5, 6};</td><td>要素は5個なのに初期値が6個 → 通常コンパイラが<b>エラー</b>(警告)を出す</td></tr>
+    <tr><td class="mono">int a[5] = {1, 2};</td><td>初期値が足りない要素には <b class="bl">0</b> が入る → 1, 2, 0, 0, 0</td></tr>
+    <tr><td class="mono">int a[] = {10, 20, 30};</td><td>[ ] 内の要素数は<b>省略できる</b>。初期値の数から要素数 3 になる(<span class="mono">int a[3] = {10, 20, 30};</span> と同じ)</td></tr>
+  </table></div>
+  <p class="legend">上のメモリ図で、要素数を空欄にしたり、初期値の数を増やしたり減らしたりして確かめられます。<span class="mono">int a[100] = {0};</span> と書けば全部 0 にできる。</p>
+</section>
+
+<section class="task" id="loop">
+  <h2><span class="no">4</span>配列の使い方:for 文と組み合わせる</h2>
+  <ul>
+    <li>5つの値を表示するとき、個別の変数(suti1〜suti5)だと printf を5回書く必要がある。</li>
+    <li>配列なら、要素番号に for 文のカウンター変数 <span class="mono">i</span> を使って <span class="mono">hairetu[i]</span> と書ける → <b>反復処理を簡素に書ける</b>のが配列のメリット。</li>
+    <li>キーボードからの入力も、合計の計算も同じように for 文で書ける。</li>
+  </ul>
+  <h3>例:5人の点数を入力して合計と平均を出す</h3>
+<pre class="code"><code>#include &lt;stdio.h&gt;
+#define N 5
+
+int main(void)
+{
+    int tensu[N];           /* 5 人分の点数 */
+    int i, goukei = 0;
+
+    for (i = 0; i &lt; N; i++) {           /* i は 0, 1, 2, 3, 4 */
+        printf("%d 人目の点数: ", i + 1);
+        scanf("%d", &amp;tensu[i]);         /* 要素にも &amp; を付ける */
+    }
+    for (i = 0; i &lt; N; i++) {
+        goukei += tensu[i];
+    }
+    printf("合計 %d 点、平均 %.1f 点\n", goukei, (double)goukei / N);
+    return 0;
+}</code></pre>
+  <div class="sample">1 人目の点数: <span class="in">70</span>
+2 人目の点数: <span class="in">80</span>
+3 人目の点数: <span class="in">65</span>
+4 人目の点数: <span class="in">90</span>
+5 人目の点数: <span class="in">100</span>
+合計 405 点、平均 81.0 点</div>
+  <p><span class="mono">#define N 5</span> にしておくと、人数を変えるときに1か所直すだけで済む。for の条件は <span class="mono">i &lt; N</span>(<span class="mono">i &lt;= N</span> にすると範囲外の tensu[5] を使ってしまう)。</p>
+</section>
+
+<section class="task" id="multi">
+  <h2><span class="no">5</span>多次元配列</h2>
+  <ul>
+    <li>1次元配列を2次元、3次元に拡張した配列。<span class="mono">int a[2][3];</span> は「2行3列」の表のようなもの。</li>
+    <li>初期化は、次元の数だけ { } が入れ子になる。{ } やカンマの組み合わせに注意。</li>
+  </ul>
+  <div class="formula"><span class="mono" style="font-size:.95rem">int a[2][3] = { {10, 20, 30}, {40, 50, 60} };</span></div>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>マスをタップすると、その要素の書き方が出ます</div>
+    <div class="grid2" id="g2"></div>
+    <div class="msg" id="g2m" aria-live="polite">マスをタップしてみよう</div>
+  </div>
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a[2][3] = { {10, 20, 30},
+                    {40, 50, 60} };     /* 2 行 3 列 */
+    int i, j;
+
+    a[1][2] = 99;                       /* 2 行目・3 列目を書き換え */
+    for (i = 0; i &lt; 2; i++) {           /* 行 */
+        for (j = 0; j &lt; 3; j++) {       /* 列 */
+            printf("%4d", a[i][j]);
+        }
+        printf("\n");
+    }
+    return 0;
+}</code></pre>
+  <div class="sample">  10  20  30
+  40  50  99</div>
+  <p>2重の for 文で、外側が行(i)、内側が列(j)。</p>
+</section>
+
+<section class="task" id="str">
+  <h2><span class="no">6</span>文字列の扱い ― 文字配列(第8章)</h2>
+  <ul>
+    <li>C には「文字列型」がない。文字列は <b>char 型の配列(文字配列)</b>に1文字ずつ入れる。</li>
+    <li>文字列の終わりには、目印として <b class="bl">ヌル文字</b>(<b class="mono">'\0'</b>、値は 0)を置く。printf の %s などは、ヌル文字を見て「ここで終わり」と判断する。</li>
+    <li>終了コード(ヌル文字)がないと、文字列の終わりが判定できない。要注意!</li>
+    <li>"ringo" は 5 文字だが、ヌル文字を入れて <b class="bl">6</b> 要素が必要。</li>
+  </ul>
+  <div class="panel">
+    <div class="ptitle"><span class="badge">試す</span>文字配列のメモリと printf("%s") の結果</div>
+    <div class="decl">char s[<input id="sn" class="cin" style="width:3.2em" value="" inputmode="numeric" aria-label="要素数(空欄で省略)">] = "<input id="sv" class="cin" style="width:9em" value="ringo" maxlength="12" aria-label="文字列">";</div>
+    <div class="sw" id="sex" style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sub" type="button" data-n="" data-v="ringo">省略(ちょうど)</button><button class="btn sub" type="button" data-n="10" data-v="ringo">大きめ [10]</button><button class="btn sub" type="button" data-n="5" data-v="ringo">\0 の場所がない [5]</button><button class="btn sub" type="button" data-n="3" data-v="ringo">足りない [3]</button></div>
+    <div class="mem" id="sm"></div>
+    <div class="decl">s[<input id="sx" class="cin" style="width:3em" value="2" inputmode="numeric" aria-label="要素番号">] = '<input id="sc" class="cin" style="width:3em" value="\0" maxlength="2" aria-label="文字">'; <button class="btn" id="sgo" type="button">実行</button></div>
+    <div class="res" id="sres" aria-live="polite"></div>
+    <div class="msg" id="smsg"></div>
+  </div>
+</section>
+
+<section class="task" id="sinit">
+  <h2><span class="no">7</span>文字配列の初期化</h2>
+  <div class="tbl"><table>
+    <tr><th>書き方</th><th>説明</th></tr>
+    <tr><td class="mono">char s[6] = "ringo";</td><td><b>文字列リテラル</b>で初期化。'\0' は自動で付く</td></tr>
+    <tr><td class="mono">char s[6] = {'r','i','n','g','o','\0'};</td><td><b>文字並び</b>で初期化。<b>必ずヌル文字で終端</b>すること。どちらも同じ結果</td></tr>
+    <tr><td class="mono">char s[] = "ringo";</td><td>要素数を省略 → 文字数 + 1 = 6 が自動で取られる。ただし実行中にそれより長い文字列を入れないこと</td></tr>
+    <tr><td class="mono">char s[5] = {'x','x','x','x','\0'};</td><td>特定の文字で埋める例</td></tr>
+    <tr><td class="mono">char s[10];</td><td>初期化しないと中身は<b>処理系依存</b>(何が入っているか分からない)。ヌル文字で終わっていないと異常終了の原因に → 少なくとも <span class="mono">char s[10] = "";</span> や <span class="mono">{0}</span> で初期化しておく</td></tr>
+  </table></div>
+  <ul>
+    <li>配列が<b>足りない</b>例:<span class="mono">char s[3] = "ringo";</span> → 入りきらない。</li>
+    <li>メモリを<b>無駄にする</b>例:<span class="mono">char s[1000] = "ringo";</span></li>
+    <li>→ 文字配列は「入れる文字数の最大 <b class="bl">+1</b>(ヌル文字)」で定義するのがベスト。</li>
+    <li>隣り合った文字列リテラルは自動で1つにつながる:<span class="mono">"ab" "cd"</span> は <span class="mono">"abcd"</span> と同じ(あまり使わない)。</li>
+  </ul>
+<pre class="code"><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char s1[] = "ringo";                          /* 文字列リテラルで初期化 */
+    char s2[] = {'k', 'a', 'k', 'i', '\0'};       /* 文字並びで初期化(\0 を忘れずに) */
+    int i;
+
+    printf("%s\n", s1);                 /* %s:\0 の手前までまとめて表示 */
+
+    for (i = 0; s2[i] != '\0'; i++) {   /* %c:1 文字ずつ、\0 が来たら終わり */
+        printf("%c", s2[i]);
+    }
+    printf("\n");
+
+    s1[0] = 'R';                        /* 一部の置き換えはできる */
+    printf("%s(要素数 %d = 5 文字 + \\0)\n", s1, (int)sizeof s1);
+    return 0;
+}</code></pre>
+  <div class="sample">ringo
+kaki
+Ringo(要素数 6 = 5 文字 + \0)</div>
+</section>
+
+<section class="task" id="sio">
+  <h2><span class="no">8</span>文字列の表示と入力</h2>
+  <div class="tbl"><table>
+    <tr><th></th><th>書き方</th><th>ポイント</th></tr>
+    <tr><td>まとめて表示</td><td class="mono">printf("%s", s);</td><td><b class="bl mono">%s</b> に<b>配列の名前</b>を渡す。ヌル文字の手前まで表示</td></tr>
+    <tr><td>1文字ずつ表示</td><td class="mono">printf("%c", s[i]);</td><td><b class="bl mono">%c</b> に<b>1つの要素</b>を渡す。for で <span class="mono">s[i] != '\0'</span> の間くり返す</td></tr>
+    <tr><td>入力</td><td class="mono">scanf("%s", s);</td><td>配列の名前には <b class="bl">& を付けない</b>。<b>空白文字までしか</b>読み込めない。'\0' は自動で追加される</td></tr>
+  </table></div>
+  <p>%s と %c のループ、どちらが簡素? → %s の方が短く書ける。1文字ずつ処理したい(数える、置き換える)ときは %c とループ。</p>
+<pre class="code"><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(void)
+{
+    char name[16];
+
+    printf("名前(ローマ字): ");
+    scanf("%15s", name);                /* &amp; は付けない。15 文字まで(+\0 で 16) */
+    printf("こんにちは、%s さん(%d 文字)\n", name, (int)strlen(name));
+
+    /* name = "taro";  ← 配列に = で文字列は代入できない(コンパイルエラー) */
+    strcpy(name, "taro");               /* 代入したいときは strcpy を使う */
+    printf("%s\n", name);
+    return 0;
+}</code></pre>
+  <div class="sample">名前(ローマ字): <span class="in">Hanako Yamada</span>
+こんにちは、Hanako さん(6 文字)
+taro</div>
+  <p>「Hanako Yamada」と入力しても、空白の手前の Hanako しか読まれない。<span class="mono">%15s</span> は「最大15文字まで」で、配列があふれるのを防ぐ。</p>
+</section>
+
+<section class="task" id="assign">
+  <h2><span class="no">9</span>文字列の代入と置き換え</h2>
+  <ul>
+    <li>初期化のとき以外は、文字配列に文字列を <b>= でそのまま代入できない</b>。<span class="mono">s = "kaki";</span> はコンパイルエラー。</li>
+    <li>1文字ずつ代入する(<span class="mono">s[0] = 'k'; s[1] = 'a'; … s[4] = '\0';</span>)か、<span class="mono">string.h</span> の <span class="mono">strcpy(s, "kaki");</span> を使う。</li>
+    <li>初期化した文字配列の一部は、実行中に1文字ずつ<b>上書きできる</b>(<span class="mono">s[0] = 'R';</span>)。要素番号は 0 から始まることに注意。</li>
+  </ul>
+</section>
+
+<section class="task" id="q">
+  <h2><span class="no">Q</span>練習問題</h2>
+
+  <div class="qbox" data-ans="9"><div class="qno">問1</div><p><span class="mono">int a[10];</span> の最後の要素の要素番号は?</p>
+    <div class="check"><input class="ans" placeholder="例 5" aria-label="問1の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox" data-ans="0"><div class="qno">問2</div><p><span class="mono">int a[5] = {1, 2};</span> のとき、a[3] の値は?</p>
+    <div class="check"><input class="ans" placeholder="例 2" aria-label="問2の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox" data-ans="3"><div class="qno">問3</div><p><span class="mono">int a[] = {10, 20, 30};</span> の要素数は?</p>
+    <div class="check"><input class="ans" placeholder="例 4" aria-label="問3の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox"><div class="qno">問4</div><p>配列 a の3番目の要素に scanf で整数を入力するには?</p>
+    <div class="opts"><button>scanf("%d", a[3]);</button><button>scanf("%d", &amp;a[3]);</button><button data-ok>scanf("%d", &amp;a[2]);</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox" data-ans="60"><div class="qno">問5</div><p><span class="mono">int a[2][3] = {{10,20,30},{40,50,60}};</span> のとき、a[1][2] の値は?</p>
+    <div class="check"><input class="ans" placeholder="例 20" aria-label="問5の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div></div>
+
+  <div class="qbox" data-ans="6"><div class="qno">問6</div><p><span class="mono">char s[] = "ringo";</span> の要素数は?</p>
+    <div class="check"><input class="ans" placeholder="例 5" aria-label="問6の答え"><button class="btn" type="button">判定</button><span class="fb" aria-live="polite"></span></div>
+    <details class="ans"><summary><span class="tag">答え</span>答えと解説<span class="tap"></span></summary><div class="body"><p class="ansline"><b>答え:6</b></p><p>5 文字 + ヌル文字 '\0' の 6 要素。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問7</div><p>文字配列 name に文字列を入力する正しい書き方は?</p>
+    <div class="opts"><button>scanf("%s", &amp;name);</button><button data-ok>scanf("%s", name);</button><button>scanf("%c", name);</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問8</div><p>キーボードから「New York」と入力したとき、<span class="mono">scanf("%s", s);</span> で s に入るのは?</p>
+    <div class="opts"><button>New York</button><button data-ok>New</button><button>York</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問9</div><p><span class="mono">char s[10]; s = "kaki";</span> はどうなる?</p>
+    <div class="opts"><button>s に "kaki" が入る</button><button data-ok>コンパイルエラーになる(strcpy を使う)</button><button>s[0] だけに 'k' が入る</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="qbox"><div class="qno">問10</div><p><span class="mono">char s[] = "abcde"; s[2] = '\0';</span> のあと <span class="mono">printf("%s", s);</span> の表示は?</p>
+    <div class="opts"><button>abcde</button><button data-ok>ab</button><button>abde</button><button>abc</button></div><span class="fb" aria-live="polite"></span>
+    <details class="ans"><summary><span class="tag">解説</span>ヌル文字で止まる<span class="tap"></span></summary><div class="body"><p>%s はヌル文字の手前までを表示する。s[2] は3文字目なので、'a' 'b' の2文字だけ表示される。上の文字配列の図で試せます。</p></div></details></div>
+
+  <div class="qbox"><div class="qno">問11</div><p>文字配列の大きさの決め方として最もよいのは?</p>
+    <div class="opts"><button>入れる文字数の最大と同じ</button><button data-ok>入れる文字数の最大 + 1</button><button>できるだけ大きく(1000 など)</button></div><span class="fb" aria-live="polite"></span></div>
+
+  <div class="score" id="score"></div>
+</section>
+
+<footer>名城大学 情報工学部「プログラミング演習II」第3回のスライドをもとにまとめています。サンプルプログラムは説明用に作成したもので、すべて gcc でコンパイルし、警告なしで動くこと、実行例どおりの出力になることを確認済みです。</footer>
+</div>
+
+<script>
+/* ---- 共通: 分数と答え合わせ ---- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fracHTML(n,d){
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d===1) return String(n);
+  return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>';
+}
+function parseNum(s){
+  s=String(s).replace(/[０-９．／－]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/\s/g,'').replace(/[−ー]/g,'-');
+  if(!s) return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return parseFloat(m[1])/parseFloat(m[2]);
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if(/^-?\d*\.?\d+%$/.test(s)) return parseFloat(s)/100;
+  return NaN;
+}
+(function(){
+  var boxes=document.querySelectorAll('.qbox[data-ans]'), mcs=document.querySelectorAll('.qbox .opts'), solved={}, score=document.getElementById('score');
+  var total=boxes.length+mcs.length;
+  function upd(){ if(score) score.textContent='正解 '+Object.keys(solved).length+' / '+total+'(答え合わせできる問題)'; }
+  /* 選択問題: .opts の中の button[data-ok] が正解 */
+  mcs.forEach(function(g,gi){
+    var fb=g.parentNode.querySelector('.fb');
+    g.querySelectorAll('button').forEach(function(b){
+      b.type='button';
+      b.addEventListener('click',function(){
+        var ok=b.hasAttribute('data-ok');
+        b.classList.add(ok?'ok':'ng');
+        if(fb){fb.className='fb '+(ok?'ok':'ng');fb.textContent=ok?'◯ 正解!':'✕ ちがいます。もう一度選んでみよう';}
+        if(ok){solved['m'+gi]=1;g.querySelectorAll('button').forEach(function(x){x.disabled=true;});}
+        upd();
+      });
+    });
+  });
+  boxes.forEach(function(box,i){
+    var inp=box.querySelector('input.ans'), btn=box.querySelector('.btn'), fb=box.querySelector('.fb');
+    var ans=parseNum(box.getAttribute('data-ans'));
+    function judge(){
+      var v=parseNum(inp.value);
+      if(isNaN(v)){fb.className='fb ng';fb.textContent='分数(例 3/5)か小数で入力してください';return;}
+      if(Math.abs(v-ans)<1e-6){fb.className='fb ok';fb.textContent='◯ 正解!';solved[i]=1;}
+      else{fb.className='fb ng';fb.textContent='✕ もう一度考えてみよう(下の「答え」で確認できます)';}
+      upd();
+    }
+    btn.addEventListener('click',judge);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')judge();});
+  });
+  upd();
+})();
+/* ---- 穴埋め: <b class="bl">答え</b> をタップで表示 ---- */
+(function(){
+  var bls=[].slice.call(document.querySelectorAll('.bl')); if(!bls.length) return;
+  var cnt=document.getElementById('blcount');
+  function upd(){ if(cnt) cnt.textContent=bls.filter(function(b){return b.classList.contains('open');}).length+' / '+bls.length+' 個 表示中'; }
+  bls.forEach(function(b){
+    var a=b.textContent; b.setAttribute('data-a',a); b.setAttribute('role','button'); b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','穴埋め(タップで答えを表示)'); b.textContent='?';
+    function tog(){var o=!b.classList.contains('open');b.classList.toggle('open',o);b.textContent=o?a:'?';b.setAttribute('aria-label',o?a:'穴埋め(タップで答えを表示)');upd();}
+    b.addEventListener('click',tog);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+  function all(o){bls.forEach(function(b){b.classList.toggle('open',o);b.textContent=o?b.getAttribute('data-a'):'?';});upd();}
+  var s=document.getElementById('blshow'), h=document.getElementById('blhide');
+  if(s) s.addEventListener('click',function(){all(true);}); if(h) h.addEventListener('click',function(){all(false);});
+  upd();
+})();
+
+(function(){
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+
+  /* ===== int 配列のメモリ ===== */
+  var A=[], AN=0, hit=-1, extra={};
+  function declA(){
+    var ns=$('an').value.trim(), vals=$('ai').value.split(',').map(function(s){return s.trim();}).filter(function(s){return s!=='';}), bad=vals.some(function(v){return !/^-?\d+$/.test(v);});
+    $('an').classList.remove('err'); $('ai').classList.toggle('err',bad); hit=-1; extra={};
+    if(bad){$('amsg').innerHTML='初期値は整数をカンマで区切って書いてください';A=[];AN=0;drawA();return;}
+    if(ns===''){ if(!vals.length){$('an').classList.add('err');$('amsg').innerHTML='要素数を省略するときは、初期値が必要です(<span class="mono">int a[] = {};</span> は書けない)';A=[];AN=0;drawA();return;}
+      AN=vals.length; A=vals.map(Number); $('amsg').innerHTML='要素数を省略 → 初期値の数から <b>'+AN+' 要素</b>の配列になった。'; drawA(); return;}
+    var n=parseInt(ns,10); if(!(n>=1&&n<=12)){$('an').classList.add('err');$('amsg').textContent='要素数は 1〜12 で試してください';A=[];AN=0;drawA();return;}
+    if(vals.length>n){$('ai').classList.add('err');$('amsg').innerHTML='<b style="color:var(--warn)">エラー:</b>要素は '+n+' 個なのに初期値が '+vals.length+' 個(初期値が多すぎる)。';A=[];AN=0;drawA();return;}
+    AN=n; A=[]; for(var i=0;i<n;i++) A.push(i<vals.length?+vals[i]:0);
+    $('amsg').innerHTML=vals.length<n?'初期値が足りない a['+vals.length+']〜a['+(n-1)+'] には <b>0</b> が入った(灰色)。':'すべての要素に初期値が入った。';
+    drawA();}
+  function drawA(){var h='';
+    for(var i=-1;i<=AN;i++){var out=i<0||i>=AN; if(out&&extra[i]===undefined) continue;
+      var v=out?extra[i]:A[i], z=!out&&v===0&&i>=($('ai').value.split(',').filter(function(s){return s.trim()!=='';}).length);
+      h+='<div class="c'+(out?' out':'')+(z?' z':'')+(i===hit?' hit':'')+'"><div class="i">a['+i+']</div><div class="v">'+v+'</div><div class="ad">'+(1000+i*4)+'番地</div></div>';}
+    $('am').innerHTML=h||'<span class="legend">(配列なし)</span>';}
+  function setA(){var i=parseInt($('ax').value,10), v=parseInt($('av').value,10);
+    if(isNaN(i)||isNaN(v)){$('amsg').textContent='要素番号と値は整数で入力してください';return;}
+    if(!AN){$('amsg').textContent='まず正しい宣言にしてください';return;}
+    hit=i;
+    if(i<0||i>=AN){extra[i]=v; drawA(); $('amsg').innerHTML='<b style="color:var(--warn)">範囲外!</b> a['+i+'] は配列の外('+(1000+i*4)+'番地)。使えるのは a[0]〜a['+(AN-1)+'] だけ。C ではエラーにならずに書き込めてしまい、そこにあるほかの変数を壊したり、異常終了したりする。';return;}
+    A[i]=v; drawA(); $('amsg').innerHTML='a['+i+'] = '+v+'; → '+(i+1)+' 番目の要素('+(1000+i*4)+'番地)に '+v+' を代入。';}
+  ['an','ai'].forEach(function(id){$(id).addEventListener('input',declA);});
+  $('ago').addEventListener('click',setA); $('ar').addEventListener('click',declA);
+  [$('ax'),$('av')].forEach(function(e){e.addEventListener('keydown',function(ev){if(ev.key==='Enter')setA();});});
+  declA();
+
+  /* ===== 2次元配列 ===== */
+  var G=[[10,20,30],[40,50,60]], gsel=null;
+  function drawG(){var h='<div class="h"></div><div class="h">列 j=0</div><div class="h">j=1</div><div class="h">j=2</div>';
+    for(var i=0;i<2;i++){h+='<div class="h">行 i='+i+'</div>';for(var j=0;j<3;j++)h+='<button type="button" data-i="'+i+'" data-j="'+j+'" aria-pressed="'+(gsel&&gsel[0]===i&&gsel[1]===j)+'">'+G[i][j]+'</button>';}
+    $('g2').innerHTML=h;
+    $('g2').querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){var i=+b.getAttribute('data-i'),j=+b.getAttribute('data-j');gsel=[i,j];drawG();
+      $('g2m').innerHTML='<span class="mono"><b>a['+i+']['+j+']</b> = '+G[i][j]+'</span>:'+(i+1)+' 行目・'+(j+1)+' 列目(前が行、後ろが列。どちらも 0 から数える)';});});}
+  drawG();
+
+  /* ===== 文字配列 ===== */
+  var S=[], SN=0, SL=0, shit=-1, serr='';
+  function show(c){return c===0?'\\0':String.fromCharCode(c);}
+  function declS(){var ns=$('sn').value.trim(), v=$('sv').value; shit=-1; serr='';
+    $('sn').classList.remove('err');
+    if(/[^\x20-\x7e]/.test(v)){serr='半角英数字で試してください(全角文字は1文字が複数バイトになります)';S=[];SN=0;drawS();return;}
+    SL=v.length;
+    if(ns===''){SN=SL+1;}
+    else{var n=parseInt(ns,10); if(!(n>=1&&n<=16)){$('sn').classList.add('err');serr='要素数は 1〜16 で試してください';S=[];SN=0;drawS();return;} SN=n;}
+    S=[]; for(var i=0;i<SN;i++) S.push(i<SL?v.charCodeAt(i):0);
+    drawS();}
+  var GARB='#%@K!\u00bf';
+  function drawS(){
+    document.querySelectorAll('#sex button').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-n')===$('sn').value.trim()&&b.getAttribute('data-v')===$('sv').value?'true':'false');});
+    if(serr){$('sm').innerHTML='';$('sres').textContent='';$('smsg').textContent=serr;return;}
+    var h='', hasNul=S.indexOf(0)>=0;
+    for(var i=0;i<SN;i++){var c=S[i];h+='<div class="c'+(c===0?' nul':'')+(i===shit?' hit':'')+'"><div class="i">s['+i+']</div><div class="v">'+esc(show(c))+'</div><div class="ad">'+(c===0?'ヌル文字':c)+'</div></div>';}
+    if(!hasNul) for(var k=0;k<3;k++) h+='<div class="c out gar"><div class="i">s['+(SN+k)+']?</div><div class="v">'+esc(GARB[k])+'</div><div class="ad">配列の外</div></div>';
+    $('sm').innerHTML=h;
+    var out='', m='';
+    if(hasNul){out=S.slice(0,S.indexOf(0)).map(show).join('');}
+    if(!$('sn').value.trim()) m='要素数を省略 → 文字数 '+SL+' + ヌル文字 1 = <b>'+SN+' 要素</b>。';
+    else if(SN<SL) m='<b style="color:var(--warn)">配列が足りない!</b> "'+esc($('sv').value)+'" は '+SL+' 文字 + \\0 で '+(SL+1)+' 要素必要なのに '+SN+' 要素しかない(C では入りきらない分は切り捨てられ、警告が出る)。';
+    else if(SN===SL) m='<b style="color:var(--warn)">ヌル文字の入る場所がない!</b> C では char s['+SN+'] = "'+esc($('sv').value)+'"; と書けてしまうが、終わりの目印がないので %s は配列の外まで読み進めてしまう。';
+    else if(SN>SL+1) m='余った s['+(SL+1)+']〜s['+(SN-1)+'] には \\0 が入る。'+(SN>SL+4?'(メモリを少し無駄にしている)':'');
+    else m='ちょうどよい大きさ(文字数 + 1)。';
+    $('sres').innerHTML='printf("%s", s); → '+(hasNul?esc(out)+'<span style="color:var(--c-com)">(ここで \\0 を見つけて終了)</span>':esc(S.map(show).join(''))+'<span class="bad">'+esc(GARB)+'…(\\0 が見つかるまで配列の外のゴミを表示し続ける)</span>');
+    $('smsg').innerHTML=m;}
+  function setS(){var i=parseInt($('sx').value,10), raw=$('sc').value, c;
+    if(!SN){return;}
+    if(raw==='\\0') c=0; else if(raw.length===1&&/[\x20-\x7e]/.test(raw)) c=raw.charCodeAt(0); else {$('smsg').textContent="1文字か \\0 を入れてください";return;}
+    if(isNaN(i)||i<0||i>=SN){$('smsg').innerHTML='<b style="color:var(--warn)">範囲外!</b> 使えるのは s[0]〜s['+(SN-1)+'] だけ。';return;}
+    S[i]=c; shit=i; drawS(); $('smsg').innerHTML="s["+i+"] = '"+esc(show(c))+"'; を実行。"+(c===0?'ここに \\0 を入れたので、%s はその手前までしか表示しない。':'1文字ずつなら上書きできる。');}
+  ['sn','sv'].forEach(function(id){$(id).addEventListener('input',declS);});
+  $('sgo').addEventListener('click',setS);
+  document.querySelectorAll('#sex button').forEach(function(b){b.addEventListener('click',function(){$('sn').value=b.getAttribute('data-n');$('sv').value=b.getAttribute('data-v');declS();});});
+  declS();
+
+  /* ===== コードの色付け ===== */
+  var kw=/^(int|char|void|return|for|if|else|while|do|switch|case|break|continue|default|include|define|double|float|long|const|unsigned|sizeof|NULL)$/;
+  document.querySelectorAll('pre.code code').forEach(function(el){
+    var src=el.textContent,out='',re=/(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(#?\b[A-Za-z_]\w*\b)|(\b\d+(?:\.\d+)?\b)|([\s\S])/g,m;
+    function e(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    while((m=re.exec(src))){if(m[1])out+='<span class="tk-com">'+e(m[1])+'</span>';else if(m[2])out+='<span class="tk-str">'+e(m[2])+'</span>';else if(m[3])out+=kw.test(m[3].replace('#',''))?'<span class="tk-kw">'+e(m[3])+'</span>':e(m[3]);else if(m[4])out+='<span class="tk-num">'+m[4]+'</span>';else out+=e(m[5]);}
+    el.innerHTML=out;});
+})();
+</script>
+</body>
+</html>
